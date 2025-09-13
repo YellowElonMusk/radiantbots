@@ -5,8 +5,9 @@ import { Profile } from './Profile';
 import { BookingForm } from './BookingForm';
 import { Confirmation } from './Confirmation';
 import { Messages } from './Messages';
+import { Bootcamp } from './Bootcamp';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp';
 
 interface PageData {
   technicianId?: string;
@@ -61,6 +62,9 @@ export function AppRouter() {
             onNavigate={navigate} 
           />
         );
+      
+      case 'bootcamp':
+        return <Bootcamp onNavigate={navigate} />;
       
       default:
         return <Landing onNavigate={navigate} />;

@@ -68,9 +68,10 @@ export function Landing({ onNavigate }: LandingProps) {
               <Button 
                 variant="outline" 
                 size="lg"
+                onClick={() => onNavigate('bootcamp')}
                 className="text-lg px-8 py-6 h-auto"
               >
-                How it Works
+                Become a Certified Robotics Tech
               </Button>
             </div>
             
