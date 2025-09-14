@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Wrench, Clock } from 'lucide-react';
 import { store } from '@/lib/store';
 import { seedTechnicians } from '@/lib/seed';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 
 interface LandingProps {
@@ -12,6 +13,7 @@ interface LandingProps {
 
 export function Landing({ onNavigate }: LandingProps) {
   const [featuredTechs, setFeaturedTechs] = useState<Technician[]>([]);
+  const { t } = useLanguage();
 
   useEffect(() => {
     // Seed data if needed
@@ -41,17 +43,16 @@ export function Landing({ onNavigate }: LandingProps) {
           <div className="text-center max-w-4xl mx-auto">
             <div className="mb-6">
               <Badge variant="secondary" className="mb-4 text-sm font-medium">
-                🤖 Trusted by 500+ Companies
+                {t('landing.trusted')}
               </Badge>
             </div>
             
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-hero bg-clip-text text-transparent leading-tight">
-              Book Certified Robotics Technicians
+              {t('landing.hero.title')}
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-              Anytime, Anywhere. Connect with expert robotics technicians for maintenance, 
-              troubleshooting, and system optimization. Book instantly like a haircut.
+              {t('landing.hero.subtitle')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -62,7 +63,7 @@ export function Landing({ onNavigate }: LandingProps) {
                 className="text-lg px-8 py-6 h-auto"
               >
                 <Wrench className="mr-2 h-5 w-5" />
-                Find a Technician
+                {t('landing.hero.findTech')}
               </Button>
               
               <Button 
@@ -71,7 +72,7 @@ export function Landing({ onNavigate }: LandingProps) {
                 onClick={() => onNavigate('bootcamp')}
                 className="text-lg px-8 py-6 h-auto"
               >
-                Become a Certified Robotics Tech
+                {t('landing.hero.becomeTech')}
               </Button>
             </div>
             
@@ -79,15 +80,15 @@ export function Landing({ onNavigate }: LandingProps) {
             <div className="grid grid-cols-3 gap-8 mt-16 max-w-md mx-auto">
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">500+</div>
-                <div className="text-sm text-muted-foreground">Technicians</div>
+                <div className="text-sm text-muted-foreground">{t('landing.stats.technicians')}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">15min</div>
-                <div className="text-sm text-muted-foreground">Avg Response</div>
+                <div className="text-sm text-muted-foreground">{t('landing.stats.response')}</div>
               </div>
               <div className="text-center">
                 <div className="text-2xl font-bold text-primary">98%</div>
-                <div className="text-sm text-muted-foreground">Success Rate</div>
+                <div className="text-sm text-muted-foreground">{t('landing.stats.success')}</div>
               </div>
             </div>
           </div>
@@ -98,9 +99,9 @@ export function Landing({ onNavigate }: LandingProps) {
       <section className="py-16 bg-card/50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Most Booked This Week</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('landing.featured.title')}</h2>
             <p className="text-muted-foreground max-w-2xl mx-auto">
-              Meet our top-rated robotics technicians trusted by leading companies
+              {t('landing.featured.subtitle')}
             </p>
           </div>
           
@@ -147,7 +148,7 @@ export function Landing({ onNavigate }: LandingProps) {
                   
                   <Button variant="book" size="sm" className="w-full">
                     <Clock className="mr-2 h-4 w-4" />
-                    Book Now
+                    {t('landing.featured.bookNow')}
                   </Button>
                 </div>
               </div>
@@ -160,9 +161,9 @@ export function Landing({ onNavigate }: LandingProps) {
       <section className="py-16">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Simple as 1-2-3</h2>
+            <h2 className="text-3xl font-bold mb-4">{t('landing.howItWorks.title')}</h2>
             <p className="text-muted-foreground">
-              Book expert robotics support in minutes
+              {t('landing.howItWorks.subtitle')}
             </p>
           </div>
           
@@ -171,9 +172,9 @@ export function Landing({ onNavigate }: LandingProps) {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">1</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Browse & Filter</h3>
+              <h3 className="font-semibold text-lg mb-2">{t('landing.howItWorks.step1.title')}</h3>
               <p className="text-muted-foreground">
-                Find technicians by location, robot brand, and expertise
+                {t('landing.howItWorks.step1.desc')}
               </p>
             </div>
             
@@ -181,9 +182,9 @@ export function Landing({ onNavigate }: LandingProps) {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">2</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Book Instantly</h3>
+              <h3 className="font-semibold text-lg mb-2">{t('landing.howItWorks.step2.title')}</h3>
               <p className="text-muted-foreground">
-                Choose your time slot and confirm your booking in seconds
+                {t('landing.howItWorks.step2.desc')}
               </p>
             </div>
             
@@ -191,9 +192,9 @@ export function Landing({ onNavigate }: LandingProps) {
               <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl font-bold text-primary">3</span>
               </div>
-              <h3 className="font-semibold text-lg mb-2">Get Support</h3>
+              <h3 className="font-semibold text-lg mb-2">{t('landing.howItWorks.step3.title')}</h3>
               <p className="text-muted-foreground">
-                Chat with your technician and track progress in real-time
+                {t('landing.howItWorks.step3.desc')}
               </p>
             </div>
           </div>

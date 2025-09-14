@@ -6,6 +6,7 @@ import { BookingForm } from './BookingForm';
 import { Confirmation } from './Confirmation';
 import { Messages } from './Messages';
 import { Bootcamp } from './Bootcamp';
+import { LanguageToggle } from './LanguageToggle';
 
 type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp';
 
@@ -73,6 +74,7 @@ export function AppRouter() {
 
   return (
     <div className="min-h-screen">
+      <LanguageToggle />
       {renderPage()}
     </div>
   );
