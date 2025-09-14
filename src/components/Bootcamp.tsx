@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, BookOpen, Clock, Users, Award, Target, Wrench } from 'lucide-react';
 
 interface BootcampProps {
@@ -8,6 +9,8 @@ interface BootcampProps {
 }
 
 export function Bootcamp({ onNavigate }: BootcampProps) {
+  const { t } = useLanguage();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background">
       {/* Header */}
@@ -19,7 +22,7 @@ export function Bootcamp({ onNavigate }: BootcampProps) {
             className="mb-2"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Home
+            {t('bootcamp.backToHome')}
           </Button>
         </div>
       </header>
@@ -29,11 +32,11 @@ export function Bootcamp({ onNavigate }: BootcampProps) {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <Badge variant="secondary" className="mb-4 text-sm font-medium">
-              🎓 Career Transformation Program
+              {t('bootcamp.careerProgram')}
             </Badge>
             
             <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-hero bg-clip-text text-transparent leading-tight">
-              Welcome to Your New Career
+              {t('bootcamp.title')}
             </h1>
             
             <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">

@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { store } from '@/lib/store';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 import { ArrowLeft, Calendar, Clock, MapPin, Euro, User, MessageSquare, Star } from 'lucide-react';
 
@@ -21,6 +22,7 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
   const [notes, setNotes] = useState('');
   const [clientName, setClientName] = useState('');
   const [estimatedHours, setEstimatedHours] = useState(2);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const tech = store.getTechnician(technicianId);
@@ -36,9 +38,9 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Technician not found</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('profile.notFound')}</h2>
           <Button variant="outline" onClick={() => onNavigate('catalog')}>
-            Back to Catalog
+            {t('profile.backToCatalog')}
           </Button>
         </div>
       </div>
@@ -92,8 +94,8 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="text-2xl font-bold">Book {technician.name}</h1>
-              <p className="text-sm text-muted-foreground">Complete your booking</p>
+              <h1 className="text-2xl font-bold">{t('booking.title')} {technician.name}</h1>
+              <p className="text-sm text-muted-foreground">{t('booking.completeBooking')}</p>
             </div>
           </div>
         </div>
@@ -108,7 +110,7 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Calendar className="h-5 w-5" />
-                    Booking Details
+                    {t('booking.bookingDetails')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -117,16 +119,16 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
                     <div className="space-y-4">
                       <h3 className="font-semibold flex items-center gap-2">
                         <User className="h-4 w-4" />
-                        Your Information
+                        {t('booking.yourInfo')}
                       </h3>
                       <div>
                         <label className="block text-sm font-medium mb-2">
-                          Full Name *
+                          {t('booking.fullName')} *
                         </label>
                         <Input
                           value={clientName}
                           onChange={(e) => setClientName(e.target.value)}
-                          placeholder="Enter your full name"
+                          placeholder={t('booking.fullNamePlaceholder')}
                           required
                         />
                       </div>
@@ -136,7 +138,7 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
                     <div className="space-y-4">
                       <h3 className="font-semibold flex items-center gap-2">
                         <Clock className="h-4 w-4" />
-                        Date & Time
+                        {t('booking.dateTime')}
                       </h3>
                       
                       <div className="grid md:grid-cols-2 gap-4">
@@ -229,7 +231,7 @@ export function BookingForm({ technicianId, onNavigate }: BookingFormProps) {
                     </div>
 
                     <Button type="submit" variant="book" size="lg" className="w-full">
-                      Confirm Booking
+                      {t('booking.confirmBooking')}
                     </Button>
                   </form>
                 </CardContent>

@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { store } from '@/lib/store';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 import { ArrowLeft, Star, MapPin, Clock, Award, MessageSquare, Calendar, Wrench, CheckCircle } from 'lucide-react';
 
@@ -14,6 +15,7 @@ interface ProfileProps {
 export function Profile({ technicianId, onNavigate }: ProfileProps) {
   const [technician, setTechnician] = useState<Technician | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string>('');
+  const { t } = useLanguage();
 
   useEffect(() => {
     const tech = store.getTechnician(technicianId);
@@ -24,9 +26,9 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Technician not found</h2>
+          <h2 className="text-2xl font-bold mb-2">{t('profile.notFound')}</h2>
           <Button variant="outline" onClick={() => onNavigate('catalog')}>
-            Back to Catalog
+            {t('profile.backToCatalog')}
           </Button>
         </div>
       </div>
@@ -83,7 +85,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             </Button>
             <div>
               <h1 className="text-2xl font-bold">{technician.name}</h1>
-              <p className="text-sm text-muted-foreground">Robotics Technician</p>
+              <p className="text-sm text-muted-foreground">{t('profile.roboticsTechnician')}</p>
             </div>
           </div>
         </div>
@@ -118,13 +120,13 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                         </div>
                         <div className="flex items-center gap-2 mb-4">
                           <CheckCircle className="h-4 w-4 text-accent" />
-                          <span className="text-accent font-medium">Available Today</span>
+                          <span className="text-accent font-medium">{t('profile.availableToday')}</span>
                         </div>
                       </div>
                       
                       <div className="text-right">
                         <div className="text-2xl font-bold text-primary">€{technician.rate}/hr</div>
-                        <div className="text-sm text-muted-foreground">Starting rate</div>
+                        <div className="text-sm text-muted-foreground">{t('profile.startingRate')}</div>
                       </div>
                     </div>
                     
@@ -132,9 +134,9 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                     
                     <div className="flex items-center gap-2">
                       <Award className="h-4 w-4 text-secondary" />
-                      <span className="text-sm font-medium">{technician.experience} experience</span>
+                      <span className="text-sm font-medium">{technician.experience} {t('profile.experience')}</span>
                       <span className="text-muted-foreground">•</span>
-                      <span className="text-sm">{technician.completedJobs} jobs completed</span>
+                      <span className="text-sm">{technician.completedJobs} {t('techCard.jobsCompleted')}</span>
                     </div>
                   </div>
                 </div>
@@ -144,15 +146,15 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             {/* About Section */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">About</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('profile.about')}</h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium mb-2">Experience</h4>
+                    <h4 className="font-medium mb-2">{t('profile.experience')}</h4>
                     <p className="text-muted-foreground">{technician.bio}</p>
                   </div>
                   
                   <div>
-                    <h4 className="font-medium mb-2">Certifications</h4>
+                    <h4 className="font-medium mb-2">{t('profile.certifications')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {technician.certifications.map((cert) => (
                         <Badge key={cert} variant="outline" className="text-sm">
@@ -169,10 +171,10 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             {/* Skills & Brands */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Skills & Expertise</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('profile.skillsExpertise')}</h3>
                 <div className="space-y-4">
                   <div>
-                    <h4 className="font-medium mb-2">Robot Brands</h4>
+                    <h4 className="font-medium mb-2">{t('profile.robotBrands')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {technician.brands.map((brand) => (
                         <Badge key={brand} variant="secondary" className="text-sm">
@@ -183,7 +185,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                   </div>
                   
                   <div>
-                    <h4 className="font-medium mb-2">Technical Skills</h4>
+                    <h4 className="font-medium mb-2">{t('profile.technicalSkills')}</h4>
                     <div className="flex flex-wrap gap-2">
                       {technician.skills.map((skill) => (
                         <Badge key={skill} variant="outline" className="text-sm">
@@ -199,7 +201,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             {/* Reviews Section (Static for demo) */}
             <Card>
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Recent Reviews</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('profile.recentReviews')}</h3>
                 <div className="space-y-4">
                   <div className="border-b border-border pb-4 last:border-0">
                     <div className="flex items-center gap-2 mb-2">
@@ -240,19 +242,19 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             {/* Quick Booking Card */}
             <Card className="sticky top-24">
               <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-4">Book {technician.name}</h3>
+                <h3 className="font-semibold text-lg mb-4">{t('profile.book')} {technician.name}</h3>
                 
                 <div className="space-y-4">
                   <div className="text-center p-4 bg-muted/50 rounded-lg">
                     <div className="text-2xl font-bold text-primary mb-1">€{technician.rate}/hr</div>
-                    <div className="text-sm text-muted-foreground">Starting rate</div>
+                    <div className="text-sm text-muted-foreground">{t('profile.startingRate')}</div>
                   </div>
 
                   {/* Available Time Slots */}
                   <div>
                     <h4 className="font-medium mb-3 flex items-center gap-2">
                       <Calendar className="h-4 w-4" />
-                      Available Times
+                      {t('profile.availableTimes')}
                     </h4>
                     <div className="grid grid-cols-1 gap-2">
                       {technician.availability.slice(0, 3).map((slot) => {
@@ -283,7 +285,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                       onClick={handleBookNow}
                     >
                       <Clock className="mr-2 h-4 w-4" />
-                      Book Now
+                      {t('profile.bookNow')}
                     </Button>
                     
                     <Button 
@@ -293,7 +295,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                       onClick={handleMessage}
                     >
                       <MessageSquare className="mr-2 h-4 w-4" />
-                      Send Message
+                      {t('profile.sendMessage')}
                     </Button>
                   </div>
 
@@ -307,14 +309,14 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
             {/* Response Time Card */}
             <Card>
               <CardContent className="p-6">
-                <h4 className="font-medium mb-3">Response Time</h4>
+                <h4 className="font-medium mb-3">{t('profile.responseTime')}</h4>
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
                     <Clock className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="font-medium">Usually responds in 15 minutes</div>
-                    <div className="text-sm text-muted-foreground">Very responsive</div>
+                    <div className="font-medium">{t('profile.usuallyResponds')}</div>
+                    <div className="text-sm text-muted-foreground">{t('profile.veryResponsive')}</div>
                   </div>
                 </div>
               </CardContent>

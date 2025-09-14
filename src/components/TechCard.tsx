@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, Wrench } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 
 interface TechCardProps {
@@ -10,6 +11,8 @@ interface TechCardProps {
 }
 
 export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps) {
+  const { t } = useLanguage();
+  
   const handleCardClick = () => {
     onViewProfile(technician.id);
   };
@@ -44,7 +47,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
         <div className="absolute top-4 right-4">
           <Badge variant="secondary" className="bg-accent/90 text-accent-foreground">
             <Clock className="h-3 w-3 mr-1" />
-            Available
+            {t('techCard.available')}
           </Badge>
         </div>
       </div>
@@ -60,7 +63,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{technician.city}</span>
             <span className="text-sm">•</span>
-            <span className="text-sm">{technician.experience} experience</span>
+            <span className="text-sm">{technician.experience} {t('techCard.experience')}</span>
           </div>
           
           <p className="text-sm text-muted-foreground line-clamp-2">
@@ -77,7 +80,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
           ))}
           {technician.brands.length > 3 && (
             <Badge variant="outline" className="text-xs">
-              +{technician.brands.length - 3} more
+              +{technician.brands.length - 3} {t('techCard.more')}
             </Badge>
           )}
         </div>
@@ -94,7 +97,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
           ))}
           {technician.skills.length > 2 && (
             <span className="inline-block px-2 py-1 bg-muted rounded-md text-xs text-muted-foreground">
-              +{technician.skills.length - 2} skills
+              +{technician.skills.length - 2} {t('techCard.skills')}
             </span>
           )}
         </div>
@@ -102,10 +105,10 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
         {/* Stats Row */}
         <div className="flex items-center justify-between mb-4 text-sm">
           <span className="text-muted-foreground">
-            {technician.completedJobs} jobs completed
+            {technician.completedJobs} {t('techCard.jobsCompleted')}
           </span>
           <span className="font-semibold text-primary">
-            Starting at €{technician.rate}/hr
+            {t('techCard.startingAt')} €{technician.rate}/hr
           </span>
         </div>
 
@@ -117,7 +120,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
             className="flex-1"
             onClick={handleCardClick}
           >
-            View Profile
+            {t('techCard.viewProfile')}
           </Button>
           <Button 
             variant="book" 
@@ -126,7 +129,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
             onClick={handleBookClick}
           >
             <Clock className="mr-2 h-4 w-4" />
-            Book Now
+            {t('techCard.bookNow')}
           </Button>
         </div>
       </div>

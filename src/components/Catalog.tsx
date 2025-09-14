@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { TechCard } from './TechCard';
 import { store } from '@/lib/store';
+import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 import { ArrowLeft, Search, Filter, MapPin, Star } from 'lucide-react';
 
@@ -18,6 +19,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
   const [minRating, setMinRating] = useState(0);
+  const { t } = useLanguage();
 
   // Get unique values for filters
   const [locations, setLocations] = useState<string[]>([]);
@@ -116,9 +118,9 @@ export function Catalog({ onNavigate }: CatalogProps) {
             </Button>
             
             <div>
-              <h1 className="text-2xl font-bold">Find a Technician</h1>
+              <h1 className="text-2xl font-bold">{t('catalog.title')}</h1>
               <p className="text-sm text-muted-foreground">
-                {filteredTechs.length} technicians available
+                {filteredTechs.length} {t('catalog.available')}
               </p>
             </div>
           </div>
@@ -133,7 +135,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold flex items-center gap-2">
                   <Filter className="h-4 w-4" />
-                  Filters
+                  {t('catalog.filters')}
                 </h3>
                 {hasActiveFilters && (
                   <Button
@@ -142,18 +144,18 @@ export function Catalog({ onNavigate }: CatalogProps) {
                     onClick={clearFilters}
                     className="text-xs"
                   >
-                    Clear all
+                    {t('catalog.clearAll')}
                   </Button>
                 )}
               </div>
 
               {/* Search */}
               <div className="space-y-2 mb-6">
-                <label className="text-sm font-medium">Search</label>
+                <label className="text-sm font-medium">{t('catalog.search')}</label>
                 <div className="relative">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Name, skills, or keywords..."
+                    placeholder={t('catalog.searchPlaceholder')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pl-10"
@@ -165,14 +167,14 @@ export function Catalog({ onNavigate }: CatalogProps) {
               <div className="space-y-2 mb-6">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Location
+                  {t('catalog.location')}
                 </label>
                 <select
                   value={selectedLocation}
                   onChange={(e) => setSelectedLocation(e.target.value)}
                   className="w-full p-2 border border-border rounded-md bg-background"
                 >
-                  <option value="">All locations</option>
+                  <option value="">{t('catalog.allLocations')}</option>
                   {locations.map(location => (
                     <option key={location} value={location}>{location}</option>
                   ))}
@@ -181,7 +183,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
 
               {/* Brand Filter */}
               <div className="space-y-2 mb-6">
-                <label className="text-sm font-medium">Robot Brands</label>
+                <label className="text-sm font-medium">{t('catalog.robotBrands')}</label>
                 <div className="space-y-2 max-h-40 overflow-y-auto">
                   {brands.map(brand => (
                     <label key={brand} className="flex items-center gap-2 cursor-pointer">
@@ -201,7 +203,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
               <div className="space-y-2">
                 <label className="text-sm font-medium flex items-center gap-2">
                   <Star className="h-4 w-4" />
-                  Minimum Rating
+                  {t('catalog.minRating')}
                 </label>
                 <div className="space-y-2">
                   {[0, 4.5, 4.7, 4.8, 4.9].map(rating => (
@@ -214,7 +216,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
                         className="rounded-full border-border"
                       />
                       <span className="text-sm">
-                        {rating === 0 ? 'Any rating' : `${rating}+ stars`}
+                        {rating === 0 ? t('catalog.anyRating') : `${rating}+ ${t('catalog.stars')}`}
                       </span>
                     </label>
                   ))}
@@ -225,7 +227,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
             {/* Active Filters */}
             {hasActiveFilters && (
               <div className="bg-card rounded-xl p-4 border border-border/50">
-                <h4 className="font-medium mb-3">Active Filters</h4>
+                <h4 className="font-medium mb-3">{t('catalog.activeFilters')}</h4>
                 <div className="flex flex-wrap gap-2">
                   {selectedLocation && (
                     <Badge variant="secondary" className="text-xs">
@@ -239,7 +241,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
                   ))}
                   {minRating > 0 && (
                     <Badge variant="secondary" className="text-xs">
-                      ⭐ {minRating}+ stars
+                      ⭐ {minRating}+ {t('catalog.stars')}
                     </Badge>
                   )}
                 </div>
@@ -254,12 +256,12 @@ export function Catalog({ onNavigate }: CatalogProps) {
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                   <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="font-semibold mb-2">No technicians found</h3>
+                <h3 className="font-semibold mb-2">{t('catalog.noResults')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Try adjusting your filters or search terms
+                  {t('catalog.noResultsDesc')}
                 </p>
                 <Button variant="outline" onClick={clearFilters}>
-                  Clear Filters
+                  {t('catalog.clearFilters')}
                 </Button>
               </div>
             ) : (
