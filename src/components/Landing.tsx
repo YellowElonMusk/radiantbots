@@ -3,7 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Wrench, Clock } from 'lucide-react';
 import { store } from '@/lib/store';
-import { seedTechnicians } from '@/lib/seed';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 
@@ -16,10 +15,7 @@ export function Landing({ onNavigate }: LandingProps) {
   const { t } = useLanguage();
 
   useEffect(() => {
-    // Seed data if needed
-    store.seedData(seedTechnicians);
-    
-    // Get top 3 rated technicians for featured section
+    // Get top 3 rated technicians for featured section (only real registered techs)
     const allTechs = store.getTechnicians();
     const featured = allTechs
       .sort((a, b) => b.rating - a.rating)
@@ -106,7 +102,7 @@ export function Landing({ onNavigate }: LandingProps) {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {featuredTechs.map((tech) => (
+            {featuredTechs.length > 0 ? featuredTechs.map((tech) => (
               <div
                 key={tech.id}
                 onClick={() => handleTechClick(tech)}
@@ -152,7 +148,20 @@ export function Landing({ onNavigate }: LandingProps) {
                   </Button>
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="text-center py-12 md:col-span-3">
+                <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
+                  <Wrench className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="font-semibold mb-2">{t('landing.featured.noTechs')}</h3>
+                <p className="text-muted-foreground mb-4">
+                  {t('landing.featured.noTechsDesc')}
+                </p>
+                <Button variant="outline" onClick={() => onNavigate('bootcamp')}>
+                  {t('landing.featured.registerFirst')}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </section>
