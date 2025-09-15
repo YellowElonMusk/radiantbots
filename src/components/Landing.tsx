@@ -15,7 +15,10 @@ export function Landing({ onNavigate }: LandingProps) {
   const { t } = useLanguage();
 
   useEffect(() => {
-    // Get top 3 rated technicians for featured section (only real registered techs)
+    // Clear any fake data and start fresh
+    store.initializeStore();
+    
+    // Get technicians (will be empty until real registrations)
     const allTechs = store.getTechnicians();
     const featured = allTechs
       .sort((a, b) => b.rating - a.rating)

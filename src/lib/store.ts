@@ -131,10 +131,21 @@ class Store {
     return newTechnician;
   }
 
-  // Seeding data (removed to eliminate fake technicians)
-  seedData(technicians: Technician[]) {
-    // No longer seeds fake data - real technicians will register through the form
-    console.log('Seed data disabled - using real registrations only');
+  // Clear all fake data - start fresh for real registrations only
+  clearAllData() {
+    this.data = {
+      technicians: [],
+      bookings: [],
+      messages: [],
+    };
+    this.save();
+  }
+
+  // Initialize store (clear fake data on first load)
+  initializeStore() {
+    // Clear any existing fake data
+    this.clearAllData();
+    console.log('Store initialized - ready for real technician registrations');
   }
 
   // Search and filter
