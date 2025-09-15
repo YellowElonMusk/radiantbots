@@ -21,6 +21,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     email: '',
     phone: '',
     city: '',
+    age: '',
     techBackground: '',
     experience: '',
     canDrive: false,
@@ -30,6 +31,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isUnder18, setIsUnder18] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -39,9 +41,20 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     if (!formData.email.trim()) newErrors.email = t('registration.errors.required');
     if (!formData.phone.trim()) newErrors.phone = t('registration.errors.required');
     if (!formData.city.trim()) newErrors.city = t('registration.errors.required');
+    if (!formData.age.trim()) newErrors.age = t('registration.errors.required');
     if (!formData.techBackground.trim()) newErrors.techBackground = t('registration.errors.required');
     if (!formData.experience) newErrors.experience = t('registration.errors.required');
-    if (!formData.hasFreelancerStatus) newErrors.hasFreelancerStatus = t('registration.errors.freelancerRequired');
+    
+    // Age validation
+    const age = parseInt(formData.age);
+    if (isNaN(age) || age < 16 || age > 100) {
+      newErrors.age = t('registration.errors.invalidAge');
+    }
+    
+    // Only require freelancer status if 18 or older
+    if (age >= 18 && !formData.hasFreelancerStatus) {
+      newErrors.hasFreelancerStatus = t('registration.errors.freelancerRequired');
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -50,15 +63,23 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // For now, just show success - in real app this would create account
-      console.log('Registration data:', formData);
-      // Navigate to bootcamp payment or next step
+      const age = parseInt(formData.age);
+      console.log('Registration data:', { ...formData, age, canWorkAsTech: age >= 18 });
+      
+      // Everyone can access courses, age only affects work eligibility
       onNavigate('bootcamp');
     }
   };
 
   const handleInputChange = (field: string, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Check age for under 18 warning
+    if (field === 'age' && typeof value === 'string') {
+      const age = parseInt(value);
+      setIsUnder18(!isNaN(age) && age < 18);
+    }
+    
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -137,7 +158,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                   {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
                     <Label htmlFor="phone">{t('registration.phone')} *</Label>
                     <Input
@@ -147,6 +168,19 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                       className={errors.phone ? 'border-destructive' : ''}
                     />
                     {errors.phone && <p className="text-sm text-destructive mt-1">{errors.phone}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="age">{t('registration.age')} *</Label>
+                    <Input
+                      id="age"
+                      type="number"
+                      min="16"
+                      max="100"
+                      value={formData.age}
+                      onChange={(e) => handleInputChange('age', e.target.value)}
+                      className={errors.age ? 'border-destructive' : ''}
+                    />
+                    {errors.age && <p className="text-sm text-destructive mt-1">{errors.age}</p>}
                   </div>
                   <div>
                     <Label htmlFor="city">{t('registration.city')} *</Label>
@@ -159,6 +193,16 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                     {errors.city && <p className="text-sm text-destructive mt-1">{errors.city}</p>}
                   </div>
                 </div>
+
+                {/* Under 18 Warning */}
+                {isUnder18 && (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      <strong>{t('registration.under18Warning.title')}</strong><br />
+                      {t('registration.under18Warning.message')}
+                    </p>
+                  </div>
+                )}
 
                 {/* Technical Background */}
                 <div className="pt-6 border-t border-border">
@@ -202,7 +246,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                 <div className="pt-6 border-t border-border">
                   <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
                     <CheckCircle className="h-5 w-5 text-primary" />
-                    {t('registration.requirements')}
+                    {t('registration.requirementsTitle')}
                   </h3>
                   
                   <div className="space-y-4">
@@ -218,16 +262,18 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                       </Label>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="hasFreelancerStatus"
-                        checked={formData.hasFreelancerStatus}
-                        onCheckedChange={(checked) => handleInputChange('hasFreelancerStatus', checked as boolean)}
-                      />
-                      <Label htmlFor="hasFreelancerStatus" className="text-sm">
-                        {t('registration.freelancerStatus')} *
-                      </Label>
-                    </div>
+                    {!isUnder18 && (
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="hasFreelancerStatus"
+                          checked={formData.hasFreelancerStatus}
+                          onCheckedChange={(checked) => handleInputChange('hasFreelancerStatus', checked as boolean)}
+                        />
+                        <Label htmlFor="hasFreelancerStatus" className="text-sm">
+                          {t('registration.freelancerStatus')} *
+                        </Label>
+                      </div>
+                    )}
                     {errors.hasFreelancerStatus && <p className="text-sm text-destructive">{errors.hasFreelancerStatus}</p>}
 
                     <div className="flex items-center space-x-2">
@@ -259,11 +305,16 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                 {/* Submit */}
                 <div className="pt-6">
                   <Button type="submit" className="w-full" size="lg">
-                    {t('registration.createAccount')}
+                    {isUnder18 ? t('registration.accessCourses') : t('registration.createAccount')}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     {t('registration.terms')}
                   </p>
+                  {!isUnder18 && (
+                    <p className="text-xs text-muted-foreground mt-2 text-center">
+                      {t('registration.freeAccess')}
+                    </p>
+                  )}
                 </div>
               </form>
             </CardContent>
