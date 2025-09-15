@@ -6,9 +6,10 @@ import { BookingForm } from './BookingForm';
 import { Confirmation } from './Confirmation';
 import { Messages } from './Messages';
 import { Bootcamp } from './Bootcamp';
+import { TechnicianRegistration } from './TechnicianRegistration';
 import { LanguageToggle } from './LanguageToggle';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration';
 
 interface PageData {
   technicianId?: string;
@@ -66,6 +67,9 @@ export function AppRouter() {
       
       case 'bootcamp':
         return <Bootcamp onNavigate={navigate} />;
+      
+      case 'registration':
+        return <TechnicianRegistration onNavigate={navigate} />;
       
       default:
         return <Landing onNavigate={navigate} />;

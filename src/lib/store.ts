@@ -119,12 +119,22 @@ class Store {
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
   }
 
-  // Seeding data
+  // Add technician (for registration)
+  addTechnician(technician: Omit<Technician, 'id'>): Technician {
+    const newTechnician: Technician = {
+      ...technician,
+      id: `tech_${Date.now()}`,
+    };
+    
+    this.data.technicians.push(newTechnician);
+    this.save();
+    return newTechnician;
+  }
+
+  // Seeding data (removed to eliminate fake technicians)
   seedData(technicians: Technician[]) {
-    if (this.data.technicians.length === 0) {
-      this.data.technicians = technicians;
-      this.save();
-    }
+    // No longer seeds fake data - real technicians will register through the form
+    console.log('Seed data disabled - using real registrations only');
   }
 
   // Search and filter

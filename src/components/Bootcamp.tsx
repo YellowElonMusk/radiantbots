@@ -45,7 +45,12 @@ export function Bootcamp({ onNavigate }: BootcampProps) {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-              <Button variant="hero" size="lg" className="text-lg px-8 py-6 h-auto">
+              <Button 
+                variant="hero" 
+                size="lg" 
+                className="text-lg px-8 py-6 h-auto"
+                onClick={() => onNavigate('registration')}
+              >
                 <Award className="mr-2 h-5 w-5" />
                 Enroll Now - €500
               </Button>
@@ -281,7 +286,12 @@ export function Bootcamp({ onNavigate }: BootcampProps) {
                 <p className="text-muted-foreground mb-6">
                   Join hundreds of successful graduates who are now earning €3,000-€5,000 monthly as freelance robotics technicians.
                 </p>
-                <Button variant="hero" size="lg" className="text-lg px-8 py-6 h-auto">
+                <Button 
+                  variant="hero" 
+                  size="lg" 
+                  className="text-lg px-8 py-6 h-auto"
+                  onClick={() => onNavigate('registration')}
+                >
                   <Award className="mr-2 h-5 w-5" />
                   Secure Your Spot - €500
                 </Button>
