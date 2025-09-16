@@ -12,6 +12,11 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 const translations = {
   fr: {
+    // Header
+    'header.findTechnician': 'Trouver un Technicien',
+    'header.bootcamp': 'Formation',
+    'header.becomeTech': 'Devenir Technicien',
+    
     // Landing page
     'landing.trusted': '🤖 Approuvé par 500+ Entreprises',
     'landing.hero.title': 'Réservez des Techniciens Robotiques Certifiés',
@@ -213,6 +218,11 @@ const translations = {
     'registration.under18Warning.message': 'Vous ne pouvez pas encore travailler comme technicien, mais vous pouvez accéder à tous nos cours gratuitement pour vous préparer !',
   },
   en: {
+    // Header
+    'header.findTechnician': 'Find Technician',
+    'header.bootcamp': 'Bootcamp',
+    'header.becomeTech': 'Become Technician',
+    
     // Landing page
     'landing.trusted': '🤖 Trusted by 500+ Companies',
     'landing.hero.title': 'Book Certified Robotics Technicians',
