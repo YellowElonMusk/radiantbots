@@ -10,7 +10,7 @@ export function Header({ onNavigate }: HeaderProps) {
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-50">
-      <div className="container mx-auto px-6 py-4">
+      <div className="container mx-auto px-6 py-2">
         <div className="flex items-center justify-between">
           <button
             onClick={() => onNavigate('landing')}
@@ -19,7 +19,7 @@ export function Header({ onNavigate }: HeaderProps) {
             <img 
               src={radiantbotsLogo} 
               alt="Radiantbots" 
-              className="h-72 w-auto hover:opacity-80 transition-opacity"
+              className="h-16 w-auto hover:opacity-80 transition-opacity"
             />
           </button>
           
