@@ -42,6 +42,12 @@ export function Header({ onNavigate }: HeaderProps) {
             >
               {t('header.becomeTech')}
             </button>
+            <button 
+              onClick={() => onNavigate('technician-login')}
+              className="text-gray-700 hover:text-primary transition-colors font-medium ml-4"
+            >
+              Login
+            </button>
           </nav>
         </div>
       </div>

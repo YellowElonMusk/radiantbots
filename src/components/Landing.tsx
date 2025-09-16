@@ -75,15 +75,6 @@ export function Landing({ onNavigate }: LandingProps) {
               >
                 {t('landing.hero.becomeTech')}
               </Button>
-              
-              <Button 
-                variant="ghost" 
-                size="lg"
-                onClick={() => onNavigate('technician-login')}
-                className="text-lg px-8 py-6 h-auto"
-              >
-                Technician Login
-              </Button>
             </div>
             
             {/* Stats */}
