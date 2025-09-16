@@ -15,7 +15,7 @@ export function Header({ onNavigate }: HeaderProps) {
           <img 
             src={radiantbotsLogo} 
             alt="Radiantbots" 
-            className="h-40 w-auto hover:opacity-80 transition-opacity"
+            className="h-80 w-auto hover:opacity-80 transition-opacity"
           />
         </button>
       </div>
