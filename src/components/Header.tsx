@@ -7,7 +7,7 @@ interface HeaderProps {
 export function Header({ onNavigate }: HeaderProps) {
   return (
     <header className="absolute top-0 left-0 right-0 z-10 p-6">
-      <div className="container mx-auto flex justify-between items-center">
+      <div className="container mx-auto flex justify-center items-center">
         <button
           onClick={() => onNavigate('landing')}
           className="focus:outline-none"
@@ -15,7 +15,7 @@ export function Header({ onNavigate }: HeaderProps) {
           <img 
             src={radiantbotsLogo} 
             alt="Radiantbots" 
-            className="h-8 w-auto hover:opacity-80 transition-opacity"
+            className="h-40 w-auto hover:opacity-80 transition-opacity"
           />
         </button>
       </div>
