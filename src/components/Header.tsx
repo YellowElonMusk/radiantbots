@@ -1,4 +1,4 @@
-import radiantbotsLogo from '@/assets/radiantbots-logo.png';
+import radiantbotsLogo from '@/assets/radiantbots-new-logo.png';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface HeaderProps {
