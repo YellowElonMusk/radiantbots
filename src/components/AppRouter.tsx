@@ -7,9 +7,11 @@ import { Confirmation } from './Confirmation';
 import { Messages } from './Messages';
 import { Bootcamp } from './Bootcamp';
 import { TechnicianRegistration } from './TechnicianRegistration';
+import { TechnicianLogin } from './TechnicianLogin';
+import { TechnicianDashboard } from './TechnicianDashboard';
 import { LanguageToggle } from './LanguageToggle';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard';
 
 interface PageData {
   technicianId?: string;
@@ -70,6 +72,12 @@ export function AppRouter() {
       
       case 'registration':
         return <TechnicianRegistration onNavigate={navigate} />;
+      
+      case 'technician-login':
+        return <TechnicianLogin onNavigate={navigate} />;
+      
+      case 'technician-dashboard':
+        return <TechnicianDashboard onNavigate={navigate} />;
       
       default:
         return <Landing onNavigate={navigate} />;
