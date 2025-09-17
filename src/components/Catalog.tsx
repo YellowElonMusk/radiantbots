@@ -38,7 +38,6 @@ interface TechnicianData {
 }
 
 interface SearchCriteria {
-  deploymentAddress: string;
   deploymentCity: string;
   missionDate: Date | undefined;
   dateFlexible: boolean;
@@ -54,7 +53,6 @@ export function Catalog({ onNavigate }: CatalogProps) {
   const [minRating, setMinRating] = useState(0);
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
-    deploymentAddress: '',
     deploymentCity: '',
     missionDate: undefined,
     dateFlexible: false,
@@ -235,7 +233,6 @@ export function Catalog({ onNavigate }: CatalogProps) {
     setSelectedBrands([]);
     setMinRating(0);
     setSearchCriteria({
-      deploymentAddress: '',
       deploymentCity: '',
       missionDate: undefined,
       dateFlexible: false,
@@ -297,17 +294,6 @@ export function Catalog({ onNavigate }: CatalogProps) {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Deployment Address */}
-                <div>
-                  <Label htmlFor="deploymentAddress">Adresse de déploiement</Label>
-                  <Input
-                    id="deploymentAddress"
-                    placeholder="Entrez l'adresse complète"
-                    value={searchCriteria.deploymentAddress}
-                    onChange={(e) => setSearchCriteria(prev => ({ ...prev, deploymentAddress: e.target.value }))}
-                  />
-                </div>
-
                 {/* Deployment City */}
                 <div>
                   <Label htmlFor="deploymentCity">Ville de déploiement *</Label>
