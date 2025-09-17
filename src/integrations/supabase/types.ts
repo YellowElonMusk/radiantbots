@@ -56,9 +56,29 @@ export type Database = {
         }
         Relationships: []
       }
+      mission_types: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
+          accepts_travel: boolean | null
           bio: string | null
+          city: string | null
           created_at: string
           email: string | null
           first_name: string | null
@@ -66,13 +86,16 @@ export type Database = {
           id: string
           last_name: string | null
           linkedin_url: string | null
+          max_travel_distance: number | null
           phone: string | null
           profile_photo_url: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          accepts_travel?: boolean | null
           bio?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -80,13 +103,16 @@ export type Database = {
           id?: string
           last_name?: string | null
           linkedin_url?: string | null
+          max_travel_distance?: number | null
           phone?: string | null
           profile_photo_url?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          accepts_travel?: boolean | null
           bio?: string | null
+          city?: string | null
           created_at?: string
           email?: string | null
           first_name?: string | null
@@ -94,10 +120,44 @@ export type Database = {
           id?: string
           last_name?: string | null
           linkedin_url?: string | null
+          max_travel_distance?: number | null
           phone?: string | null
           profile_photo_url?: string | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      search_requests: {
+        Row: {
+          client_email: string | null
+          created_at: string
+          date_flexible: boolean | null
+          deployment_address: string
+          deployment_city: string
+          id: string
+          mission_date: string
+          mission_type: string
+        }
+        Insert: {
+          client_email?: string | null
+          created_at?: string
+          date_flexible?: boolean | null
+          deployment_address: string
+          deployment_city: string
+          id?: string
+          mission_date: string
+          mission_type: string
+        }
+        Update: {
+          client_email?: string | null
+          created_at?: string
+          date_flexible?: boolean | null
+          deployment_address?: string
+          deployment_city?: string
+          id?: string
+          mission_date?: string
+          mission_type?: string
         }
         Relationships: []
       }

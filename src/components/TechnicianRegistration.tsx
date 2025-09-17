@@ -33,6 +33,8 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     hasFreelancerStatus: false,
     hasTaxNumber: false,
     bio: '',
+    acceptsTravel: false,
+    maxTravelDistance: 0,
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -90,6 +92,9 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
             last_name: formData.lastName,
             phone: formData.phone,
             bio: formData.bio,
+            city: formData.city,
+            accepts_travel: formData.acceptsTravel,
+            max_travel_distance: formData.maxTravelDistance,
           }
         }
       });
@@ -123,7 +128,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     }
   };
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  const handleInputChange = (field: string, value: string | boolean | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Check age for under 18 warning
@@ -365,6 +370,42 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                         {t('registration.taxNumber')}
                       </Label>
                     </div>
+                  </div>
+                </div>
+
+                {/* Travel Preferences */}
+                <div className="pt-6 border-t border-border">
+                  <h3 className="flex items-center gap-2 text-lg font-semibold mb-4">
+                    <Car className="h-5 w-5 text-primary" />
+                    Préférences de déplacement
+                  </h3>
+                  
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id="acceptsTravel"
+                        checked={formData.acceptsTravel}
+                        onCheckedChange={(checked) => handleInputChange('acceptsTravel', checked as boolean)}
+                      />
+                      <Label htmlFor="acceptsTravel">
+                        J'accepte de me déplacer pour des missions
+                      </Label>
+                    </div>
+
+                    {formData.acceptsTravel && (
+                      <div>
+                        <Label htmlFor="maxTravelDistance">Distance maximale de déplacement (km)</Label>
+                        <Input
+                          id="maxTravelDistance"
+                          type="number"
+                          min="0"
+                          max="1000"
+                          value={formData.maxTravelDistance.toString()}
+                          onChange={(e) => handleInputChange('maxTravelDistance', parseInt(e.target.value) || 0)}
+                          placeholder="ex: 50"
+                        />
+                      </div>
+                    )}
                   </div>
                 </div>
 
