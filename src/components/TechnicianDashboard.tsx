@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Calendar } from '@/components/ui/calendar';
+import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X } from 'lucide-react';
@@ -20,8 +20,6 @@ interface TechnicianDashboardProps {
 export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   const { language } = useLanguage();
   const { toast } = useToast();
-  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
-  const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -111,7 +109,6 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     await loadUserProfile(user.id);
     await loadUserSkills(user.id);
     await loadUserBrands(user.id);
-    await loadAvailability(user.id);
   };
 
   const loadUserProfile = async (userId: string) => {
@@ -188,85 +185,12 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     }
   };
 
-  const loadAvailability = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('availability')
-      .select('*')
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error loading availability:', error);
-      return;
-    }
-
-    if (data) {
-      const available: Date[] = [];
-      const unavailable: Date[] = [];
-      
-      data.forEach(item => {
-        const date = new Date(item.date);
-        if (item.is_available) {
-          available.push(date);
-        } else {
-          unavailable.push(date);
-        }
-      });
-      
-      setSelectedDates(available);
-      setUnavailableDates(unavailable);
-    }
-  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     onNavigate('landing');
   };
 
-  const handleDateClick = async (date: Date) => {
-    if (!user) return;
-    
-    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-    const isUnavailable = unavailableDates.some(d => d.toDateString() === date.toDateString());
-    const isAvailable = selectedDates.some(d => d.toDateString() === date.toDateString());
-
-    let newIsAvailable = true; // default to available
-
-    if (isUnavailable) {
-      // Remove from unavailable, add to available
-      setUnavailableDates(prev => prev.filter(d => d.toDateString() !== date.toDateString()));
-      setSelectedDates(prev => [...prev, date]);
-      newIsAvailable = true;
-    } else if (isAvailable) {
-      // Remove from available, add to unavailable
-      setSelectedDates(prev => prev.filter(d => d.toDateString() !== date.toDateString()));
-      setUnavailableDates(prev => [...prev, date]);
-      newIsAvailable = false;
-    } else {
-      // Add to available
-      setSelectedDates(prev => [...prev, date]);
-      newIsAvailable = true;
-    }
-
-    // Save to database with proper conflict handling
-    const { error } = await supabase
-      .from('availability')
-      .upsert({
-        user_id: user.id,
-        date: dateStr,
-        is_available: newIsAvailable
-      }, {
-        onConflict: 'user_id,date'
-      });
-
-    if (error) {
-      console.error('Error updating availability:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update availability",
-        variant: "destructive",
-      });
-    }
-  };
 
   const addSkill = async () => {
     if (!newSkill.trim() || skills.includes(newSkill.trim()) || !user) return;
@@ -696,33 +620,9 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                 <CardTitle>{t.calendarTitle}</CardTitle>
                 <CardDescription>{t.clickToToggle}</CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="flex gap-4 mb-6">
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-green-500 rounded"></div>
-                    <span className="text-sm">{t.availableDays}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-4 h-4 bg-red-500 rounded"></div>
-                    <span className="text-sm">{t.unavailableDays}</span>
-                  </div>
-                </div>
-                <Calendar
-                  mode="multiple"
-                  selected={selectedDates}
-                  onSelect={(dates) => setSelectedDates(dates || [])}
-                  onDayClick={handleDateClick}
-                  className="rounded-md border pointer-events-auto"
-                  modifiers={{
-                    available: selectedDates,
-                    unavailable: unavailableDates
-                  }}
-                  modifiersStyles={{
-                    available: { backgroundColor: 'rgb(34, 197, 94)', color: 'white' },
-                    unavailable: { backgroundColor: 'rgb(239, 68, 68)', color: 'white' }
-                  }}
-                />
-              </CardContent>
+               <CardContent>
+                 <AvailabilityCalendar userId={user?.id} />
+               </CardContent>
             </Card>
           </TabsContent>
 
