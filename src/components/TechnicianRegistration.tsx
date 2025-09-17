@@ -8,6 +8,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, User, Briefcase, Car, CheckCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface TechnicianRegistrationProps {
   onNavigate: (page: string) => void;
@@ -15,10 +17,13 @@ interface TechnicianRegistrationProps {
 
 export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationProps) {
   const { t } = useLanguage();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
+    confirmPassword: '',
     phone: '',
     city: '',
     age: '',
@@ -32,6 +37,7 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isUnder18, setIsUnder18] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
@@ -39,6 +45,10 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     if (!formData.firstName.trim()) newErrors.firstName = t('registration.errors.required');
     if (!formData.lastName.trim()) newErrors.lastName = t('registration.errors.required');
     if (!formData.email.trim()) newErrors.email = t('registration.errors.required');
+    if (!formData.password.trim()) newErrors.password = t('registration.errors.required');
+    if (formData.password.length < 6) newErrors.password = t('registration.errors.passwordTooShort');
+    if (!formData.confirmPassword.trim()) newErrors.confirmPassword = t('registration.errors.required');
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = t('registration.errors.passwordMismatch');
     if (!formData.phone.trim()) newErrors.phone = t('registration.errors.required');
     if (!formData.city.trim()) newErrors.city = t('registration.errors.required');
     if (!formData.age.trim()) newErrors.age = t('registration.errors.required');
@@ -60,14 +70,56 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (validateForm()) {
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+    
+    try {
       const age = parseInt(formData.age);
-      console.log('Registration data:', { ...formData, age, canWorkAsTech: age >= 18 });
       
-      // Everyone can access courses, age only affects work eligibility
-      onNavigate('bootcamp');
+      // Create the user account with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            phone: formData.phone,
+            bio: formData.bio,
+          }
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data.user) {
+        toast({
+          title: "Success!",
+          description: t('registration.successMessage'),
+        });
+        
+        // Navigate to a confirmation page or login
+        onNavigate('technician-login');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -156,6 +208,33 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
                     className={errors.email ? 'border-destructive' : ''}
                   />
                   {errors.email && <p className="text-sm text-destructive mt-1">{errors.email}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="password">{t('registration.password')} *</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) => handleInputChange('password', e.target.value)}
+                      className={errors.password ? 'border-destructive' : ''}
+                      placeholder={t('registration.passwordPlaceholder')}
+                    />
+                    {errors.password && <p className="text-sm text-destructive mt-1">{errors.password}</p>}
+                  </div>
+                  <div>
+                    <Label htmlFor="confirmPassword">{t('registration.confirmPassword')} *</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                      className={errors.confirmPassword ? 'border-destructive' : ''}
+                      placeholder={t('registration.confirmPasswordPlaceholder')}
+                    />
+                    {errors.confirmPassword && <p className="text-sm text-destructive mt-1">{errors.confirmPassword}</p>}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -304,15 +383,15 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
 
                 {/* Submit */}
                 <div className="pt-6">
-                  <Button type="submit" className="w-full" size="lg">
-                    {isUnder18 ? t('registration.accessCourses') : t('registration.createAccount')}
+                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
+                    {isLoading ? t('registration.creating') : (isUnder18 ? t('registration.accessCourses') : t('registration.createAccount'))}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2 text-center">
                     {t('registration.terms')}
                   </p>
                   {!isUnder18 && (
                     <p className="text-xs text-muted-foreground mt-2 text-center">
-                      {t('registration.freeAccess')}
+                      {t('registration.emailConfirmation')}
                     </p>
                   )}
                 </div>
