@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   const [newBrand, setNewBrand] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const translations = {
     fr: {
@@ -129,12 +130,24 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       setProfile({
         firstName: data.first_name || '',
         lastName: data.last_name || '',
-        email: data.email || '',
-        phone: data.phone || '',
+        email: data.email || user?.email || '',
+        phone: data.phone || user?.user_metadata?.phone || '',
         linkedin: data.linkedin_url || '',
-        bio: data.bio || '',
+        bio: data.bio || user?.user_metadata?.bio || '',
         hourlyRate: data.hourly_rate ? data.hourly_rate.toString() : '',
         profilePhotoUrl: data.profile_photo_url || ''
+      });
+    } else if (user) {
+      // If no profile exists, load from user metadata
+      setProfile({
+        firstName: user.user_metadata?.first_name || '',
+        lastName: user.user_metadata?.last_name || '',
+        email: user.email || '',
+        phone: user.user_metadata?.phone || '',
+        linkedin: '',
+        bio: user.user_metadata?.bio || '',
+        hourlyRate: '',
+        profilePhotoUrl: ''
       });
     }
   };
@@ -210,21 +223,46 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   };
 
   const handleDateClick = async (date: Date) => {
-    const dateStr = date.toDateString();
-    const isUnavailable = unavailableDates.some(d => d.toDateString() === dateStr);
-    const isAvailable = selectedDates.some(d => d.toDateString() === dateStr);
+    if (!user) return;
+    
+    const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+    const isUnavailable = unavailableDates.some(d => d.toDateString() === date.toDateString());
+    const isAvailable = selectedDates.some(d => d.toDateString() === date.toDateString());
+
+    let newIsAvailable = true; // default to available
 
     if (isUnavailable) {
       // Remove from unavailable, add to available
-      setUnavailableDates(prev => prev.filter(d => d.toDateString() !== dateStr));
+      setUnavailableDates(prev => prev.filter(d => d.toDateString() !== date.toDateString()));
       setSelectedDates(prev => [...prev, date]);
+      newIsAvailable = true;
     } else if (isAvailable) {
       // Remove from available, add to unavailable
-      setSelectedDates(prev => prev.filter(d => d.toDateString() !== dateStr));
+      setSelectedDates(prev => prev.filter(d => d.toDateString() !== date.toDateString()));
       setUnavailableDates(prev => [...prev, date]);
+      newIsAvailable = false;
     } else {
       // Add to available
       setSelectedDates(prev => [...prev, date]);
+      newIsAvailable = true;
+    }
+
+    // Save to database
+    const { error } = await supabase
+      .from('availability')
+      .upsert({
+        user_id: user.id,
+        date: dateStr,
+        is_available: newIsAvailable
+      });
+
+    if (error) {
+      console.error('Error updating availability:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update availability",
+        variant: "destructive",
+      });
     }
   };
 
@@ -374,6 +412,66 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     setIsLoading(false);
   };
 
+  const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "Error",
+        description: "File size must be less than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/profile.${fileExt}`;
+
+    setIsLoading(true);
+
+    try {
+      // Upload to Supabase storage
+      const { error: uploadError } = await supabase.storage
+        .from('profile-photos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('profile-photos')
+        .getPublicUrl(fileName);
+
+      // Update profile with new photo URL
+      setProfile(prev => ({ ...prev, profilePhotoUrl: publicUrl }));
+      
+      // Save to database
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .upsert({
+          user_id: user.id,
+          profile_photo_url: publicUrl
+        });
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Profile photo updated successfully!",
+      });
+    } catch (error) {
+      console.error('Error uploading photo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload photo",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card p-4">
@@ -437,10 +535,24 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                       }
                     </AvatarFallback>
                   </Avatar>
-                  <Button variant="outline" className="flex items-center gap-2">
-                    <Upload className="h-4 w-4" />
-                    {t.uploadPhoto}
-                  </Button>
+                  <div>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handlePhotoUpload}
+                      accept="image/*"
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isLoading}
+                    >
+                      <Upload className="h-4 w-4" />
+                      {isLoading ? "Uploading..." : t.uploadPhoto}
+                    </Button>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
