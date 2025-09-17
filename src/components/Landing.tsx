@@ -4,7 +4,6 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Wrench, Clock } from 'lucide-react';
 import { store } from '@/lib/store';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Header } from '@/components/Header';
 import type { Technician } from '@/lib/store';
 
 interface LandingProps {
@@ -37,7 +36,6 @@ export function Landing({ onNavigate }: LandingProps) {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background pt-20">
-      <Header onNavigate={onNavigate} />
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-16">
         <div className="container mx-auto px-4">

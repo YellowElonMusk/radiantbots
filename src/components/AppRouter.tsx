@@ -10,6 +10,7 @@ import { TechnicianRegistration } from './TechnicianRegistration';
 import { TechnicianLogin } from './TechnicianLogin';
 import { TechnicianDashboard } from './TechnicianDashboard';
 import { LanguageToggle } from './LanguageToggle';
+import { Header } from './Header';
 
 type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard';
 
@@ -86,6 +87,7 @@ export function AppRouter() {
 
   return (
     <div className="min-h-screen">
+      <Header onNavigate={navigate} />
       <LanguageToggle />
       {renderPage()}
     </div>
