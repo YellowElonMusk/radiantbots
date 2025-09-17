@@ -7,14 +7,29 @@ import { store } from '@/lib/store';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
 import { ArrowLeft, Search, Filter, MapPin, Star } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CatalogProps {
   onNavigate: (page: string, data?: any) => void;
 }
 
+interface TechnicianData {
+  id: string;
+  name: string;
+  city: string;
+  rating: number;
+  rate: number;
+  brands: string[];
+  skills: string[];
+  bio: string;
+  photo: string;
+  experience: string;
+  completedJobs: number;
+}
+
 export function Catalog({ onNavigate }: CatalogProps) {
-  const [technicians, setTechnicians] = useState<Technician[]>([]);
-  const [filteredTechs, setFilteredTechs] = useState<Technician[]>([]);
+  const [technicians, setTechnicians] = useState<TechnicianData[]>([]);
+  const [filteredTechs, setFilteredTechs] = useState<TechnicianData[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -26,17 +41,86 @@ export function Catalog({ onNavigate }: CatalogProps) {
   const [brands, setBrands] = useState<string[]>([]);
 
   useEffect(() => {
-    const allTechs = store.getTechnicians();
-    setTechnicians(allTechs);
-    setFilteredTechs(allTechs);
-
-    // Extract unique locations and brands
-    const uniqueLocations = [...new Set(allTechs.map(tech => tech.city))].sort();
-    const uniqueBrands = [...new Set(allTechs.flatMap(tech => tech.brands))].sort();
-    
-    setLocations(uniqueLocations);
-    setBrands(uniqueBrands);
+    loadTechnicians();
   }, []);
+
+  const loadTechnicians = async () => {
+    try {
+      // Get all profiles that have the required technician data
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select(`
+          user_id,
+          first_name,
+          last_name,
+          bio,
+          hourly_rate,
+          profile_photo_url
+        `)
+        .not('first_name', 'is', null)
+        .not('last_name', 'is', null)
+        .not('hourly_rate', 'is', null);
+
+      if (profilesError) {
+        console.error('Error loading profiles:', profilesError);
+        return;
+      }
+
+      if (!profiles?.length) {
+        setTechnicians([]);
+        setFilteredTechs([]);
+        return;
+      }
+
+      // Get brands and skills for each technician
+      const technicianPromises = profiles.map(async (profile) => {
+        const [brandsResult, skillsResult] = await Promise.all([
+          supabase
+            .from('technician_brands')
+            .select(`
+              brands (name)
+            `)
+            .eq('user_id', profile.user_id),
+          supabase
+            .from('technician_skills')
+            .select(`
+              skills (name)
+            `)
+            .eq('user_id', profile.user_id)
+        ]);
+
+        const brands = brandsResult.data?.map((item: any) => item.brands?.name).filter(Boolean) || [];
+        const skills = skillsResult.data?.map((item: any) => item.skills?.name).filter(Boolean) || [];
+
+        return {
+          id: profile.user_id,
+          name: `${profile.first_name} ${profile.last_name}`,
+          city: 'Paris', // Default for now, could be added to profiles table
+          rating: 4.8, // Default for now, could be calculated from reviews
+          rate: Number(profile.hourly_rate) || 50,
+          brands,
+          skills,
+          bio: profile.bio || '',
+          photo: profile.profile_photo_url || '',
+          experience: '5+ ans', // Default for now
+          completedJobs: 25 // Default for now
+        } as TechnicianData;
+      });
+
+      const allTechs = await Promise.all(technicianPromises);
+      setTechnicians(allTechs);
+      setFilteredTechs(allTechs);
+
+      // Extract unique locations and brands
+      const uniqueLocations = [...new Set(allTechs.map(tech => tech.city))].sort();
+      const uniqueBrands = [...new Set(allTechs.flatMap(tech => tech.brands))].sort();
+      
+      setLocations(uniqueLocations);
+      setBrands(uniqueBrands);
+    } catch (error) {
+      console.error('Error loading technicians:', error);
+    }
+  };
 
   useEffect(() => {
     // Apply filters

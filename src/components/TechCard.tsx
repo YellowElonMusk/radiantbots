@@ -2,10 +2,22 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Clock, Wrench } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import type { Technician } from '@/lib/store';
+interface TechnicianData {
+  id: string;
+  name: string;
+  city: string;
+  rating: number;
+  rate: number;
+  brands: string[];
+  skills: string[];
+  bio: string;
+  photo: string;
+  experience: string;
+  completedJobs: number;
+}
 
 interface TechCardProps {
-  technician: Technician;
+  technician: TechnicianData;
   onViewProfile: (id: string) => void;
   onBookNow: (id: string) => void;
 }
@@ -30,9 +42,17 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
       {/* Card Header with Photo */}
       <div className="relative h-48 bg-gradient-primary overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/80 to-secondary/80 flex items-center justify-center">
-          <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-            <Wrench className="h-12 w-12 text-white" />
-          </div>
+          {technician.photo ? (
+            <img 
+              src={technician.photo} 
+              alt={technician.name}
+              className="w-24 h-24 rounded-full object-cover border-4 border-white/20 backdrop-blur-sm"
+            />
+          ) : (
+            <div className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+              <Wrench className="h-12 w-12 text-white" />
+            </div>
+          )}
         </div>
         
         {/* Rating Badge */}

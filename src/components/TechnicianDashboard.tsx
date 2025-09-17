@@ -247,13 +247,15 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       newIsAvailable = true;
     }
 
-    // Save to database
+    // Save to database with proper conflict handling
     const { error } = await supabase
       .from('availability')
       .upsert({
         user_id: user.id,
         date: dateStr,
         is_available: newIsAvailable
+      }, {
+        onConflict: 'user_id,date'
       });
 
     if (error) {
