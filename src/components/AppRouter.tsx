@@ -9,10 +9,11 @@ import { Bootcamp } from './Bootcamp';
 import { TechnicianRegistration } from './TechnicianRegistration';
 import { TechnicianLogin } from './TechnicianLogin';
 import { TechnicianDashboard } from './TechnicianDashboard';
+import { MissionBookingForm } from './MissionBookingForm';
 import { LanguageToggle } from './LanguageToggle';
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking';
 
 interface PageData {
   technicianId?: string;
@@ -79,6 +80,14 @@ export function AppRouter() {
       
       case 'technician-dashboard':
         return <TechnicianDashboard onNavigate={navigate} />;
+      
+      case 'mission-booking':
+        return (
+          <MissionBookingForm 
+            technicianId={pageData.technicianId!} 
+            onNavigate={navigate} 
+          />
+        );
       
       default:
         return <Landing onNavigate={navigate} />;
