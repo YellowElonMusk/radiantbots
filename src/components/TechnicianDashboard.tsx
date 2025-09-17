@@ -393,6 +393,8 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
         bio: profile.bio,
         hourly_rate: profile.hourlyRate ? parseFloat(profile.hourlyRate) : null,
         profile_photo_url: profile.profilePhotoUrl
+      }, {
+        onConflict: 'user_id'
       });
 
     if (error) {
@@ -451,7 +453,13 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
         .from('profiles')
         .upsert({
           user_id: user.id,
-          profile_photo_url: publicUrl
+          profile_photo_url: publicUrl,
+          // Include other required fields to prevent constraint violations
+          email: profile.email || user.email,
+          first_name: profile.firstName,
+          last_name: profile.lastName
+        }, {
+          onConflict: 'user_id'
         });
 
       if (updateError) throw updateError;
