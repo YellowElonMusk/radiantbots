@@ -14,7 +14,163 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      availability: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          is_available: boolean
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          id?: string
+          is_available?: boolean
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          is_available?: boolean
+          user_id?: string
+        }
+        Relationships: []
+      }
+      brands: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string | null
+          first_name: string | null
+          hourly_rate: number | null
+          id: string
+          last_name: string | null
+          linkedin_url: string | null
+          phone: string | null
+          profile_photo_url: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          hourly_rate?: number | null
+          id?: string
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string | null
+          first_name?: string | null
+          hourly_rate?: number | null
+          id?: string
+          last_name?: string | null
+          linkedin_url?: string | null
+          phone?: string | null
+          profile_photo_url?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      skills: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      technician_brands: {
+        Row: {
+          brand_id: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          brand_id: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          brand_id?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_brands_brand_id_fkey"
+            columns: ["brand_id"]
+            isOneToOne: false
+            referencedRelation: "brands"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technician_skills: {
+        Row: {
+          id: string
+          skill_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          skill_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          skill_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technician_skills_skill_id_fkey"
+            columns: ["skill_id"]
+            isOneToOne: false
+            referencedRelation: "skills"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

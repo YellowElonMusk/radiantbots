@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,8 @@ import { Calendar } from '@/components/ui/calendar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface TechnicianDashboardProps {
   onNavigate: (page: string, data?: any) => void;
@@ -17,21 +19,25 @@ interface TechnicianDashboardProps {
 
 export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   const { language } = useLanguage();
+  const { toast } = useToast();
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const [profile, setProfile] = useState({
-    name: '',
-    photo: '',
-    linkedin: '',
+    firstName: '',
+    lastName: '',
+    email: '',
     phone: '',
-    location: '',
+    linkedin: '',
     bio: '',
-    skills: [] as string[],
-    brands: [] as string[],
-    hourlyRate: ''
+    hourlyRate: '',
+    profilePhotoUrl: ''
   });
+  const [skills, setSkills] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
   const [newSkill, setNewSkill] = useState('');
   const [newBrand, setNewBrand] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
   const translations = {
     fr: {
@@ -48,6 +54,8 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       skills: "Compétences",
       brands: "Marques de robots",
       hourlyRate: "Tarif horaire (€)",
+      firstName: "Prénom",
+      lastName: "Nom",
       uploadPhoto: "Télécharger une photo",
       addSkill: "Ajouter une compétence",
       addBrand: "Ajouter une marque",
@@ -72,6 +80,8 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       skills: "Skills",
       brands: "Robot brands",
       hourlyRate: "Hourly rate (€)",
+      firstName: "First Name",
+      lastName: "Last Name",
       uploadPhoto: "Upload photo",
       addSkill: "Add skill",
       addBrand: "Add brand",
@@ -86,7 +96,120 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
 
   const t = translations[language];
 
-  const handleDateClick = (date: Date) => {
+  useEffect(() => {
+    checkUser();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      onNavigate('technician-login');
+      return;
+    }
+    setUser(user);
+    await loadUserProfile(user.id);
+    await loadUserSkills(user.id);
+    await loadUserBrands(user.id);
+    await loadAvailability(user.id);
+  };
+
+  const loadUserProfile = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', userId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') {
+      console.error('Error loading profile:', error);
+      return;
+    }
+
+    if (data) {
+      setProfile({
+        firstName: data.first_name || '',
+        lastName: data.last_name || '',
+        email: data.email || '',
+        phone: data.phone || '',
+        linkedin: data.linkedin_url || '',
+        bio: data.bio || '',
+        hourlyRate: data.hourly_rate ? data.hourly_rate.toString() : '',
+        profilePhotoUrl: data.profile_photo_url || ''
+      });
+    }
+  };
+
+  const loadUserSkills = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('technician_skills')
+      .select(`
+        skills (name)
+      `)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error loading skills:', error);
+      return;
+    }
+
+    if (data) {
+      setSkills(data.map((item: any) => item.skills.name));
+    }
+  };
+
+  const loadUserBrands = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('technician_brands')
+      .select(`
+        brands (name)
+      `)
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error loading brands:', error);
+      return;
+    }
+
+    if (data) {
+      setBrands(data.map((item: any) => item.brands.name));
+    }
+  };
+
+  const loadAvailability = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('availability')
+      .select('*')
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error loading availability:', error);
+      return;
+    }
+
+    if (data) {
+      const available: Date[] = [];
+      const unavailable: Date[] = [];
+      
+      data.forEach(item => {
+        const date = new Date(item.date);
+        if (item.is_available) {
+          available.push(date);
+        } else {
+          unavailable.push(date);
+        }
+      });
+      
+      setSelectedDates(available);
+      setUnavailableDates(unavailable);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    onNavigate('landing');
+  };
+
+  const handleDateClick = async (date: Date) => {
     const dateStr = date.toDateString();
     const isUnavailable = unavailableDates.some(d => d.toDateString() === dateStr);
     const isAvailable = selectedDates.some(d => d.toDateString() === dateStr);
@@ -105,43 +228,150 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     }
   };
 
-  const addSkill = () => {
-    if (newSkill.trim() && !profile.skills.includes(newSkill.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        skills: [...prev.skills, newSkill.trim()]
-      }));
-      setNewSkill('');
+  const addSkill = async () => {
+    if (!newSkill.trim() || skills.includes(newSkill.trim()) || !user) return;
+
+    // First, create or get the skill
+    const { data: skillData, error: skillError } = await supabase
+      .from('skills')
+      .upsert({ name: newSkill.trim() })
+      .select()
+      .single();
+
+    if (skillError) {
+      console.error('Error creating skill:', skillError);
+      return;
     }
-  };
 
-  const addBrand = () => {
-    if (newBrand.trim() && !profile.brands.includes(newBrand.trim())) {
-      setProfile(prev => ({
-        ...prev,
-        brands: [...prev.brands, newBrand.trim()]
-      }));
-      setNewBrand('');
+    // Then, link it to the user
+    const { error: linkError } = await supabase
+      .from('technician_skills')
+      .insert({ user_id: user.id, skill_id: skillData.id });
+
+    if (linkError) {
+      console.error('Error linking skill:', linkError);
+      return;
     }
+
+    setSkills(prev => [...prev, newSkill.trim()]);
+    setNewSkill('');
   };
 
-  const removeSkill = (skill: string) => {
-    setProfile(prev => ({
-      ...prev,
-      skills: prev.skills.filter(s => s !== skill)
-    }));
+  const addBrand = async () => {
+    if (!newBrand.trim() || brands.includes(newBrand.trim()) || !user) return;
+
+    // First, create or get the brand
+    const { data: brandData, error: brandError } = await supabase
+      .from('brands')
+      .upsert({ name: newBrand.trim() })
+      .select()
+      .single();
+
+    if (brandError) {
+      console.error('Error creating brand:', brandError);
+      return;
+    }
+
+    // Then, link it to the user
+    const { error: linkError } = await supabase
+      .from('technician_brands')
+      .insert({ user_id: user.id, brand_id: brandData.id });
+
+    if (linkError) {
+      console.error('Error linking brand:', linkError);
+      return;
+    }
+
+    setBrands(prev => [...prev, newBrand.trim()]);
+    setNewBrand('');
   };
 
-  const removeBrand = (brand: string) => {
-    setProfile(prev => ({
-      ...prev,
-      brands: prev.brands.filter(b => b !== brand)
-    }));
+  const removeSkill = async (skill: string) => {
+    if (!user) return;
+
+    // First get the skill ID
+    const { data: skillData } = await supabase
+      .from('skills')
+      .select('id')
+      .eq('name', skill)
+      .single();
+
+    if (!skillData) return;
+
+    const { error } = await supabase
+      .from('technician_skills')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('skill_id', skillData.id);
+
+    if (error) {
+      console.error('Error removing skill:', error);
+      return;
+    }
+
+    setSkills(prev => prev.filter(s => s !== skill));
   };
 
-  const handleSaveProfile = () => {
-    // Will be replaced with actual API call
-    alert(t.profileSaved);
+  const removeBrand = async (brand: string) => {
+    if (!user) return;
+
+    // First get the brand ID
+    const { data: brandData } = await supabase
+      .from('brands')
+      .select('id')
+      .eq('name', brand)
+      .single();
+
+    if (!brandData) return;
+
+    const { error } = await supabase
+      .from('technician_brands')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('brand_id', brandData.id);
+
+    if (error) {
+      console.error('Error removing brand:', error);
+      return;
+    }
+
+    setBrands(prev => prev.filter(b => b !== brand));
+  };
+
+  const handleSaveProfile = async () => {
+    if (!user) return;
+
+    setIsLoading(true);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        user_id: user.id,
+        email: profile.email,
+        first_name: profile.firstName,
+        last_name: profile.lastName,
+        phone: profile.phone,
+        linkedin_url: profile.linkedin,
+        bio: profile.bio,
+        hourly_rate: profile.hourlyRate ? parseFloat(profile.hourlyRate) : null,
+        profile_photo_url: profile.profilePhotoUrl
+      });
+
+    if (error) {
+      console.error('Error saving profile:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save profile",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Success",
+        description: t.profileSaved,
+      });
+    }
+    
+    setIsLoading(false);
   };
 
   return (
@@ -151,14 +381,17 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
           <h1 className="text-2xl font-bold">{t.dashboard}</h1>
           <div className="flex items-center gap-4">
             <Avatar>
-              <AvatarImage src={profile.photo} />
+              <AvatarImage src={profile.profilePhotoUrl} />
               <AvatarFallback>
-                <User className="h-4 w-4" />
+                {profile.firstName && profile.lastName 
+                  ? `${profile.firstName[0]}${profile.lastName[0]}` 
+                  : <User className="h-4 w-4" />
+                }
               </AvatarFallback>
             </Avatar>
             <Button
               variant="outline"
-              onClick={() => onNavigate('landing')}
+              onClick={handleLogout}
               className="flex items-center gap-2"
             >
               <LogOut className="h-4 w-4" />
@@ -196,9 +429,12 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
               <CardContent className="space-y-6">
                 <div className="flex items-center gap-6">
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={profile.photo} />
+                    <AvatarImage src={profile.profilePhotoUrl} />
                     <AvatarFallback>
-                      <User className="h-8 w-8" />
+                      {profile.firstName && profile.lastName 
+                        ? `${profile.firstName[0]}${profile.lastName[0]}` 
+                        : <User className="h-8 w-8" />
+                      }
                     </AvatarFallback>
                   </Avatar>
                   <Button variant="outline" className="flex items-center gap-2">
@@ -209,11 +445,28 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">{t.name}</Label>
+                    <Label htmlFor="firstName">{t.firstName || "First Name"}</Label>
                     <Input
-                      id="name"
-                      value={profile.name}
-                      onChange={(e) => setProfile(prev => ({ ...prev, name: e.target.value }))}
+                      id="firstName"
+                      value={profile.firstName}
+                      onChange={(e) => setProfile(prev => ({ ...prev, firstName: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">{t.lastName || "Last Name"}</Label>
+                    <Input
+                      id="lastName"
+                      value={profile.lastName}
+                      onChange={(e) => setProfile(prev => ({ ...prev, lastName: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={profile.email}
+                      onChange={(e) => setProfile(prev => ({ ...prev, email: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
@@ -222,14 +475,6 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                       id="phone"
                       value={profile.phone}
                       onChange={(e) => setProfile(prev => ({ ...prev, phone: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">{t.location}</Label>
-                    <Input
-                      id="location"
-                      value={profile.location}
-                      onChange={(e) => setProfile(prev => ({ ...prev, location: e.target.value }))}
                     />
                   </div>
                   <div className="space-y-2">
@@ -277,7 +522,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {profile.skills.map((skill, index) => (
+                      {skills.map((skill, index) => (
                         <Badge key={index} variant="secondary" className="flex items-center gap-1">
                           {skill}
                           <X 
@@ -303,7 +548,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                       </Button>
                     </div>
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {profile.brands.map((brand, index) => (
+                      {brands.map((brand, index) => (
                         <Badge key={index} variant="outline" className="flex items-center gap-1">
                           {brand}
                           <X 
@@ -316,8 +561,8 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                   </div>
                 </div>
 
-                <Button onClick={handleSaveProfile} className="w-full">
-                  {t.saveProfile}
+                <Button onClick={handleSaveProfile} className="w-full" disabled={isLoading}>
+                  {isLoading ? "Saving..." : t.saveProfile}
                 </Button>
               </CardContent>
             </Card>
