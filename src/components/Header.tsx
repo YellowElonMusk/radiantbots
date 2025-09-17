@@ -38,7 +38,7 @@ export function Header({ onNavigate }: HeaderProps) {
             </button>
             <button 
               onClick={() => onNavigate('registration')}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium"
+              className="bg-gradient-hero text-white px-6 py-2 rounded-lg hover:scale-105 shadow-button hover:shadow-hover transition-all duration-300 font-medium"
             >
               {t('header.becomeTech')}
             </button>
