@@ -216,7 +216,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
   };
 
   const handleBookNow = (technicianId: string) => {
-    onNavigate('booking', { technicianId });
+    onNavigate('mission-booking', { technicianId });
   };
 
   const toggleBrand = (brand: string) => {
