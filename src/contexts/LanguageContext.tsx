@@ -20,7 +20,7 @@ const translations = {
     // Landing page
     'landing.trusted': '🤖 Approuvé par 500+ Entreprises',
     'landing.hero.title': 'Réservez des Techniciens Robotiques Certifiés',
-    'landing.hero.subtitle': 'N\'importe quand, N\'importe où. Connectez-vous avec des techniciens robotiques experts pour la maintenance, le dépannage et l\'optimisation système. Réservez instantanément comme chez le coiffeur.',
+    'landing.hero.subtitle': 'Quand vous voulez, où vous voulez. Connectez-vous avec des techniciens robotiques certifiés pour le déploiement, le dépannage et la maintenance préventive de votre flotte de robots. Réservez instantanément comme chez le coiffeur.',
     'landing.hero.findTech': 'Trouver un Technicien',
     'landing.hero.becomeTech': 'Devenir un Technicien Robotique Certifié',
     'landing.stats.technicians': 'Techniciens',
