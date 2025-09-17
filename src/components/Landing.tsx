@@ -2,36 +2,60 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Wrench, Clock } from 'lucide-react';
-import { store } from '@/lib/store';
+import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import type { Technician } from '@/lib/store';
+
+interface Profile {
+  id: string;
+  first_name: string | null;
+  last_name: string | null;
+  city: string | null;
+  hourly_rate: number | null;
+  bio: string | null;
+  profile_photo_url: string | null;
+  user_id: string;
+}
 
 interface LandingProps {
   onNavigate: (page: string, data?: any) => void;
 }
 
 export function Landing({ onNavigate }: LandingProps) {
-  const [featuredTechs, setFeaturedTechs] = useState<Technician[]>([]);
+  const [featuredTechs, setFeaturedTechs] = useState<Profile[]>([]);
   const { t } = useLanguage();
 
   useEffect(() => {
-    // Clear any fake data and start fresh
-    store.initializeStore();
-    
-    // Get technicians (will be empty until real registrations)
-    const allTechs = store.getTechnicians();
-    const featured = allTechs
-      .sort((a, b) => b.rating - a.rating)
-      .slice(0, 3);
-    setFeaturedTechs(featured);
+    const fetchFeaturedTechnicians = async () => {
+      try {
+        const { data: profiles, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .not('first_name', 'is', null)
+          .not('last_name', 'is', null)
+          .not('hourly_rate', 'is', null)
+          .order('created_at', { ascending: false })
+          .limit(3);
+
+        if (error) {
+          console.error('Error fetching profiles:', error);
+          return;
+        }
+
+        setFeaturedTechs(profiles || []);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
+
+    fetchFeaturedTechnicians();
   }, []);
 
   const handleFindTechnician = () => {
     onNavigate('catalog');
   };
 
-  const handleTechClick = (tech: Technician) => {
-    onNavigate('profile', { technicianId: tech.id });
+  const handleTechClick = (tech: Profile) => {
+    onNavigate('profile', { technicianId: tech.user_id });
   };
 
   return (
@@ -113,36 +137,42 @@ export function Landing({ onNavigate }: LandingProps) {
               >
                 <div className="flex flex-col items-center text-center">
                   <div className="w-20 h-20 rounded-full bg-gradient-primary mb-4 flex items-center justify-center">
-                    <Wrench className="h-10 w-10 text-white" />
+                    {tech.profile_photo_url ? (
+                      <img 
+                        src={tech.profile_photo_url} 
+                        alt={`${tech.first_name} ${tech.last_name}`}
+                        className="w-full h-full rounded-full object-cover"
+                      />
+                    ) : (
+                      <Wrench className="h-10 w-10 text-white" />
+                    )}
                   </div>
                   
                   <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
-                    {tech.name}
+                    {tech.first_name} {tech.last_name}
                   </h3>
                   
                   <div className="flex items-center gap-1 mb-2">
                     <MapPin className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">{tech.city}</span>
+                    <span className="text-sm text-muted-foreground">{tech.city || 'Non spécifié'}</span>
                   </div>
                   
                   <div className="flex items-center gap-1 mb-3">
                     <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="font-medium">{tech.rating}</span>
+                    <span className="font-medium">5.0</span>
                     <span className="text-sm text-muted-foreground">
-                      ({tech.completedJobs} jobs)
+                      (Nouveau)
                     </span>
                   </div>
                   
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {tech.brands.slice(0, 2).map((brand) => (
-                      <Badge key={brand} variant="outline" className="text-xs">
-                        {brand}
-                      </Badge>
-                    ))}
+                  <div className="mb-4">
+                    <Badge variant="outline" className="text-xs">
+                      Certifié
+                    </Badge>
                   </div>
                   
                   <div className="text-primary font-semibold mb-4">
-                    Starting at €{tech.rate}/hr
+                    À partir de €{tech.hourly_rate || 'TBD'}/h
                   </div>
                   
                   <Button variant="book" size="sm" className="w-full">
