@@ -150,7 +150,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
           bio: profile.bio || '',
           photo: profile.profile_photo_url || '',
           experience: '5+ ans', // Default for now
-          completedJobs: 25, // Default for now
+          completedJobs: 0, // Real data will be tracked when booking system is implemented
           acceptsTravel: profile.accepts_travel || false,
           maxTravelDistance: profile.max_travel_distance || 0
         } as TechnicianData;
