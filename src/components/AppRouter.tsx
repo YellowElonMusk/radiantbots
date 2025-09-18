@@ -10,10 +10,11 @@ import { TechnicianRegistration } from './TechnicianRegistration';
 import { TechnicianLogin } from './TechnicianLogin';
 import { TechnicianDashboard } from './TechnicianDashboard';
 import { MissionBookingForm } from './MissionBookingForm';
+import { MessagingInbox } from './MessagingInbox';
 import { LanguageToggle } from './LanguageToggle';
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox';
 
 interface PageData {
   technicianId?: string;
@@ -88,6 +89,9 @@ export function AppRouter() {
             onNavigate={navigate} 
           />
         );
+      
+      case 'messaging-inbox':
+        return <MessagingInbox onNavigate={navigate} />;
       
       default:
         return <Landing onNavigate={navigate} />;

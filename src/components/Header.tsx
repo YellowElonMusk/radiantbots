@@ -1,12 +1,58 @@
 import radiantbotsLogo from '@/assets/radiantbots-logo-new.png';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useState, useEffect } from 'react';
+import { User } from '@supabase/supabase-js';
+import { supabase } from '@/integrations/supabase/client';
+import { Menu, User as UserIcon, MessageCircle } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 interface HeaderProps {
-  onNavigate: (page: string) => void;
+  onNavigate: (page: string, data?: any) => void;
 }
 
 export function Header({ onNavigate }: HeaderProps) {
   const { t } = useLanguage();
+  const [user, setUser] = useState<User | null>(null);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setIsSheetOpen(false);
+    onNavigate('landing');
+  };
+
+  const handleMyProfile = () => {
+    if (user) {
+      setIsSheetOpen(false);
+      onNavigate('profile', { technicianId: user.id });
+    }
+  };
+
+  const handleMessages = () => {
+    setIsSheetOpen(false);
+    onNavigate('messaging-inbox');
+  };
 
   return (
     <header className="bg-white border-b border-gray-200 shadow-sm fixed top-0 left-0 right-0 z-50">
@@ -42,12 +88,62 @@ export function Header({ onNavigate }: HeaderProps) {
             >
               {t('header.becomeTech')}
             </button>
-            <button 
-              onClick={() => onNavigate('technician-login')}
-              className="text-gray-700 hover:text-primary transition-colors font-medium ml-4"
-            >
-              Login
-            </button>
+            {user ? (
+              <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-80">
+                  <div className="py-6">
+                    <div className="mb-6">
+                      <h2 className="text-lg font-semibold mb-2">Menu</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {user.email}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={handleMyProfile}
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Mon Profil
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={handleMessages}
+                      >
+                        <MessageCircle className="mr-2 h-4 w-4" />
+                        Messages
+                      </Button>
+                      
+                      <hr className="my-4" />
+                      
+                      <Button 
+                        variant="outline" 
+                        className="w-full" 
+                        onClick={handleLogout}
+                      >
+                        Déconnexion
+                      </Button>
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            ) : (
+              <button 
+                onClick={() => onNavigate('technician-login')}
+                className="text-gray-700 hover:text-primary transition-colors font-medium ml-4"
+              >
+                Login
+              </button>
+            )}
           </nav>
         </div>
       </div>
