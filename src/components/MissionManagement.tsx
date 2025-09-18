@@ -44,6 +44,8 @@ export const MissionManagement = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      console.log('Loading missions for technician user ID:', user.id);
+
       const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
@@ -59,8 +61,12 @@ export const MissionManagement = () => {
         .eq('technician_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading missions:', error);
+        throw error;
+      }
 
+      console.log('Loaded missions:', missionsData);
       setMissions(missionsData || []);
     } catch (error: any) {
       console.error('Error loading missions:', error);

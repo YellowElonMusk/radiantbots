@@ -39,36 +39,72 @@ export function MessagingInbox({ onNavigate }: MessagingInboxProps) {
   };
 
   const loadConversations = async () => {
-    // Simulate loading conversations - replace with real data when backend is ready
-    setTimeout(() => {
-      setConversations([
-        {
-          id: '1',
-          clientName: 'Marie Dubois',
-          lastMessage: 'Merci pour la maintenance, tout fonctionne parfaitement !',
-          timestamp: '2024-01-15T10:30:00Z',
-          unread: false,
-          missionType: 'Maintenance préventive'
-        },
-        {
-          id: '2',
-          clientName: 'Jean Martin',
-          lastMessage: 'Bonjour, j\'aurais besoin d\'aide pour un dépannage urgent',
-          timestamp: '2024-01-16T14:20:00Z',
-          unread: true,
-          missionType: 'Dépannage'
-        },
-        {
-          id: '3',
-          clientName: 'Sophie Laurent',
-          lastMessage: 'Quand pourriez-vous passer pour l\'installation ?',
-          timestamp: '2024-01-16T16:45:00Z',
-          unread: true,
-          missionType: 'Déploiement'
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Load real messages from database
+      const { data: messages, error } = await supabase
+        .from('messages')
+        .select(`
+          id,
+          content,
+          created_at,
+          mission_id,
+          sender_id,
+          receiver_id,
+          mission:missions!messages_mission_id_fkey(
+            title,
+            client_name,
+            client_user_id,
+            guest_user_id
+          ),
+          sender:profiles!messages_sender_id_fkey(
+            first_name,
+            last_name
+          )
+        `)
+        .or(`sender_id.eq.${user.id},receiver_id.eq.${user.id}`)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading conversations:', error);
+        setConversations([]);
+        setLoading(false);
+        return;
+      }
+
+      // Group messages by mission and get the latest message for each conversation
+      const conversationMap = new Map();
+      
+      messages?.forEach((message: any) => {
+        const missionId = message.mission_id;
+        if (!conversationMap.has(missionId) || 
+            new Date(message.created_at) > new Date(conversationMap.get(missionId).timestamp)) {
+          
+          const isFromClient = message.sender_id !== user.id;
+          const clientName = message.mission?.client_name || 
+                           `${message.sender?.first_name || ''} ${message.sender?.last_name || ''}`.trim() ||
+                           'Unknown Client';
+          
+          conversationMap.set(missionId, {
+            id: missionId,
+            clientName,
+            lastMessage: message.content,
+            timestamp: message.created_at,
+            unread: false, // Could be implemented with read status tracking
+            missionType: message.mission?.title || 'Mission'
+          });
         }
-      ]);
+      });
+
+      setConversations(Array.from(conversationMap.values()));
       setLoading(false);
-    }, 1000);
+    } catch (error) {
+      console.error('Error loading conversations:', error);
+      setConversations([]);
+      setLoading(false);
+    }
   };
 
   const formatTimestamp = (timestamp: string) => {

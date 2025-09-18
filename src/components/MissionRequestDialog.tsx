@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -118,7 +118,7 @@ export const MissionRequestDialog = ({ isOpen, onClose, technician }: MissionReq
       const { data: { user } } = await supabase.auth.getUser();
       
       let missionData: any = {
-        technician_id: technician.user_id,
+        technician_id: technician.user_id, // This should match the technician's user_id
         title: formData.title,
         description: formData.description,
         desired_date: formData.desiredDate || null,
@@ -134,6 +134,8 @@ export const MissionRequestDialog = ({ isOpen, onClose, technician }: MissionReq
         const guestUserId = await getOrCreateGuestUser();
         missionData.guest_user_id = guestUserId;
       }
+
+      console.log('Submitting mission request:', missionData);
 
       const { error } = await supabase
         .from('missions')
@@ -180,6 +182,9 @@ export const MissionRequestDialog = ({ isOpen, onClose, technician }: MissionReq
             <User className="h-5 w-5" />
             Request Mission with {technician.first_name} {technician.last_name}
           </DialogTitle>
+          <DialogDescription>
+            Fill out the form below to request a mission from this technician. They will review your request and respond accordingly.
+          </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
