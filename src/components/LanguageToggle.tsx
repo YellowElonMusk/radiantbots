@@ -13,9 +13,13 @@ export function LanguageToggle() {
       variant="outline"
       size="sm"
       onClick={toggleLanguage}
-      className="fixed top-4 right-4 z-50 bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
+      className="flex items-center gap-1"
     >
-      {language === 'fr' ? '🇫🇷' : '🇬🇧'}
+      {language === 'fr' ? (
+        <>🇫🇷 FR</>
+      ) : (
+        <>🇬🇧 EN</>
+      )}
     </Button>
   );
 }
