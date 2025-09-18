@@ -16,7 +16,7 @@ interface HeaderProps {
 }
 
 export function Header({ onNavigate }: HeaderProps) {
-  const { t } = useLanguage();
+  const { t, language, setLanguage } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -77,6 +77,14 @@ export function Header({ onNavigate }: HeaderProps) {
           </button>
           
           <nav className="hidden md:flex items-center space-x-8">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
+              className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
+            >
+              {language === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
+            </Button>
             <button 
               onClick={() => onNavigate('catalog')}
               className="text-gray-700 hover:text-primary transition-colors font-medium"
