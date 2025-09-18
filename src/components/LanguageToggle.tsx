@@ -15,7 +15,7 @@ export function LanguageToggle() {
       onClick={toggleLanguage}
       className="fixed top-4 right-4 z-50 bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
     >
-      {language === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
+      {language === 'fr' ? '🇫🇷' : '🇬🇧'}
     </Button>
   );
 }
