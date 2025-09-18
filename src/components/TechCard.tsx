@@ -149,7 +149,7 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
             onClick={handleBookClick}
           >
             <Clock className="mr-2 h-4 w-4" />
-            {t('techCard.bookNow')}
+            Request Mission
           </Button>
         </div>
       </div>

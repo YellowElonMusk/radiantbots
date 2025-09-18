@@ -9,7 +9,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X } from 'lucide-react';
+import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase } from 'lucide-react';
+import { MissionManagement } from './MissionManagement';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -438,20 +439,24 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
 
       <div className="container mx-auto p-6">
         <Tabs defaultValue="profile" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile" className="flex items-center gap-2">
-              <User className="h-4 w-4" />
-              {t.profile}
-            </TabsTrigger>
-            <TabsTrigger value="availability" className="flex items-center gap-2">
-              <CalendarIcon className="h-4 w-4" />
-              {t.availability}
-            </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              {t.settings}
-            </TabsTrigger>
-          </TabsList>
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="profile" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            {t.profile}
+          </TabsTrigger>
+          <TabsTrigger value="missions" className="flex items-center gap-2">
+            <Briefcase className="h-4 w-4" />
+            Missions
+          </TabsTrigger>
+          <TabsTrigger value="availability" className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            {t.availability}
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            {t.settings}
+          </TabsTrigger>
+        </TabsList>
 
           <TabsContent value="profile" className="space-y-6">
             <Card>
@@ -615,6 +620,10 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                 </Button>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="missions" className="space-y-6">
+            <MissionManagement />
           </TabsContent>
 
           <TabsContent value="availability" className="space-y-6">

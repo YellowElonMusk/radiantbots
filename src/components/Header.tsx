@@ -141,6 +141,18 @@ export function Header({ onNavigate }: HeaderProps) {
                       <Button 
                         variant="ghost" 
                         className="w-full justify-start" 
+                        onClick={() => {
+                          setIsSheetOpen(false);
+                          onNavigate('client-dashboard');
+                        }}
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        My Missions
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
                         onClick={handlePreviewProfile}
                       >
                         <UserIcon className="mr-2 h-4 w-4" />

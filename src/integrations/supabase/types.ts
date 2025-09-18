@@ -56,6 +56,79 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_users: {
+        Row: {
+          browser_token: string
+          created_at: string
+          email: string | null
+          id: string
+          name: string | null
+        }
+        Insert: {
+          browser_token: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+        }
+        Update: {
+          browser_token?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string | null
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          mission_id: string
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          mission_id: string
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          mission_id?: string
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       mission_types: {
         Row: {
           created_at: string
@@ -74,6 +147,79 @@ export type Database = {
         }
         Relationships: []
       }
+      missions: {
+        Row: {
+          accepted_at: string | null
+          client_email: string
+          client_name: string
+          client_user_id: string | null
+          created_at: string
+          description: string | null
+          desired_date: string | null
+          desired_time: string | null
+          guest_user_id: string | null
+          id: string
+          status: Database["public"]["Enums"]["mission_status"]
+          technician_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          client_email: string
+          client_name: string
+          client_user_id?: string | null
+          created_at?: string
+          description?: string | null
+          desired_date?: string | null
+          desired_time?: string | null
+          guest_user_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          technician_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          client_email?: string
+          client_name?: string
+          client_user_id?: string | null
+          created_at?: string
+          description?: string | null
+          desired_date?: string | null
+          desired_time?: string | null
+          guest_user_id?: string | null
+          id?: string
+          status?: Database["public"]["Enums"]["mission_status"]
+          technician_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "missions_client_user_id_fkey"
+            columns: ["client_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "missions_guest_user_id_fkey"
+            columns: ["guest_user_id"]
+            isOneToOne: false
+            referencedRelation: "guest_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "missions_technician_id_fkey"
+            columns: ["technician_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           accepts_travel: boolean | null
@@ -89,6 +235,7 @@ export type Database = {
           max_travel_distance: number | null
           phone: string | null
           profile_photo_url: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
           user_id: string
         }
@@ -106,6 +253,7 @@ export type Database = {
           max_travel_distance?: number | null
           phone?: string | null
           profile_photo_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id: string
         }
@@ -123,6 +271,7 @@ export type Database = {
           max_travel_distance?: number | null
           phone?: string | null
           profile_photo_url?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id?: string
         }
@@ -239,7 +388,8 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      mission_status: "pending" | "accepted" | "declined" | "completed"
+      user_role: "client" | "technician"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -366,6 +516,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      mission_status: ["pending", "accepted", "declined", "completed"],
+      user_role: ["client", "technician"],
+    },
   },
 } as const

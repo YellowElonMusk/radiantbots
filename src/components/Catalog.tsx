@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TechCard } from './TechCard';
+import { MissionRequestDialog } from './MissionRequestDialog';
 import { store } from '@/lib/store';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
@@ -59,6 +60,8 @@ export function Catalog({ onNavigate }: CatalogProps) {
     missionType: ''
   });
   const [missionTypes, setMissionTypes] = useState<string[]>([]);
+  const [selectedTechnician, setSelectedTechnician] = useState<TechnicianData | null>(null);
+  const [showMissionDialog, setShowMissionDialog] = useState(false);
   const { t } = useLanguage();
 
   // Get unique values for filters
@@ -216,7 +219,16 @@ export function Catalog({ onNavigate }: CatalogProps) {
   };
 
   const handleBookNow = (technicianId: string) => {
-    onNavigate('mission-booking', { technicianId });
+    const technician = technicians.find(t => t.id === technicianId);
+    if (technician) {
+      setSelectedTechnician(technician);
+      setShowMissionDialog(true);
+    }
+  };
+
+  const handleMissionDialogClose = () => {
+    setShowMissionDialog(false);
+    setSelectedTechnician(null);
   };
 
   const toggleBrand = (brand: string) => {
