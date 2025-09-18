@@ -11,7 +11,7 @@ import { TechnicianLogin } from './TechnicianLogin';
 import { TechnicianDashboard } from './TechnicianDashboard';
 import { MissionBookingForm } from './MissionBookingForm';
 import { MessagingInbox } from './MessagingInbox';
-import { LanguageToggle } from './LanguageToggle';
+
 import { Header } from './Header';
 
 type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox';
@@ -101,7 +101,7 @@ export function AppRouter() {
   return (
     <div className="min-h-screen">
       <Header onNavigate={navigate} />
-      <LanguageToggle />
+      
       {renderPage()}
     </div>
   );
