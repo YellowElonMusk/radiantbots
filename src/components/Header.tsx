@@ -45,6 +45,13 @@ export function Header({ onNavigate }: HeaderProps) {
   const handleMyProfile = () => {
     if (user) {
       setIsSheetOpen(false);
+      onNavigate('technician-dashboard');
+    }
+  };
+
+  const handlePreviewProfile = () => {
+    if (user) {
+      setIsSheetOpen(false);
       onNavigate('profile', { technicianId: user.id });
     }
   };
@@ -121,6 +128,15 @@ export function Header({ onNavigate }: HeaderProps) {
                       >
                         <MessageCircle className="mr-2 h-4 w-4" />
                         Messages
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={handlePreviewProfile}
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Preview Profil
                       </Button>
                       
                       <hr className="my-4" />
