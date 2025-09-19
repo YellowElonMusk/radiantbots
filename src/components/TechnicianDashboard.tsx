@@ -38,6 +38,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   const [newBrand, setNewBrand] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [availabilityPeriods, setAvailabilityPeriods] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -118,6 +119,35 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       onNavigate('technician-login');
       return;
     }
+    
+    // Check user role from profiles table
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', user.id)
+      .single();
+      
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+      onNavigate('home');
+      return;
+    }
+    
+    // Redirect if user is not a technician
+    if (profileData?.role !== 'technician') {
+      toast({
+        title: "Accès refusé",
+        description: "Cette page est réservée aux techniciens.",
+        variant: "destructive"
+      });
+      if (profileData?.role === 'client') {
+        onNavigate('enterprise-dashboard');
+      } else {
+        onNavigate('home');
+      }
+      return;
+    }
+    
     setUser(user);
     await loadUserProfile(user.id);
     await loadUserSkills(user.id);

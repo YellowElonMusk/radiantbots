@@ -16,6 +16,7 @@ interface EnterpriseDashboardProps {
 
 export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const [profile, setProfile] = useState({
     company_name: '',
     contact_person: '',
@@ -34,18 +35,56 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
+    const initializeUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      const currentUser = session?.user ?? null;
+      setUser(currentUser);
+      
+      if (currentUser) {
+        // Check user role from profiles table
+        const { data: profileData, error } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', currentUser.id)
+          .single();
+          
+        if (error) {
+          console.error('Error fetching user profile:', error);
+          return;
+        }
+        
+        setUserProfile(profileData);
+        
+        // Redirect if user is not a client/enterprise
+        if (profileData?.role !== 'client') {
+          toast({
+            title: "Accès refusé",
+            description: "Cette page est réservée aux entreprises.",
+            variant: "destructive"
+          });
+          if (profileData?.role === 'technician') {
+            onNavigate('technician-dashboard');
+          } else {
+            onNavigate('home');
+          }
+          return;
+        }
+      }
+    };
+
+    initializeUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          initializeUser();
+        }
       }
     );
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [onNavigate, toast]);
 
   const handleAddItem = (type: 'regions' | 'robot_brands' | 'robot_models', value: string, setter: (value: string) => void) => {
     if (value.trim() && !profile[type].includes(value.trim())) {
