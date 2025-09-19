@@ -77,14 +77,6 @@ export function Header({ onNavigate }: HeaderProps) {
           </button>
           
           <nav className="hidden md:flex items-center space-x-8">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-              className="bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
-            >
-              {language === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
-            </Button>
             <button 
               onClick={() => onNavigate('catalog')}
               className="text-gray-700 hover:text-primary transition-colors font-medium"
@@ -120,6 +112,17 @@ export function Header({ onNavigate }: HeaderProps) {
                     </div>
                     
                     <div className="space-y-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
+                        className="w-full justify-start bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
+                      >
+                        {language === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
+                      </Button>
+                      
+                      <hr className="my-2" />
+                      
                       <Button 
                         variant="ghost" 
                         className="w-full justify-start" 
