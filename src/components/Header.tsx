@@ -81,7 +81,7 @@ export function Header({ onNavigate }: HeaderProps) {
           <nav className="hidden md:flex items-center space-x-8">
             <button 
               onClick={() => onNavigate('account-type-selection')}
-              className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 font-medium"
+              className="bg-gradient-hero text-white px-6 py-2 rounded-lg hover:scale-105 shadow-button hover:shadow-hover transition-all duration-300 font-medium"
             >
               Créer mon compte
             </button>
