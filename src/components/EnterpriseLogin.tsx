@@ -48,8 +48,8 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-6 max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-block bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-            Rejoindre en tant que collaborateur
+          <div className="inline-block bg-blue-600 text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
+            Connexion Entreprise
           </div>
         </div>
 
