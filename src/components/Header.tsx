@@ -86,7 +86,7 @@ export function Header({ onNavigate }: HeaderProps) {
               Créer mon compte
             </button>
             <button 
-              onClick={() => onNavigate('technician-login')}
+              onClick={() => onNavigate('login-type-selection')}
               className="text-blue-600 border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-all duration-300 font-medium"
             >
               Me connecter
