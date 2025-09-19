@@ -22,7 +22,7 @@ const translations = {
     'landing.hero.title': 'Réservez des Techniciens Certifiés en Robotique',
     'landing.hero.subtitle': 'Quand vous voulez, où vous voulez. Connectez-vous avec des techniciens certifiés en robotique pour le déploiement, le dépannage et la maintenance préventive de votre flotte de robots. Réservez instantanément comme chez le coiffeur.',
     'landing.hero.findTech': 'Trouver un Technicien',
-    'landing.hero.becomeTech': 'Devenir un Technicien Robotique Certifié',
+    'landing.hero.becomeTech': 'Devenir Technicien Certifié en Robotique',
     'landing.stats.technicians': 'Techniciens',
     'landing.stats.response': 'Réponse Moy.',
     'landing.stats.success': 'Taux de Réussite',

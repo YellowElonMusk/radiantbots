@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Star, MapPin, Wrench, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { User } from '@supabase/supabase-js';
 
 interface Profile {
   id: string;
@@ -22,9 +23,22 @@ interface LandingProps {
 
 export function Landing({ onNavigate }: LandingProps) {
   const [featuredTechs, setFeaturedTechs] = useState<Profile[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
     const fetchFeaturedTechnicians = async () => {
       try {
         const { data: profiles, error } = await supabase
@@ -48,6 +62,8 @@ export function Landing({ onNavigate }: LandingProps) {
     };
 
     fetchFeaturedTechnicians();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const handleFindTechnician = () => {
@@ -79,24 +95,28 @@ export function Landing({ onNavigate }: LandingProps) {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Button 
-                variant="hero" 
-                size="lg" 
-                onClick={handleFindTechnician}
-                className="text-lg px-8 py-6 h-auto"
-              >
-                <Wrench className="mr-2 h-5 w-5" />
-                {t('landing.hero.findTech')}
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => onNavigate('bootcamp')}
-                className="text-lg px-8 py-6 h-auto"
-              >
-                {t('landing.hero.becomeTech')}
-              </Button>
+              {!user && (
+                <>
+                  <Button 
+                    variant="hero" 
+                    size="lg" 
+                    onClick={handleFindTechnician}
+                    className="text-lg px-8 py-6 h-auto"
+                  >
+                    <Wrench className="mr-2 h-5 w-5" />
+                    {t('landing.hero.findTech')}
+                  </Button>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="lg"
+                    onClick={() => onNavigate('bootcamp')}
+                    className="text-lg px-8 py-6 h-auto"
+                  >
+                    {t('landing.hero.becomeTech')}
+                  </Button>
+                </>
+              )}
             </div>
             
             {/* Stats */}
