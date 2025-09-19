@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Landing } from './Landing';
 import { Catalog } from './Catalog';
 import { Profile } from './Profile';
-import { BookingForm } from './BookingForm';
+
 import { Confirmation } from './Confirmation';
 import { Messages } from './Messages';
 import { Bootcamp } from './Bootcamp';
@@ -19,7 +19,7 @@ import { EnterpriseDashboard } from './EnterpriseDashboard';
 
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'account-type-selection' | 'login-type-selection' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
+type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'account-type-selection' | 'login-type-selection' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
 
 interface PageData {
   technicianId?: string;
@@ -51,13 +51,6 @@ export function AppRouter() {
           />
         );
       
-      case 'booking':
-        return (
-          <BookingForm 
-            technicianId={pageData.technicianId!} 
-            onNavigate={navigate} 
-          />
-        );
       
       case 'confirmation':
         return (

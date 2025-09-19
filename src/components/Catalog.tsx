@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TechCard } from './TechCard';
-import { MissionRequestDialog } from './MissionRequestDialog';
+
 import { store } from '@/lib/store';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
@@ -225,17 +225,9 @@ export function Catalog({ onNavigate }: CatalogProps) {
   };
 
   const handleBookNow = (technicianId: string) => {
-    const technician = technicians.find(t => t.id === technicianId);
-    if (technician) {
-      setSelectedTechnician(technician);
-      setShowMissionDialog(true);
-    }
+    onNavigate('mission-booking', { technicianId });
   };
 
-  const handleMissionDialogClose = () => {
-    setShowMissionDialog(false);
-    setSelectedTechnician(null);
-  };
 
   const toggleBrand = (brand: string) => {
     setSelectedBrands(prev =>
@@ -546,21 +538,6 @@ export function Catalog({ onNavigate }: CatalogProps) {
         </div>
       </div>
 
-      {/* Mission Request Dialog */}
-      {selectedTechnician && (
-        <MissionRequestDialog
-          isOpen={showMissionDialog}
-          onClose={handleMissionDialogClose}
-          technician={{
-            user_id: selectedTechnician.user_id,
-            first_name: selectedTechnician.first_name,
-            last_name: selectedTechnician.last_name,
-            city: selectedTechnician.city,
-            hourly_rate: selectedTechnician.rate,
-            profile_photo_url: selectedTechnician.photo
-          }}
-        />
-      )}
     </div>
   );
 }
