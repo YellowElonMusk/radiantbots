@@ -18,10 +18,12 @@ import { AccountTypeSelection } from './AccountTypeSelection';
 import { EnterpriseRegistration } from './EnterpriseRegistration';
 import { EnterpriseLogin } from './EnterpriseLogin';
 import { EnterpriseDashboard } from './EnterpriseDashboard';
+import { ForgotPassword } from './ForgotPassword';
+import { ResetPassword } from './ResetPassword';
 
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'account-type-selection' | 'enterprise-registration' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
+type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'account-type-selection' | 'enterprise-registration' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation' | 'forgot-password' | 'reset-password';
 
 interface PageData {
   technicianId?: string;
@@ -111,6 +113,12 @@ export function AppRouter() {
 
       case 'enterprise-dashboard':
         return <EnterpriseDashboard onNavigate={navigate} />;
+
+      case 'forgot-password':
+        return <ForgotPassword onNavigate={navigate} />;
+
+      case 'reset-password':
+        return <ResetPassword onNavigate={navigate} />;
 
       
       default:

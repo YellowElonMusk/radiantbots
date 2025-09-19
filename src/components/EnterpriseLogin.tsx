@@ -124,6 +124,13 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
           </form>
 
           <div className="mt-6 text-center">
+            <button 
+              type="button"
+              onClick={() => onNavigate('forgot-password')}
+              className="text-sm text-blue-600 hover:underline mb-4 block w-full"
+            >
+              Mot de passe oublié ?
+            </button>
             <p className="text-sm text-gray-600">
               Pas encore de compte ? <button onClick={() => onNavigate('enterprise-registration')} className="text-blue-600 hover:underline">S'inscrire</button>
             </p>

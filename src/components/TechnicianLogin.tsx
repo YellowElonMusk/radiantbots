@@ -212,7 +212,12 @@ export function TechnicianLogin({ onNavigate }: TechnicianLoginProps) {
               </Button>
             </div>
             <div className="text-center">
-              <Button variant="link" className="text-sm">
+              <Button 
+                type="button"
+                variant="link" 
+                onClick={() => onNavigate('forgot-password')}
+                className="text-sm"
+              >
                 {t.forgotPassword}
               </Button>
             </div>
