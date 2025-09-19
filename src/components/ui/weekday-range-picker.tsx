@@ -88,6 +88,8 @@ export function WeekdayRangePicker({
   }, [value]);
 
   const handleDayClick = (date: Date) => {
+    console.log('Day clicked:', date, 'Current state:', { startDate, endDate });
+    
     // Check if it's a weekend
     if (isWeekend(date)) {
       setShowTooltip({ show: true, message: "Les week-ends ne sont pas disponibles" });
@@ -104,14 +106,19 @@ export function WeekdayRangePicker({
 
     if (!startDate || (startDate && endDate)) {
       // First click or reset
+      console.log('Setting start date:', date);
       setStartDate(date);
       setEndDate(null);
+      setHoverDate(null); // Clear hover state
     } else {
-      // Second click - temporarily set end date for visual feedback
+      // Second click - set end date and validate
+      console.log('Setting end date:', date, 'Start was:', startDate);
       setEndDate(date);
+      setHoverDate(null); // Clear hover state
       
       // Validate the range
       const range = normalizeRange(startDate, date);
+      console.log('Range calculated:', range);
       
       // Check max weekdays limit
       if (range.count_weekdays > maxWeekdays) {
@@ -124,8 +131,14 @@ export function WeekdayRangePicker({
       }
 
       // If validation passes, emit the range and close
+      console.log('Emitting range and closing:', range);
       onChange(range);
-      setTimeout(() => setIsOpen(false), 200); // Slightly longer delay to show final selection
+      setTimeout(() => {
+        setIsOpen(false);
+        // Reset internal state after closing
+        setStartDate(null);
+        setEndDate(null);
+      }, 300);
     }
   };
 
@@ -244,8 +257,8 @@ export function WeekdayRangePicker({
                           )}
                           onClick={() => !isDisabled && handleDayClick(date)}
                           onKeyDown={(e) => !isDisabled && handleKeyDown(e, date)}
-                          onMouseEnter={() => !isDisabled && startDate && !endDate && setHoverDate(date)}
-                          onMouseLeave={() => setHoverDate(null)}
+                          onMouseEnter={() => !isDisabled && startDate && !endDate && !hoverDate && setHoverDate(date)}
+                          onMouseLeave={() => !isDisabled && setHoverDate(null)}
                           disabled={isDisabled}
                           aria-label={format(date, "dd MMMM yyyy")}
                           {...props}
@@ -260,7 +273,6 @@ export function WeekdayRangePicker({
                   );
                 }
               }}
-              onDayClick={handleDayClick}
             />
             
             {/* Legend */}
