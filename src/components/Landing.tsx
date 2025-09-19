@@ -15,6 +15,7 @@ interface Profile {
   bio: string | null;
   profile_photo_url: string | null;
   user_id: string;
+  role?: string;
 }
 
 interface LandingProps {
@@ -24,20 +25,48 @@ interface LandingProps {
 export function Landing({ onNavigate }: LandingProps) {
   const [featuredTechs, setFeaturedTechs] = useState<Profile[]>([]);
   const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const { t } = useLanguage();
 
   useEffect(() => {
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         setUser(session?.user ?? null);
+        if (session?.user) {
+          fetchUserProfile(session.user.id);
+        } else {
+          setUserProfile(null);
+        }
       }
     );
+
+    const fetchUserProfile = async (userId: string) => {
+      try {
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', userId)
+          .single();
+
+        if (error) {
+          console.error('Error fetching user profile:', error);
+          return;
+        }
+
+        setUserProfile(profile);
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    };
 
     const fetchFeaturedTechnicians = async () => {
       try {
@@ -115,6 +144,33 @@ export function Landing({ onNavigate }: LandingProps) {
                   >
                     {t('landing.hero.becomeTech')}
                   </Button>
+                </>
+              )}
+              
+              {user && userProfile && (
+                <>
+                  {userProfile.role !== 'technician' && (
+                    <Button 
+                      variant="hero" 
+                      size="lg" 
+                      onClick={handleFindTechnician}
+                      className="text-lg px-8 py-6 h-auto"
+                    >
+                      <Wrench className="mr-2 h-5 w-5" />
+                      {t('landing.hero.findTech')}
+                    </Button>
+                  )}
+                  
+                  {userProfile.role !== 'enterprise' && (
+                    <Button 
+                      variant="outline" 
+                      size="lg"
+                      onClick={() => onNavigate('bootcamp')}
+                      className="text-lg px-8 py-6 h-auto"
+                    >
+                      {t('landing.hero.becomeTech')}
+                    </Button>
+                  )}
                 </>
               )}
             </div>
