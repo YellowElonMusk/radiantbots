@@ -27,6 +27,10 @@ interface Mission {
     phone: string;
     linkedin_url: string;
   };
+  guest_profile?: {
+    name: string;
+    email: string;
+  };
 }
 
 export const MissionManagement = () => {
@@ -56,6 +60,10 @@ export const MissionManagement = () => {
             email,
             phone,
             linkedin_url
+          ),
+          guest_profile:guest_users!missions_guest_user_id_fkey(
+            name,
+            email
           )
         `)
         .eq('technician_id', user.id)
@@ -282,11 +290,14 @@ export const MissionManagement = () => {
                           <div className="space-y-1 text-sm">
                             <div className="flex items-center gap-2">
                               <User className="h-3 w-3" />
-                              {mission.client_name}
+                              {mission.client_profile 
+                                ? `${mission.client_profile.first_name} ${mission.client_profile.last_name}`
+                                : mission.guest_profile?.name || mission.client_name
+                              }
                             </div>
                             <div className="flex items-center gap-2">
                               <Mail className="h-3 w-3" />
-                              {mission.client_email}
+                              {mission.client_profile?.email || mission.guest_profile?.email || mission.client_email}
                             </div>
                             {mission.client_profile?.phone && (
                               <div className="flex items-center gap-2">
