@@ -4,7 +4,10 @@ import { Star, MapPin, Clock, Wrench } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 interface TechnicianData {
   id: string;
+  user_id: string;
   name: string;
+  first_name: string;
+  last_name: string;
   city: string;
   rating: number;
   rate: number;

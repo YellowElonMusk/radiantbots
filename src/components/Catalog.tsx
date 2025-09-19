@@ -24,7 +24,10 @@ interface CatalogProps {
 
 interface TechnicianData {
   id: string;
+  user_id: string;
   name: string;
+  first_name: string;
+  last_name: string;
   city: string;
   rating: number;
   rate: number;
@@ -144,7 +147,10 @@ export function Catalog({ onNavigate }: CatalogProps) {
 
         return {
           id: profile.user_id,
+          user_id: profile.user_id, // Add user_id field for mission requests
           name: `${profile.first_name} ${profile.last_name}`,
+          first_name: profile.first_name,
+          last_name: profile.last_name,
           city: profile.city || 'Paris',
           rating: 4.8, // Default for now, could be calculated from reviews
           rate: Number(profile.hourly_rate) || 50,
