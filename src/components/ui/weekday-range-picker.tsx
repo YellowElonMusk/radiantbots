@@ -107,7 +107,10 @@ export function WeekdayRangePicker({
       setStartDate(date);
       setEndDate(null);
     } else {
-      // Second click - validate the range first
+      // Second click - temporarily set end date for visual feedback
+      setEndDate(date);
+      
+      // Validate the range
       const range = normalizeRange(startDate, date);
       
       // Check max weekdays limit
@@ -120,10 +123,9 @@ export function WeekdayRangePicker({
         return;
       }
 
-      // If validation passes, set end date and emit the range
-      setEndDate(date);
+      // If validation passes, emit the range and close
       onChange(range);
-      setTimeout(() => setIsOpen(false), 100); // Small delay to show selection before closing
+      setTimeout(() => setIsOpen(false), 200); // Slightly longer delay to show final selection
     }
   };
 
@@ -236,7 +238,7 @@ export function WeekdayRangePicker({
                             "h-10 w-10 p-0 font-normal min-h-[40px] min-w-[40px]",
                             "focus:outline-2 focus:outline-blue-500 focus:outline-offset-2",
                             isInRange && !isDisabled && "bg-blue-100 text-blue-900",
-                            (isStart || isEnd) && !isDisabled && "ring-2 ring-blue-500 bg-blue-200",
+                            (isStart || isEnd) && !isDisabled && "ring-2 ring-blue-500 bg-blue-500 text-white",
                             isDisabled && "text-red-500 opacity-40 cursor-not-allowed hover:bg-transparent",
                             date.toDateString() === new Date().toDateString() && "font-bold bg-accent"
                           )}
