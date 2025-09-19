@@ -51,7 +51,7 @@ export function AccountTypeSelection({ onNavigate }: AccountTypeSelectionProps) 
 
         <div className="text-center">
           <p className="text-gray-600 mb-2">
-            🔧 Vous êtes consultant ou manager de transition ? <a href="#" className="text-blue-600 hover:underline">Découvrez Malt Strategy</a>
+            Ou êtes technicien mécanicien ou jeune diplômé souhaitant devenir technicien robot freelance? Découvrez notre <button onClick={() => onNavigate('bootcamp')} className="text-blue-600 hover:underline">bootcamp</button>.
           </p>
           <p className="text-gray-600">
             Vous avez déjà un compte ? <button onClick={() => onNavigate('technician-login')} className="text-blue-600 hover:underline">Connexion</button>

@@ -86,25 +86,19 @@ export function Header({ onNavigate }: HeaderProps) {
               {t('header.findTechnician')}
             </button>
             <button 
-              onClick={() => onNavigate('bootcamp')}
-              className="text-gray-700 hover:text-primary transition-colors font-medium"
-            >
-              {t('header.bootcamp')}
-            </button>
-            <button 
               onClick={() => onNavigate('registration')}
               className="bg-gradient-hero text-white px-6 py-2 rounded-lg hover:scale-105 shadow-button hover:shadow-hover transition-all duration-300 font-medium"
             >
               {t('header.becomeTech')}
             </button>
             <button 
-              onClick={() => onNavigate('account-creation')}
+              onClick={() => onNavigate('account-type-selection')}
               className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-all duration-300 font-medium"
             >
               Créer mon compte
             </button>
             <button 
-              onClick={() => onNavigate('account-type-selection')}
+              onClick={() => onNavigate('technician-login')}
               className="text-blue-600 border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-all duration-300 font-medium"
             >
               Me connecter
@@ -181,6 +175,18 @@ export function Header({ onNavigate }: HeaderProps) {
                       >
                         <UserIcon className="mr-2 h-4 w-4" />
                         Preview Profil
+                      </Button>
+                      
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start" 
+                        onClick={() => {
+                          setIsSheetOpen(false);
+                          onNavigate('bootcamp');
+                        }}
+                      >
+                        <UserIcon className="mr-2 h-4 w-4" />
+                        Formation
                       </Button>
                       
                       <hr className="my-4" />
