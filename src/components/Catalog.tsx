@@ -50,7 +50,6 @@ interface SearchCriteria {
     count_weekdays: number;
   } | null;
   dateFlexible: boolean;
-  missionType: string;
 }
 
 export function Catalog({ onNavigate }: CatalogProps) {
@@ -64,8 +63,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     deploymentCity: '',
     missionDateRange: null,
-    dateFlexible: false,
-    missionType: ''
+    dateFlexible: false
   });
   const [missionTypes, setMissionTypes] = useState<string[]>([]);
   const [selectedTechnician, setSelectedTechnician] = useState<TechnicianData | null>(null);
@@ -250,28 +248,56 @@ export function Catalog({ onNavigate }: CatalogProps) {
     setSearchCriteria({
       deploymentCity: '',
       missionDateRange: null,
-      dateFlexible: false,
-      missionType: ''
+      dateFlexible: false
     });
   };
 
-  const handleAdvancedSearch = () => {
-    // Filter technicians based on search criteria
+  const handleAdvancedSearch = async () => {
+    console.log('Starting advanced search with criteria:', searchCriteria);
+    
+    // Start with all technicians
     let filtered = technicians;
 
+    // Filter by city
     if (searchCriteria.deploymentCity) {
       filtered = filtered.filter(tech => 
-        tech.city.toLowerCase() === searchCriteria.deploymentCity.toLowerCase() ||
+        tech.city.toLowerCase().includes(searchCriteria.deploymentCity.toLowerCase()) ||
         (tech.acceptsTravel && tech.maxTravelDistance > 0)
       );
     }
 
+    // Filter by availability periods if date range is selected
+    if (searchCriteria.missionDateRange) {
+      const { start_date, end_date } = searchCriteria.missionDateRange;
+      
+      try {
+        // Query availability periods that overlap with the requested range
+        const { data: availabilityPeriods, error } = await supabase
+          .from('availability_periods')
+          .select('user_id')
+          .lte('start_date', end_date)
+          .gte('end_date', start_date);
+
+        if (error) {
+          console.error('Error querying availability periods:', error);
+        } else {
+          console.log('Found availability periods:', availabilityPeriods);
+          
+          // Filter technicians to only include those with availability
+          const availableUserIds = new Set(availabilityPeriods?.map(ap => ap.user_id) || []);
+          filtered = filtered.filter(tech => availableUserIds.has(tech.user_id));
+        }
+      } catch (error) {
+        console.error('Error checking availability:', error);
+      }
+    }
+
+    console.log('Filtered technicians:', filtered.length);
     setFilteredTechs(filtered);
-    setShowAdvancedSearch(false);
   };
 
   const hasActiveFilters = searchQuery || selectedLocation || selectedBrands.length > 0 || minRating > 0 || 
-    searchCriteria.deploymentCity || searchCriteria.missionType;
+    searchCriteria.deploymentCity || searchCriteria.missionDateRange;
 
   return (
     <div className="min-h-screen bg-background">
@@ -308,7 +334,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Deployment City */}
                 <div>
                   <Label htmlFor="deploymentCity">Ville de déploiement *</Label>
@@ -318,24 +344,6 @@ export function Catalog({ onNavigate }: CatalogProps) {
                     value={searchCriteria.deploymentCity}
                     onChange={(e) => setSearchCriteria(prev => ({ ...prev, deploymentCity: e.target.value }))}
                   />
-                </div>
-
-                {/* Mission Type */}
-                <div>
-                  <Label htmlFor="missionType">Type de mission</Label>
-                  <Select 
-                    value={searchCriteria.missionType} 
-                    onValueChange={(value) => setSearchCriteria(prev => ({ ...prev, missionType: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Sélectionner le type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {missionTypes.map(type => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </div>
               </div>
 
