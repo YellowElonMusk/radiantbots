@@ -123,8 +123,8 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
   };
 
   const handleMessage = () => {
-    // TODO: Implement messaging system
-    console.log('Message functionality to be implemented');
+    // Navigate to messaging with the technician
+    onNavigate('messaging-inbox', { technicianId: technician.user_id });
   };
 
   const formatTimeSlot = (isoString: string) => {
