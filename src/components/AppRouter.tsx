@@ -12,10 +12,13 @@ import { TechnicianDashboard } from './TechnicianDashboard';
 import { MissionBookingForm } from './MissionBookingForm';
 import { MessagingInbox } from './MessagingInbox';
 import { ClientDashboard } from './ClientDashboard';
+import { AccountTypeSelection } from './AccountTypeSelection';
+import { EnterpriseLogin } from './EnterpriseLogin';
+import { EnterpriseDashboard } from './EnterpriseDashboard';
 
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard';
+type Page = 'landing' | 'catalog' | 'profile' | 'booking' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'account-type-selection' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
 
 interface PageData {
   technicianId?: string;
@@ -96,6 +99,18 @@ export function AppRouter() {
       
       case 'client-dashboard':
         return <ClientDashboard />;
+
+      case 'account-type-selection':
+        return <AccountTypeSelection onNavigate={navigate} />;
+
+      case 'enterprise-login':
+        return <EnterpriseLogin onNavigate={navigate} />;
+
+      case 'enterprise-dashboard':
+        return <EnterpriseDashboard onNavigate={navigate} />;
+
+      case 'account-creation':
+        return <TechnicianRegistration onNavigate={navigate} />;
       
       default:
         return <Landing onNavigate={navigate} />;

@@ -1,0 +1,63 @@
+import { Card } from "@/components/ui/card";
+
+interface AccountTypeSelectionProps {
+  onNavigate: (page: string) => void;
+}
+
+export function AccountTypeSelection({ onNavigate }: AccountTypeSelectionProps) {
+  return (
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-6 max-w-4xl">
+        <div className="text-center mb-8">
+          <div className="inline-block bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
+            Bonjour !
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-8">
+            Quel type de compte souhaitez-vous créer ?
+          </h1>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-8 mb-8">
+          <Card 
+            className="p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => onNavigate('enterprise-login')}
+          >
+            <div className="mb-6">
+              <div className="w-24 h-24 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                <div className="text-4xl">🏢</div>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold mb-3">Entreprise</h3>
+            <p className="text-gray-600 font-medium">
+              Je cherche des freelances
+            </p>
+          </Card>
+
+          <Card 
+            className="p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => onNavigate('registration')}
+          >
+            <div className="mb-6">
+              <div className="w-24 h-24 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
+                <div className="text-4xl">👨‍💻</div>
+              </div>
+            </div>
+            <h3 className="text-xl font-bold mb-3">Freelance</h3>
+            <p className="text-gray-600 font-medium">
+              Je crée mon profil de freelance
+            </p>
+          </Card>
+        </div>
+
+        <div className="text-center">
+          <p className="text-gray-600 mb-2">
+            🔧 Vous êtes consultant ou manager de transition ? <a href="#" className="text-blue-600 hover:underline">Découvrez Malt Strategy</a>
+          </p>
+          <p className="text-gray-600">
+            Vous avez déjà un compte ? <button onClick={() => onNavigate('technician-login')} className="text-blue-600 hover:underline">Connexion</button>
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
