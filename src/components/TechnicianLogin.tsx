@@ -103,7 +103,7 @@ export function TechnicianLogin({ onNavigate }: TechnicianLoginProps) {
             .from('profiles')
             .select('role')
             .eq('user_id', data.user.id)
-            .single();
+            .maybeSingle();
             
           if (profileError) {
             console.error('Error fetching user profile:', profileError);

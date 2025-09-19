@@ -21,18 +21,56 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
     setLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
 
-      toast({
-        title: "Connexion réussie",
-        description: "Bienvenue sur votre espace entreprise !",
-      });
-      onNavigate('enterprise-dashboard');
+      if (data.user) {
+        // Check user role from profiles table
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+          
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          toast({
+            title: "Erreur",
+            description: "Impossible de vérifier le type de compte",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        // Redirect if user is not an enterprise client
+        if (profileData?.role === 'technician') {
+          await supabase.auth.signOut(); // Sign them out since they're in the wrong place
+          toast({
+            title: "Compte Technicien Détecté",
+            description: "Vous avez un compte technicien. Cliquez sur 'Me connecter' et choisissez 'Freelance' pour accéder à votre tableau de bord.",
+            variant: "destructive",
+          });
+          return;
+        } else if (profileData?.role !== 'client') {
+          await supabase.auth.signOut();
+          toast({
+            title: "Accès Refusé",
+            description: "Ce compte n'est pas autorisé à accéder à l'espace entreprise.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Connexion réussie",
+          description: "Bienvenue sur votre espace entreprise !",
+        });
+        onNavigate('enterprise-dashboard');
+      }
     } catch (error: any) {
       toast({
         title: "Erreur",
