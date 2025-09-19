@@ -107,19 +107,25 @@ export function WeekdayRangePicker({
       setStartDate(date);
       setEndDate(null);
     } else {
-      // Second click
+      // Second click - set end date first
+      setEndDate(date);
+      
+      // Then create and validate the range
       const range = normalizeRange(startDate, date);
       
       // Check max weekdays limit
       if (range.count_weekdays > maxWeekdays) {
         setShowTooltip({ show: true, message: `Maximum ${maxWeekdays} jours ouvrables autorisés` });
         setTimeout(() => setShowTooltip({ show: false, message: "" }), 2000);
+        // Reset if exceeds limit
+        setStartDate(null);
+        setEndDate(null);
         return;
       }
 
-      setEndDate(date);
+      // Call onChange and close popover
       onChange(range);
-      setIsOpen(false);
+      setTimeout(() => setIsOpen(false), 100); // Small delay to show selection before closing
     }
   };
 
