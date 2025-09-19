@@ -98,6 +98,42 @@ export function TechnicianLogin({ onNavigate }: TechnicianLoginProps) {
         }
 
         if (data.user) {
+          // Check user role from profiles table
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('user_id', data.user.id)
+            .single();
+            
+          if (profileError) {
+            console.error('Error fetching user profile:', profileError);
+            toast({
+              title: "Error",
+              description: "Unable to verify account type",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Redirect if user is not a technician
+          if (profileData?.role === 'client') {
+            await supabase.auth.signOut(); // Sign them out since they're in the wrong place
+            toast({
+              title: "Compte Entreprise Détecté",
+              description: "Vous avez un compte entreprise. Cliquez sur 'Me connecter' et choisissez 'Entreprise' pour accéder à votre tableau de bord.",
+              variant: "destructive",
+            });
+            return;
+          } else if (profileData?.role !== 'technician') {
+            await supabase.auth.signOut();
+            toast({
+              title: "Accès Refusé",
+              description: "Ce compte n'est pas autorisé à accéder à l'espace technicien.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           toast({
             title: "Success",
             description: "Logged in successfully!",
