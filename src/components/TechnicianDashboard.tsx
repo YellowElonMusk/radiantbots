@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { AvailabilityCalendar } from '@/components/AvailabilityCalendar';
+
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase } from 'lucide-react';
@@ -439,7 +439,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
 
       <div className="container mx-auto p-6">
         <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             {t.profile}
@@ -447,10 +447,6 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
           <TabsTrigger value="missions" className="flex items-center gap-2">
             <Briefcase className="h-4 w-4" />
             Missions
-          </TabsTrigger>
-          <TabsTrigger value="availability" className="flex items-center gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            {t.availability}
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -626,17 +622,6 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
             <MissionManagement />
           </TabsContent>
 
-          <TabsContent value="availability" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>{t.calendarTitle}</CardTitle>
-                <CardDescription>{t.clickToToggle}</CardDescription>
-              </CardHeader>
-               <CardContent>
-                 <AvailabilityCalendar userId={user?.id} />
-               </CardContent>
-            </Card>
-          </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
             <Card>
