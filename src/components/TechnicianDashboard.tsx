@@ -17,9 +17,10 @@ import { useToast } from '@/hooks/use-toast';
 
 interface TechnicianDashboardProps {
   onNavigate: (page: string, data?: any) => void;
+  data?: { activeTab?: string };
 }
 
-export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
+export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardProps) {
   const { language } = useLanguage();
   const { toast } = useToast();
   const [profile, setProfile] = useState({
@@ -554,7 +555,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       </header>
 
       <div className="container mx-auto p-6">
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs defaultValue={data?.activeTab || "profile"} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />

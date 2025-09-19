@@ -28,6 +28,7 @@ type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'b
 interface PageData {
   technicianId?: string;
   bookingId?: string;
+  activeTab?: string;
 }
 
 export function AppRouter() {
@@ -82,7 +83,7 @@ export function AppRouter() {
         return <TechnicianLogin onNavigate={navigate} />;
       
       case 'technician-dashboard':
-        return <TechnicianDashboard onNavigate={navigate} />;
+        return <TechnicianDashboard onNavigate={navigate} data={pageData} />;
       
       case 'mission-booking':
         return (
