@@ -118,7 +118,7 @@ export function Header({ onNavigate }: HeaderProps) {
                         onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
                         className="w-full justify-start bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
                       >
-                        {language === 'fr' ? '🇫🇷 FR' : '🇺🇸 EN'}
+                        {language === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
                       </Button>
                       
                       <hr className="my-2" />
