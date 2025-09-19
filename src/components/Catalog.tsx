@@ -545,6 +545,22 @@ export function Catalog({ onNavigate }: CatalogProps) {
           </div>
         </div>
       </div>
+
+      {/* Mission Request Dialog */}
+      {selectedTechnician && (
+        <MissionRequestDialog
+          isOpen={showMissionDialog}
+          onClose={handleMissionDialogClose}
+          technician={{
+            user_id: selectedTechnician.user_id,
+            first_name: selectedTechnician.first_name,
+            last_name: selectedTechnician.last_name,
+            city: selectedTechnician.city,
+            hourly_rate: selectedTechnician.rate,
+            profile_photo_url: selectedTechnician.photo
+          }}
+        />
+      )}
     </div>
   );
 }
