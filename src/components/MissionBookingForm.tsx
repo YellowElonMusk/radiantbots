@@ -88,8 +88,83 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
     try {
       setSubmitting(true);
       
-      // Create search request in database
-      const { data, error } = await supabase
+      // Get current user or create guest user
+      const { data: { user } } = await supabase.auth.getUser();
+      let clientEmail = '';
+      let clientName = '';
+      let clientUserId = null;
+      let guestUserId = null;
+
+      if (user) {
+        // Authenticated user
+        clientEmail = user.email || '';
+        clientUserId = user.id;
+        // Get user profile for name
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name, last_name')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (profile) {
+          clientName = `${profile.first_name} ${profile.last_name}`;
+        } else {
+          clientName = user.email || 'Client';
+        }
+      } else {
+        // Guest user - generate a browser token
+        const browserToken = crypto.randomUUID();
+        
+        // Create or get guest user
+        const { data: guestUser, error: guestError } = await supabase
+          .from('guest_users')
+          .insert({
+            email: 'guest@example.com', // This will be updated with actual email in enterprise flow
+            name: clientCompany || 'Enterprise Client',
+            browser_token: browserToken
+          })
+          .select()
+          .single();
+
+        if (guestError) {
+          console.error('Error creating guest user:', guestError);
+          alert('Erreur lors de la création du compte temporaire');
+          return;
+        }
+
+        guestUserId = guestUser.id;
+        clientEmail = guestUser.email;
+        clientName = guestUser.name;
+      }
+
+      // Create mission record
+      const { data: mission, error: missionError } = await supabase
+        .from('missions')
+        .insert({
+          title: `Mission: ${missionDescription.substring(0, 50)}...`,
+          description: missionDescription,
+          desired_date: missionDateRange.start_date,
+          desired_time: preferredTime || null,
+          client_name: clientName,
+          client_email: clientEmail,
+          client_user_id: clientUserId,
+          guest_user_id: guestUserId,
+          technician_id: technicianId,
+          status: 'pending'
+        })
+        .select()
+        .single();
+
+      if (missionError) {
+        console.error('Error creating mission:', missionError);
+        alert('Erreur lors de la création de la mission');
+        return;
+      }
+
+      console.log('Mission created successfully:', mission);
+
+      // Also create search request for tracking
+      await supabase
         .from('search_requests')
         .insert({
           deployment_city: missionLocation,
@@ -97,18 +172,9 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           mission_type: 'Support technique robotique',
           mission_date: missionDateRange.start_date,
           date_flexible: missionDateRange.count_weekdays > 1,
-          client_email: `client@example.com` // This should come from auth in real implementation
-        })
-        .select()
-        .single();
+          client_email: clientEmail
+        });
 
-      if (error) {
-        console.error('Error creating mission request:', error);
-        alert('Erreur lors de la création de la demande');
-        return;
-      }
-
-      // For now, navigate back to catalog with success message
       alert('Votre demande de mission a été envoyée avec succès ! Le technicien recevra une notification.');
       onNavigate('catalog');
       
