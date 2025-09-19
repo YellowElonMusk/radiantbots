@@ -19,8 +19,8 @@ const translations = {
     
     // Landing page
     'landing.trusted': '🤖 Approuvé par 500+ Entreprises',
-    'landing.hero.title': 'Réservez des Techniciens Robotiques Certifiés',
-    'landing.hero.subtitle': 'Quand vous voulez, où vous voulez. Connectez-vous avec des techniciens robotiques certifiés pour le déploiement, le dépannage et la maintenance préventive de votre flotte de robots. Réservez instantanément comme chez le coiffeur.',
+    'landing.hero.title': 'Réservez des Techniciens Certifiés en Robotique',
+    'landing.hero.subtitle': 'Quand vous voulez, où vous voulez. Connectez-vous avec des techniciens certifiés en robotique pour le déploiement, le dépannage et la maintenance préventive de votre flotte de robots. Réservez instantanément comme chez le coiffeur.',
     'landing.hero.findTech': 'Trouver un Technicien',
     'landing.hero.becomeTech': 'Devenir un Technicien Robotique Certifié',
     'landing.stats.technicians': 'Techniciens',
@@ -183,7 +183,7 @@ const translations = {
     
     // Traductions d'inscription
     'registration.title': 'Créez Votre Compte Technicien',
-    'registration.subtitle': 'Rejoignez le réseau de techniciens robotiques certifiés',
+    'registration.subtitle': 'Rejoignez le réseau de techniciens certifiés en robotique',
     'registration.backToBootcamp': 'Retour au Bootcamp',
     'registration.personalInfo': 'Informations Personnelles',
     'registration.firstName': 'Prénom',
