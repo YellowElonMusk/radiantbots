@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, Calendar, Clock, MapPin, Phone, Users, FileText, Star, AlertCircle } from 'lucide-react';
+import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 
 interface TechnicianProfile {
   id: string;
@@ -32,8 +33,13 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
   const [missionLocation, setMissionLocation] = useState('');
   const [contactNumber, setContactNumber] = useState('');
   const [salesTeamNumber, setSalesTeamNumber] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [missionDateRange, setMissionDateRange] = useState<{
+    start_date: string;
+    end_date: string;
+    selected_weekdays: string[];
+    weekend_excluded: boolean;
+    count_weekdays: number;
+  } | null>(null);
   const [preferredTime, setPreferredTime] = useState('');
   const [missionDescription, setMissionDescription] = useState('');
   const [clientCompany, setClientCompany] = useState('');
@@ -43,11 +49,6 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
 
   useEffect(() => {
     loadTechnician();
-    // Set default start date to tomorrow
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
-    setStartDate(tomorrow.toISOString().split('T')[0]);
-    setEndDate(tomorrow.toISOString().split('T')[0]);
   }, [technicianId]);
 
   const loadTechnician = async () => {
@@ -79,7 +80,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!missionLocation || !contactNumber || !startDate || !missionDescription) {
+    if (!missionLocation || !contactNumber || !missionDateRange || !missionDescription) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -94,8 +95,8 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           deployment_city: missionLocation,
           deployment_address: missionLocation,
           mission_type: 'Support technique robotique',
-          mission_date: startDate,
-          date_flexible: startDate !== endDate,
+          mission_date: missionDateRange.start_date,
+          date_flexible: missionDateRange.count_weekdays > 1,
           client_email: `client@example.com` // This should come from auth in real implementation
         })
         .select()
@@ -255,31 +256,18 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
                         Planification
                       </h3>
                       
-                      <div className="grid md:grid-cols-3 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Date de début *
-                          </label>
-                          <Input
-                            type="date"
-                            value={startDate}
-                            onChange={(e) => setStartDate(e.target.value)}
-                            min={new Date().toISOString().split('T')[0]}
-                            required
-                          />
-                        </div>
-                        
-                        <div>
-                          <label className="block text-sm font-medium mb-2">
-                            Date de fin
-                          </label>
-                          <Input
-                            type="date"
-                            value={endDate}
-                            onChange={(e) => setEndDate(e.target.value)}
-                            min={startDate}
-                          />
-                        </div>
+                       <div className="grid md:grid-cols-2 gap-4">
+                         <div>
+                           <label className="block text-sm font-medium mb-2">
+                             Période de mission *
+                           </label>
+                           <WeekdayRangePicker
+                             value={missionDateRange}
+                             onChange={setMissionDateRange}
+                             minDate={new Date()}
+                             placeholder="Sélectionner une période"
+                           />
+                         </div>
                         
                         <div>
                           <label className="block text-sm font-medium mb-2">

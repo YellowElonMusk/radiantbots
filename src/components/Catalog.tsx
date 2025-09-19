@@ -6,14 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 import { TechCard } from './TechCard';
 
 import { store } from '@/lib/store';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { Technician } from '@/lib/store';
-import { ArrowLeft, Search, Filter, MapPin, Star, CalendarIcon, Briefcase } from 'lucide-react';
+import { ArrowLeft, Search, Filter, MapPin, Star, Briefcase } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -43,7 +42,13 @@ interface TechnicianData {
 
 interface SearchCriteria {
   deploymentCity: string;
-  missionDate: Date | undefined;
+  missionDateRange: {
+    start_date: string;
+    end_date: string;
+    selected_weekdays: string[];
+    weekend_excluded: boolean;
+    count_weekdays: number;
+  } | null;
   dateFlexible: boolean;
   missionType: string;
 }
@@ -58,7 +63,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
   const [searchCriteria, setSearchCriteria] = useState<SearchCriteria>({
     deploymentCity: '',
-    missionDate: undefined,
+    missionDateRange: null,
     dateFlexible: false,
     missionType: ''
   });
@@ -244,7 +249,7 @@ export function Catalog({ onNavigate }: CatalogProps) {
     setMinRating(0);
     setSearchCriteria({
       deploymentCity: '',
-      missionDate: undefined,
+      missionDateRange: null,
       dateFlexible: false,
       missionType: ''
     });
@@ -335,32 +340,15 @@ export function Catalog({ onNavigate }: CatalogProps) {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Mission Date */}
+                {/* Mission Date Range */}
                 <div>
-                  <Label>Date de mission</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !searchCriteria.missionDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {searchCriteria.missionDate ? format(searchCriteria.missionDate, "PPP") : "Sélectionner une date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={searchCriteria.missionDate}
-                        onSelect={(date) => setSearchCriteria(prev => ({ ...prev, missionDate: date }))}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
+                  <Label>Période de mission</Label>
+                  <WeekdayRangePicker
+                    value={searchCriteria.missionDateRange}
+                    onChange={(range) => setSearchCriteria(prev => ({ ...prev, missionDateRange: range }))}
+                    minDate={new Date()}
+                    placeholder="Sélectionner une période"
+                  />
                 </div>
 
                 {/* Date Flexibility */}
