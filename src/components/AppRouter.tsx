@@ -14,12 +14,13 @@ import { MessagingInbox } from './MessagingInbox';
 import { ClientDashboard } from './ClientDashboard';
 
 import { LoginTypeSelection } from './LoginTypeSelection';
+import { AccountTypeSelection } from './AccountTypeSelection';
 import { EnterpriseLogin } from './EnterpriseLogin';
 import { EnterpriseDashboard } from './EnterpriseDashboard';
 
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
+type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'account-type-selection' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation';
 
 interface PageData {
   technicianId?: string;
@@ -97,6 +98,9 @@ export function AppRouter() {
 
       case 'login-type-selection':
         return <LoginTypeSelection onNavigate={navigate} />;
+
+      case 'account-type-selection':
+        return <AccountTypeSelection onNavigate={navigate} />;
 
       case 'enterprise-login':
         return <EnterpriseLogin onNavigate={navigate} />;

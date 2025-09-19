@@ -81,18 +81,18 @@ export function Header({ onNavigate }: HeaderProps) {
            <nav className="hidden md:flex items-center space-x-8">
              {!user && (
                <>
-                 <button 
-                   onClick={() => onNavigate('account-type-selection')}
-                   className="bg-gradient-hero text-white px-6 py-2 rounded-lg hover:scale-105 shadow-button hover:shadow-hover transition-all duration-300 font-medium"
-                 >
-                   Créer mon compte
-                 </button>
-                 <button 
-                   onClick={() => onNavigate('login-type-selection')}
-                   className="text-blue-600 border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-all duration-300 font-medium"
-                 >
-                   Me connecter
-                 </button>
+                  <button 
+                    onClick={() => onNavigate('account-type-selection')}
+                    className="bg-gradient-hero text-white px-6 py-2 rounded-lg hover:scale-105 shadow-button hover:shadow-hover transition-all duration-300 font-medium"
+                  >
+                    {t('nav.createAccount')}
+                  </button>
+                  <button 
+                    onClick={() => onNavigate('login-type-selection')}
+                    className="text-blue-600 border border-blue-600 px-6 py-2 rounded-lg hover:bg-blue-50 transition-all duration-300 font-medium"
+                  >
+                    {t('nav.signIn')}
+                  </button>
                </>
              )}
             {user ? (

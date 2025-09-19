@@ -16,6 +16,18 @@ const translations = {
     'header.findTechnician': 'Trouver un Technicien',
     'header.bootcamp': 'Formation',
     'header.becomeTech': 'Devenir Technicien',
+    'nav.createAccount': 'Créer mon compte',
+    'nav.signIn': 'Me connecter',
+    
+    // Account Type Selection
+    'accountType.badge': 'Créer un compte',
+    'accountType.title': 'Quel type de compte souhaitez-vous créer ?',
+    'accountType.enterprise.title': 'Entreprise',
+    'accountType.enterprise.description': 'Je cherche des freelances',
+    'accountType.freelance.title': 'Freelance',
+    'accountType.freelance.description': 'Je crée mon profil de freelance',
+    'accountType.alreadyHaveAccount': 'Vous avez déjà un compte ?',
+    'accountType.signIn': 'Me connecter',
     
     // Landing page
     'landing.trusted': '🤖 Approuvé par 500+ Entreprises',
