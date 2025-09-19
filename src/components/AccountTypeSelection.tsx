@@ -38,7 +38,7 @@ export function AccountTypeSelection({ onNavigate }: AccountTypeSelectionProps) 
 
           <Card 
             className="p-8 text-center hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => onNavigate('technician-registration')}
+            onClick={() => onNavigate('registration')}
           >
             <div className="mb-6">
               <div className="w-24 h-24 mx-auto bg-gray-100 rounded-lg flex items-center justify-center mb-4">
