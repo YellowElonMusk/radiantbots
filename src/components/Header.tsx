@@ -1,4 +1,6 @@
 import radiantbotsLogo from '@/assets/radiantbots-logo-new.png';
+import ukFlag from '@/assets/uk-flag.png';
+import franceFlag from '@/assets/france-flag.png';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
@@ -116,9 +118,16 @@ export function Header({ onNavigate }: HeaderProps) {
                         variant="outline"
                         size="sm"
                         onClick={() => setLanguage(language === 'fr' ? 'en' : 'fr')}
-                        className="w-full justify-start bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
+                        className="flex items-center gap-2 px-3 py-1.5 h-8 bg-card/80 backdrop-blur-sm border-border/50 hover:bg-card/90"
                       >
-                        {language === 'fr' ? '🇫🇷 FR' : '🇬🇧 EN'}
+                        <img 
+                          src={language === 'fr' ? franceFlag : ukFlag} 
+                          alt={language === 'fr' ? 'French flag' : 'UK flag'}
+                          className="w-4 h-3 object-cover rounded-sm"
+                        />
+                        <span className="text-sm font-medium">
+                          {language === 'fr' ? 'FR' : 'EN'}
+                        </span>
                       </Button>
                       
                       <hr className="my-2" />
