@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase } from 'lucide-react';
+import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 import { MissionManagement } from './MissionManagement';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -37,13 +38,14 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
   const [newBrand, setNewBrand] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [availabilityPeriods, setAvailabilityPeriods] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const translations = {
     fr: {
       dashboard: "Tableau de Bord Technicien",
       profile: "Profil",
-      availability: "Disponibilité",
+      availabilityTab: "Disponibilité",
       settings: "Paramètres",
       logout: "Déconnexion",
       name: "Nom complet",
@@ -61,15 +63,20 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       addBrand: "Ajouter une marque",
       saveProfile: "Sauvegarder le profil",
       calendarTitle: "Calendrier de disponibilité",
-      availableDays: "Jours disponibles",
+      availableDays: "Jours disponibles", 
       unavailableDays: "Jours indisponibles",
       clickToToggle: "Cliquez sur une date pour basculer sa disponibilité",
-      profileSaved: "Profil sauvegardé avec succès!"
+      profileSaved: "Profil sauvegardé avec succès!",
+      availability: "Disponibilité",
+      setAvailabilityPeriod: "Définir une période de disponibilité",
+      currentPeriods: "Périodes actuelles",
+      addPeriod: "Ajouter une période",
+      removePeriod: "Supprimer"
     },
     en: {
       dashboard: "Technician Dashboard",
       profile: "Profile",
-      availability: "Availability",
+      availabilityTab: "Availability",
       settings: "Settings",
       logout: "Logout",
       name: "Full name",
@@ -88,9 +95,14 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
       saveProfile: "Save profile",
       calendarTitle: "Availability calendar",
       availableDays: "Available days",
-      unavailableDays: "Unavailable days",
+      unavailableDays: "Unavailable days", 
       clickToToggle: "Click on a date to toggle availability",
-      profileSaved: "Profile saved successfully!"
+      profileSaved: "Profile saved successfully!",
+      availability: "Availability",
+      setAvailabilityPeriod: "Set availability period",
+      currentPeriods: "Current periods",
+      addPeriod: "Add period",
+      removePeriod: "Remove"
     }
   };
 
@@ -110,6 +122,7 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     await loadUserProfile(user.id);
     await loadUserSkills(user.id);
     await loadUserBrands(user.id);
+    await loadAvailabilityPeriods(user.id);
   };
 
   const loadUserProfile = async (userId: string) => {
@@ -189,6 +202,79 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
     }
   };
 
+  const loadAvailabilityPeriods = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('availability_periods')
+      .select('*')
+      .eq('user_id', userId)
+      .order('start_date', { ascending: true });
+
+    if (error) {
+      console.error('Error loading availability periods:', error);
+      return;
+    }
+
+    if (data) {
+      setAvailabilityPeriods(data);
+    }
+  };
+
+  const addAvailabilityPeriod = async (period: any) => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('availability_periods')
+      .insert({
+        user_id: user.id,
+        ...period
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error adding availability period:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add availability period",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (data) {
+      setAvailabilityPeriods(prev => [...prev, data]);
+      toast({
+        title: "Success",
+        description: "Availability period added successfully!",
+      });
+    }
+  };
+
+  const removeAvailabilityPeriod = async (periodId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('availability_periods')
+      .delete()
+      .eq('id', periodId)
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error removing availability period:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to remove availability period",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setAvailabilityPeriods(prev => prev.filter(p => p.id !== periodId));
+    toast({
+      title: "Success",
+      description: "Availability period removed successfully!",
+    });
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -439,10 +525,14 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
 
       <div className="container mx-auto p-6">
         <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             {t.profile}
+          </TabsTrigger>
+          <TabsTrigger value="availability" className="flex items-center gap-2">
+            <CalendarIcon className="h-4 w-4" />
+            {t.availabilityTab}
           </TabsTrigger>
           <TabsTrigger value="missions" className="flex items-center gap-2">
             <Briefcase className="h-4 w-4" />
@@ -614,6 +704,59 @@ export function TechnicianDashboard({ onNavigate }: TechnicianDashboardProps) {
                 <Button onClick={handleSaveProfile} className="w-full" disabled={isLoading}>
                   {isLoading ? "Saving..." : t.saveProfile}
                 </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="availability" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>{t.availability}</CardTitle>
+                <CardDescription>
+                  Définissez vos périodes de disponibilité pour que les clients puissent vous trouver
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label className="text-base font-medium">{t.setAvailabilityPeriod}</Label>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Sélectionnez une période de dates (jours ouvrables uniquement)
+                  </p>
+                  <WeekdayRangePicker
+                    value={null}
+                    onChange={addAvailabilityPeriod}
+                    minDate={new Date()}
+                    maxWeekdays={30}
+                    placeholder="Sélectionner une période de disponibilité"
+                  />
+                </div>
+
+                {availabilityPeriods.length > 0 && (
+                  <div>
+                    <Label className="text-base font-medium">{t.currentPeriods}</Label>
+                    <div className="mt-3 space-y-3">
+                      {availabilityPeriods.map((period) => (
+                        <div key={period.id} className="flex items-center justify-between p-3 border rounded-lg">
+                          <div>
+                            <div className="font-medium">
+                              {new Date(period.start_date).toLocaleDateString('fr-FR')} - {new Date(period.end_date).toLocaleDateString('fr-FR')}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              {period.count_weekdays} jour{period.count_weekdays > 1 ? 's' : ''} ouvrable{period.count_weekdays > 1 ? 's' : ''}
+                            </div>
+                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => removeAvailabilityPeriod(period.id)}
+                          >
+                            {t.removePeriod}
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

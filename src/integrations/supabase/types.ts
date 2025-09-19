@@ -38,6 +38,42 @@ export type Database = {
         }
         Relationships: []
       }
+      availability_periods: {
+        Row: {
+          count_weekdays: number
+          created_at: string
+          end_date: string
+          id: string
+          selected_weekdays: string[]
+          start_date: string
+          updated_at: string
+          user_id: string
+          weekend_excluded: boolean
+        }
+        Insert: {
+          count_weekdays: number
+          created_at?: string
+          end_date: string
+          id?: string
+          selected_weekdays: string[]
+          start_date: string
+          updated_at?: string
+          user_id: string
+          weekend_excluded?: boolean
+        }
+        Update: {
+          count_weekdays?: number
+          created_at?: string
+          end_date?: string
+          id?: string
+          selected_weekdays?: string[]
+          start_date?: string
+          updated_at?: string
+          user_id?: string
+          weekend_excluded?: boolean
+        }
+        Relationships: []
+      }
       brands: {
         Row: {
           created_at: string
