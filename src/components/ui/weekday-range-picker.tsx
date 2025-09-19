@@ -107,10 +107,7 @@ export function WeekdayRangePicker({
       setStartDate(date);
       setEndDate(null);
     } else {
-      // Second click - set end date first
-      setEndDate(date);
-      
-      // Then create and validate the range
+      // Second click - validate the range first
       const range = normalizeRange(startDate, date);
       
       // Check max weekdays limit
@@ -123,7 +120,8 @@ export function WeekdayRangePicker({
         return;
       }
 
-      // Call onChange and close popover
+      // If validation passes, set end date and emit the range
+      setEndDate(date);
       onChange(range);
       setTimeout(() => setIsOpen(false), 100); // Small delay to show selection before closing
     }
