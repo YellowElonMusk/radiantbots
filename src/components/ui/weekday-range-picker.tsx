@@ -88,8 +88,6 @@ export function WeekdayRangePicker({
   }, [value]);
 
   const handleDayClick = (date: Date) => {
-    console.log('Day clicked:', date, 'Current state:', { startDate, endDate });
-    
     // Check if it's a weekend
     if (isWeekend(date)) {
       setShowTooltip({ show: true, message: "Les week-ends ne sont pas disponibles" });
@@ -106,19 +104,16 @@ export function WeekdayRangePicker({
 
     if (!startDate || (startDate && endDate)) {
       // First click or reset
-      console.log('Setting start date:', date);
       setStartDate(date);
       setEndDate(null);
       setHoverDate(null); // Clear hover state
     } else {
       // Second click - set end date and validate
-      console.log('Setting end date:', date, 'Start was:', startDate);
       setEndDate(date);
       setHoverDate(null); // Clear hover state
       
       // Validate the range
       const range = normalizeRange(startDate, date);
-      console.log('Range calculated:', range);
       
       // Check max weekdays limit
       if (range.count_weekdays > maxWeekdays) {
@@ -130,15 +125,12 @@ export function WeekdayRangePicker({
         return;
       }
 
-      // If validation passes, emit the range and close
-      console.log('Emitting range and closing:', range);
+      // If validation passes, emit the range and close with delay
       onChange(range);
       setTimeout(() => {
         setIsOpen(false);
-        // Reset internal state after closing
-        setStartDate(null);
-        setEndDate(null);
-      }, 300);
+        // Don't reset internal state - keep it to show selection when reopened
+      }, 400); // Increased delay to show final selection
     }
   };
 
