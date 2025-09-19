@@ -205,10 +205,10 @@ export function TechnicianLogin({ onNavigate }: TechnicianLoginProps) {
               <Button 
                 type="button"
                 variant="link" 
-                onClick={() => setIsLogin(!isLogin)}
+                onClick={() => onNavigate('registration')}
                 className="text-sm"
               >
-                {isLogin ? t.switchToSignup : t.switchToLogin}
+                {t.switchToSignup}
               </Button>
             </div>
             <div className="text-center">
