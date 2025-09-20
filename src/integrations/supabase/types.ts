@@ -259,9 +259,13 @@ export type Database = {
       profiles: {
         Row: {
           accepts_travel: boolean | null
+          address: string | null
           bio: string | null
           city: string | null
+          company_name: string | null
+          contact_person: string | null
           created_at: string
+          description: string | null
           email: string | null
           first_name: string | null
           hourly_rate: number | null
@@ -270,16 +274,24 @@ export type Database = {
           linkedin_url: string | null
           max_travel_distance: number | null
           phone: string | null
+          postal_code: string | null
           profile_photo_url: string | null
+          regions: string[] | null
+          robot_brands: string[] | null
+          robot_models: string[] | null
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
           user_id: string
         }
         Insert: {
           accepts_travel?: boolean | null
+          address?: string | null
           bio?: string | null
           city?: string | null
+          company_name?: string | null
+          contact_person?: string | null
           created_at?: string
+          description?: string | null
           email?: string | null
           first_name?: string | null
           hourly_rate?: number | null
@@ -288,16 +300,24 @@ export type Database = {
           linkedin_url?: string | null
           max_travel_distance?: number | null
           phone?: string | null
+          postal_code?: string | null
           profile_photo_url?: string | null
+          regions?: string[] | null
+          robot_brands?: string[] | null
+          robot_models?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id: string
         }
         Update: {
           accepts_travel?: boolean | null
+          address?: string | null
           bio?: string | null
           city?: string | null
+          company_name?: string | null
+          contact_person?: string | null
           created_at?: string
+          description?: string | null
           email?: string | null
           first_name?: string | null
           hourly_rate?: number | null
@@ -306,7 +326,11 @@ export type Database = {
           linkedin_url?: string | null
           max_travel_distance?: number | null
           phone?: string | null
+          postal_code?: string | null
           profile_photo_url?: string | null
+          regions?: string[] | null
+          robot_brands?: string[] | null
+          robot_models?: string[] | null
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id?: string
