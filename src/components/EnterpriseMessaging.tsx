@@ -45,8 +45,13 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: Ent
 
   useEffect(() => {
     loadTechnicianAndMission();
-    loadMessages();
   }, [technicianId, currentUserId]);
+
+  useEffect(() => {
+    if (mission) {
+      loadMessages();
+    }
+  }, [mission]);
 
   useEffect(() => {
     scrollToBottom();
@@ -76,14 +81,17 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: Ent
         .eq('technician_id', technicianId)
         .eq('status', 'accepted')
         .order('created_at', { ascending: false })
-        .limit(1);
+        .limit(1)
+        .single();
 
-      if (missionError) throw missionError;
-      if (missionData && missionData.length > 0) {
-        setMission(missionData[0]);
+      if (missionError && missionError.code !== 'PGRST116') throw missionError;
+      if (missionData) {
+        setMission(missionData);
       }
     } catch (error) {
       console.error('Error loading technician and mission:', error);
+    } finally {
+      setLoading(false);
     }
   };
 

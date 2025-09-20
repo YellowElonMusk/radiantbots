@@ -118,7 +118,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
         .select(`
           id,
           technician_id,
-          profiles!inner(
+          profiles!missions_technician_id_fkey(
             user_id,
             first_name,
             last_name,
