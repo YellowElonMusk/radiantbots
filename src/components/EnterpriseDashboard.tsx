@@ -18,6 +18,7 @@ interface EnterpriseDashboardProps {
 export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [hasAcceptedMissions, setHasAcceptedMissions] = useState(false);
   const [profile, setProfile] = useState({
     company_name: '',
     contact_person: '',
@@ -72,6 +73,9 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           });
         }
         
+        // Check if user has any accepted missions to enable messaging
+        await checkAcceptedMissions(currentUser.id);
+        
         // Redirect if user is not a client/enterprise
         if (profileData?.role !== 'client') {
           toast({
@@ -102,6 +106,26 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
 
     return () => subscription.unsubscribe();
   }, [onNavigate, toast]);
+
+  const checkAcceptedMissions = async (userId: string) => {
+    try {
+      const { data: missions, error } = await supabase
+        .from('missions')
+        .select('id')
+        .eq('client_user_id', userId)
+        .eq('status', 'accepted')
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking missions:', error);
+        return;
+      }
+
+      setHasAcceptedMissions(missions && missions.length > 0);
+    } catch (error) {
+      console.error('Error checking accepted missions:', error);
+    }
+  };
 
   const handleAddItem = (type: 'regions' | 'robot_brands' | 'robot_models', value: string, setter: (value: string) => void) => {
     if (value.trim() && !profile[type].includes(value.trim())) {
@@ -177,7 +201,9 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsList>
             <TabsTrigger value="profile">Mon Profil</TabsTrigger>
             <TabsTrigger value="technicians">Techniciens Réservés</TabsTrigger>
-            <TabsTrigger value="messages">Messages</TabsTrigger>
+            <TabsTrigger value="messages" disabled={!hasAcceptedMissions}>
+              Messages {!hasAcceptedMissions && "(Verrouillé)"}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile">
@@ -357,7 +383,16 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsContent value="messages">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Historique des messages</h2>
-              <p className="text-gray-600">Aucun message pour le moment.</p>
+              {hasAcceptedMissions ? (
+                <p className="text-gray-600">Aucun message pour le moment.</p>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-2">Fonctionnalité de messagerie verrouillée</p>
+                  <p className="text-sm text-gray-400">
+                    Envoyez une demande de mission à un technicien et attendez qu'elle soit acceptée pour débloquer la messagerie.
+                  </p>
+                </div>
+              )}
             </Card>
           </TabsContent>
         </Tabs>
