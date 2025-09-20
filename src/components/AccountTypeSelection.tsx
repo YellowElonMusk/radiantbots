@@ -12,9 +12,6 @@ export function AccountTypeSelection({ onNavigate }: AccountTypeSelectionProps) 
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-6 max-w-4xl">
         <div className="text-center mb-8">
-          <div className="inline-block bg-red-500 text-white px-4 py-2 rounded-full text-sm font-medium mb-6">
-            {t('accountType.badge')}
-          </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-8">
             {t('accountType.title')}
           </h1>
