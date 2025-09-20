@@ -45,7 +45,8 @@ export function usePendingMissions(userId?: string) {
           table: 'missions',
           filter: `technician_id=eq.${userId}`
         },
-        () => {
+        (payload) => {
+          console.log('Mission change detected:', payload);
           // Refetch pending missions when there's a change
           fetchPendingMissions();
         }
