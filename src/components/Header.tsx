@@ -20,18 +20,35 @@ interface HeaderProps {
 export function Header({ onNavigate }: HeaderProps) {
   const { t, language, setLanguage } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
+    const fetchUserData = async (user: User | null) => {
+      setUser(user);
+      if (user) {
+        // Fetch user role from profiles table
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+        
+        setUserRole(profileData?.role || null);
+      } else {
+        setUserRole(null);
+      }
+    };
+
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+      fetchUserData(session?.user ?? null);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        setUser(session?.user ?? null);
+        fetchUserData(session?.user ?? null);
       }
     );
 
@@ -47,7 +64,11 @@ export function Header({ onNavigate }: HeaderProps) {
   const handleMyProfile = () => {
     if (user) {
       setIsSheetOpen(false);
-      onNavigate('technician-dashboard');
+      if (userRole === 'client') {
+        onNavigate('enterprise-dashboard');
+      } else {
+        onNavigate('technician-dashboard');
+      }
     }
   };
 
@@ -148,38 +169,43 @@ export function Header({ onNavigate }: HeaderProps) {
                         Messages
                       </Button>
                       
-                       <Button 
-                         variant="ghost" 
-                         className="w-full justify-start" 
-                         onClick={() => {
-                           setIsSheetOpen(false);
-                           onNavigate('technician-dashboard', { activeTab: 'missions' });
-                         }}
-                       >
-                         <UserIcon className="mr-2 h-4 w-4" />
-                         My Missions
-                       </Button>
-                      
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start" 
-                        onClick={handlePreviewProfile}
-                      >
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Preview Profil
-                      </Button>
-                      
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start" 
-                        onClick={() => {
-                          setIsSheetOpen(false);
-                          onNavigate('bootcamp');
-                        }}
-                      >
-                        <UserIcon className="mr-2 h-4 w-4" />
-                        Formation
-                      </Button>
+                      {/* Show technician-specific menu items only for technicians */}
+                      {userRole === 'technician' && (
+                        <>
+                          <Button 
+                            variant="ghost" 
+                            className="w-full justify-start" 
+                            onClick={() => {
+                              setIsSheetOpen(false);
+                              onNavigate('technician-dashboard', { activeTab: 'missions' });
+                            }}
+                          >
+                            <UserIcon className="mr-2 h-4 w-4" />
+                            My Missions
+                          </Button>
+                         
+                         <Button 
+                           variant="ghost" 
+                           className="w-full justify-start" 
+                           onClick={handlePreviewProfile}
+                         >
+                           <UserIcon className="mr-2 h-4 w-4" />
+                           Preview Profil
+                         </Button>
+                         
+                         <Button 
+                           variant="ghost" 
+                           className="w-full justify-start" 
+                           onClick={() => {
+                             setIsSheetOpen(false);
+                             onNavigate('bootcamp');
+                           }}
+                         >
+                           <UserIcon className="mr-2 h-4 w-4" />
+                           Formation
+                         </Button>
+                        </>
+                      )}
                       
                       <hr className="my-4" />
                       
