@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
+import { ReservedTechnicians } from './ReservedTechnicians';
 
 interface EnterpriseDashboardProps {
   onNavigate: (page: string) => void;
@@ -44,7 +45,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
         // Check user role from profiles table
         const { data: profileData, error } = await supabase
           .from('profiles')
-          .select('role')
+          .select('*')
           .eq('user_id', currentUser.id)
           .single();
           
@@ -54,6 +55,22 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
         }
         
         setUserProfile(profileData);
+        
+        // Load existing profile data into form
+        if (profileData) {
+          setProfile({
+            company_name: profileData.company_name || '',
+            contact_person: profileData.contact_person || '',
+            phone: profileData.phone || '',
+            address: profileData.address || '',
+            city: profileData.city || '',
+            postal_code: profileData.postal_code || '',
+            regions: profileData.regions || [],
+            robot_brands: profileData.robot_brands || [],
+            robot_models: profileData.robot_models || [],
+            description: profileData.description || ''
+          });
+        }
         
         // Redirect if user is not a client/enterprise
         if (profileData?.role !== 'client') {
@@ -104,13 +121,34 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   };
 
   const handleSaveProfile = async () => {
+    if (!user) return;
+    
     try {
-      // Here you would save the profile to your database
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          company_name: profile.company_name,
+          contact_person: profile.contact_person,
+          phone: profile.phone,
+          address: profile.address,
+          city: profile.city,
+          postal_code: profile.postal_code,
+          regions: profile.regions,
+          robot_brands: profile.robot_brands,
+          robot_models: profile.robot_models,
+          description: profile.description,
+          updated_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
       toast({
         title: "Profil sauvegardé",
         description: "Vos informations ont été mises à jour avec succès.",
       });
     } catch (error: any) {
+      console.error('Error saving profile:', error);
       toast({
         title: "Erreur",
         description: error.message,
@@ -312,7 +350,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsContent value="technicians">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Techniciens réservés</h2>
-              <p className="text-gray-600">Aucun technicien réservé pour le moment.</p>
+              {user && <ReservedTechnicians userId={user.id} />}
             </Card>
           </TabsContent>
 

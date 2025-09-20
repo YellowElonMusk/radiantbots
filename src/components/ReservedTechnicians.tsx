@@ -1,0 +1,212 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { format } from 'date-fns';
+import { fr } from 'date-fns/locale';
+
+interface Mission {
+  id: string;
+  title: string;
+  description: string;
+  status: 'pending' | 'accepted' | 'declined' | 'completed';
+  desired_date: string;
+  desired_time: string;
+  created_at: string;
+  accepted_at?: string;
+  technician_id: string;
+  profiles: {
+    first_name: string;
+    last_name: string;
+    profile_photo_url?: string;
+    phone?: string;
+    hourly_rate?: number;
+  };
+}
+
+interface ReservedTechniciansProps {
+  userId: string;
+}
+
+export function ReservedTechnicians({ userId }: ReservedTechniciansProps) {
+  const [missions, setMissions] = useState<Mission[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadMissions();
+  }, [userId]);
+
+  const loadMissions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('missions')
+        .select(`
+          *,
+          profiles!missions_technician_id_fkey (
+            first_name,
+            last_name, 
+            profile_photo_url,
+            phone,
+            hourly_rate
+          )
+        `)
+        .eq('client_user_id', userId)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading missions:', error);
+      } else {
+        setMissions(data || []);
+      }
+    } catch (error) {
+      console.error('Error in loadMissions:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return <AlertCircle className="h-4 w-4 text-yellow-500" />;
+      case 'accepted':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'declined':
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case 'completed':
+        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+      default:
+        return <AlertCircle className="h-4 w-4 text-gray-500" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'accepted':
+        return 'bg-green-100 text-green-800';
+      case 'declined':
+        return 'bg-red-100 text-red-800';
+      case 'completed':
+        return 'bg-blue-100 text-blue-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'pending':
+        return 'En attente';
+      case 'accepted':
+        return 'Accepté';
+      case 'declined':
+        return 'Refusé';
+      case 'completed':
+        return 'Terminé';
+      default:
+        return status;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), 'dd MMM yyyy', { locale: fr });
+  };
+
+  const formatTime = (timeString: string) => {
+    return timeString ? timeString.slice(0, 5) : '';
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center p-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (missions.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Aucune mission</h3>
+        <p className="text-gray-600">Vous n'avez encore fait aucune demande de mission.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
+      {missions.map((mission) => (
+        <Card key={mission.id}>
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center space-x-3">
+                <Avatar>
+                  <AvatarImage src={mission.profiles?.profile_photo_url} />
+                  <AvatarFallback>
+                    {mission.profiles?.first_name?.[0]}{mission.profiles?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
+                <div>
+                  <h3 className="font-semibold text-lg">
+                    {mission.profiles?.first_name} {mission.profiles?.last_name}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {mission.profiles?.hourly_rate}€/heure
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2">
+                {getStatusIcon(mission.status)}
+                <Badge className={getStatusColor(mission.status)}>
+                  {getStatusText(mission.status)}
+                </Badge>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <h4 className="font-medium mb-2">{mission.title}</h4>
+              <p className="text-gray-600 text-sm mb-3">{mission.description}</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span>Demandé: {formatDate(mission.desired_date)}</span>
+              </div>
+              {mission.desired_time && (
+                <div className="flex items-center space-x-2">
+                  <Clock className="h-4 w-4 text-gray-400" />
+                  <span>Heure: {formatTime(mission.desired_time)}</span>
+                </div>
+              )}
+              <div className="flex items-center space-x-2">
+                <Calendar className="h-4 w-4 text-gray-400" />
+                <span>Créé: {formatDate(mission.created_at)}</span>
+              </div>
+              {mission.accepted_at && (
+                <div className="flex items-center space-x-2">
+                  <CheckCircle className="h-4 w-4 text-green-400" />
+                  <span>Accepté: {formatDate(mission.accepted_at)}</span>
+                </div>
+              )}
+            </div>
+
+            {mission.profiles?.phone && (
+              <div className="mt-4 pt-4 border-t">
+                <p className="text-sm text-gray-600">
+                  Contact: {mission.profiles.phone}
+                </p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
