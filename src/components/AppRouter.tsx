@@ -131,7 +131,9 @@ export function AppRouter() {
     <div className="min-h-screen">
       <Header onNavigate={navigate} />
       
-      {renderPage()}
+      <div className="pt-20">
+        {renderPage()}
+      </div>
     </div>
   );
 }
