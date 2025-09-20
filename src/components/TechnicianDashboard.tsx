@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase } from 'lucide-react';
+import { usePendingMissions } from '@/hooks/usePendingMissions';
 import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 import { MissionManagement } from './MissionManagement';
 import { supabase } from '@/integrations/supabase/client';
@@ -42,6 +43,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   const [userProfile, setUserProfile] = useState<any>(null);
   const [availabilityPeriods, setAvailabilityPeriods] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { pendingCount } = usePendingMissions(user?.id);
 
   const translations = {
     fr: {
@@ -565,9 +567,14 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
             <CalendarIcon className="h-4 w-4" />
             {t.availabilityTab}
           </TabsTrigger>
-          <TabsTrigger value="missions" className="flex items-center gap-2">
+          <TabsTrigger value="missions" className="flex items-center gap-2 relative">
             <Briefcase className="h-4 w-4" />
             Missions
+            {pendingCount > 0 && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                !
+              </div>
+            )}
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />

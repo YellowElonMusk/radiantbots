@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react';
 import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Menu, User as UserIcon, MessageCircle } from 'lucide-react';
+import { usePendingMissions } from '@/hooks/usePendingMissions';
 import {
   Sheet,
   SheetContent,
@@ -22,6 +23,7 @@ export function Header({ onNavigate }: HeaderProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const { pendingCount } = usePendingMissions(user?.id);
 
   useEffect(() => {
     const fetchUserData = async (user: User | null) => {
@@ -174,7 +176,7 @@ export function Header({ onNavigate }: HeaderProps) {
                         <>
                           <Button 
                             variant="ghost" 
-                            className="w-full justify-start" 
+                            className="w-full justify-start relative" 
                             onClick={() => {
                               setIsSheetOpen(false);
                               onNavigate('technician-dashboard', { activeTab: 'missions' });
@@ -182,6 +184,11 @@ export function Header({ onNavigate }: HeaderProps) {
                           >
                             <UserIcon className="mr-2 h-4 w-4" />
                             My Missions
+                            {pendingCount > 0 && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                                !
+                              </div>
+                            )}
                           </Button>
                          
                          <Button 
