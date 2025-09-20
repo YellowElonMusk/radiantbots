@@ -42,6 +42,27 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const { toast } = useToast();
   const { unreadCount } = useUnreadMessages(user?.id);
 
+  // Mark all messages as read when clicking Messages tab
+  const handleMessagesTabClick = async () => {
+    if (user?.id && unreadCount > 0) {
+      // Mark all unread messages as read for this user
+      const { data: unreadMessages } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+      
+      if (unreadMessages && unreadMessages.length > 0) {
+        const messageIds = unreadMessages.map(m => m.id);
+        await supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .in('id', messageIds);
+      }
+    }
+    setCurrentView('dashboard');
+  };
+
   useEffect(() => {
     const initializeUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
@@ -261,7 +282,12 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsList>
             <TabsTrigger value="profile">Mon Profil</TabsTrigger>
             <TabsTrigger value="technicians">Techniciens Réservés</TabsTrigger>
-            <TabsTrigger value="messages" disabled={acceptedTechnicians.length === 0} className="flex items-center gap-2 relative">
+            <TabsTrigger 
+              value="messages" 
+              disabled={acceptedTechnicians.length === 0} 
+              className="flex items-center gap-2 relative"
+              onClick={handleMessagesTabClick}
+            >
               Messages {acceptedTechnicians.length === 0 && "(Verrouillé)"}
               {unreadCount > 0 && acceptedTechnicians.length > 0 && (
                 <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">

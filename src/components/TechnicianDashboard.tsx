@@ -118,6 +118,26 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
 
   const t = translations[language];
 
+  // Mark all messages as read when clicking Messages tab
+  const handleMessagesTabClick = async () => {
+    if (user?.id && unreadCount > 0) {
+      // Mark all unread messages as read for this user
+      const { data: unreadMessages } = await supabase
+        .from('messages')
+        .select('id')
+        .eq('receiver_id', user.id)
+        .is('read_at', null);
+      
+      if (unreadMessages && unreadMessages.length > 0) {
+        const messageIds = unreadMessages.map(m => m.id);
+        await supabase
+          .from('messages')
+          .update({ read_at: new Date().toISOString() })
+          .in('id', messageIds);
+      }
+    }
+  };
+
   useEffect(() => {
     checkUser();
   }, []);
@@ -582,7 +602,11 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
               </div>
             )}
           </TabsTrigger>
-          <TabsTrigger value="messages" className="flex items-center gap-2 relative">
+          <TabsTrigger 
+            value="messages" 
+            className="flex items-center gap-2 relative"
+            onClick={handleMessagesTabClick}
+          >
             <MessageCircle className="h-4 w-4" />
             Messages
             {unreadCount > 0 && (
