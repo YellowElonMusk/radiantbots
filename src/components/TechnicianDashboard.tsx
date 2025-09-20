@@ -9,10 +9,12 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase } from 'lucide-react';
+import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase, MessageCircle } from 'lucide-react';
 import { usePendingMissions } from '@/hooks/usePendingMissions';
 import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 import { MissionManagement } from './MissionManagement';
+import { MessagingInbox } from './MessagingInbox';
+import { TechnicianMessaging } from './TechnicianMessaging';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -24,6 +26,8 @@ interface TechnicianDashboardProps {
 export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardProps) {
   const { language } = useLanguage();
   const { toast } = useToast();
+  const [activeView, setActiveView] = useState<'inbox' | 'conversation'>('inbox');
+  const [selectedMissionId, setSelectedMissionId] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     firstName: '',
     lastName: '',
@@ -558,7 +562,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
 
       <div className="container mx-auto p-6">
         <Tabs defaultValue={data?.activeTab || "profile"} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="profile" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             {t.profile}
@@ -575,6 +579,10 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
                 !
               </div>
             )}
+          </TabsTrigger>
+          <TabsTrigger value="messages" className="flex items-center gap-2">
+            <MessageCircle className="h-4 w-4" />
+            Messages
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -801,6 +809,30 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
 
           <TabsContent value="missions" className="space-y-6">
             <MissionManagement />
+          </TabsContent>
+
+          <TabsContent value="messages" className="space-y-6">
+            {activeView === 'inbox' ? (
+              <MessagingInbox 
+                onNavigate={(page, data) => {
+                  if (page === 'messages' && data?.bookingId) {
+                    setSelectedMissionId(data.bookingId);
+                    setActiveView('conversation');
+                  }
+                }}
+              />
+            ) : (
+              selectedMissionId && user && (
+                <TechnicianMessaging
+                  missionId={selectedMissionId}
+                  currentUserId={user.id}
+                  onBack={() => {
+                    setActiveView('inbox');
+                    setSelectedMissionId(null);
+                  }}
+                />
+              )
+            )}
           </TabsContent>
 
 
