@@ -18,7 +18,7 @@ interface EnterpriseDashboardProps {
 export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
-  const [hasAcceptedMissions, setHasAcceptedMissions] = useState(false);
+  const [acceptedTechnicians, setAcceptedTechnicians] = useState<any[]>([]);
   const [profile, setProfile] = useState({
     company_name: '',
     contact_person: '',
@@ -73,7 +73,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           });
         }
         
-        // Check if user has any accepted missions to enable messaging
+        // Check accepted missions with specific technicians
         await checkAcceptedMissions(currentUser.id);
         
         // Redirect if user is not a client/enterprise
@@ -111,17 +111,39 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
     try {
       const { data: missions, error } = await supabase
         .from('missions')
-        .select('id')
+        .select(`
+          id,
+          technician_id,
+          profiles!inner(
+            user_id,
+            first_name,
+            last_name,
+            profile_photo_url
+          )
+        `)
         .eq('client_user_id', userId)
-        .eq('status', 'accepted')
-        .limit(1);
+        .eq('status', 'accepted');
 
       if (error) {
         console.error('Error checking missions:', error);
         return;
       }
 
-      setHasAcceptedMissions(missions && missions.length > 0);
+      // Get unique technicians who have accepted missions
+      const uniqueTechnicians = missions?.reduce((acc: any[], mission: any) => {
+        const existing = acc.find(tech => tech.user_id === mission.technician_id);
+        if (!existing && mission.profiles) {
+          acc.push({
+            user_id: mission.technician_id,
+            first_name: mission.profiles.first_name,
+            last_name: mission.profiles.last_name,
+            profile_photo_url: mission.profiles.profile_photo_url
+          });
+        }
+        return acc;
+      }, []) || [];
+
+      setAcceptedTechnicians(uniqueTechnicians);
     } catch (error) {
       console.error('Error checking accepted missions:', error);
     }
@@ -201,8 +223,8 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsList>
             <TabsTrigger value="profile">Mon Profil</TabsTrigger>
             <TabsTrigger value="technicians">Techniciens Réservés</TabsTrigger>
-            <TabsTrigger value="messages" disabled={!hasAcceptedMissions}>
-              Messages {!hasAcceptedMissions && "(Verrouillé)"}
+            <TabsTrigger value="messages" disabled={acceptedTechnicians.length === 0}>
+              Messages {acceptedTechnicians.length === 0 && "(Verrouillé)"}
             </TabsTrigger>
           </TabsList>
 
@@ -382,14 +404,36 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
 
           <TabsContent value="messages">
             <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-6">Historique des messages</h2>
-              {hasAcceptedMissions ? (
-                <p className="text-gray-600">Aucun message pour le moment.</p>
+              <h2 className="text-xl font-semibold mb-6">Messages avec les techniciens</h2>
+              {acceptedTechnicians.length > 0 ? (
+                <div className="space-y-4">
+                  {acceptedTechnicians.map((technician) => (
+                    <div key={technician.user_id} className="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                      <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
+                        {technician.profile_photo_url ? (
+                          <img 
+                            src={technician.profile_photo_url} 
+                            alt={`${technician.first_name} ${technician.last_name}`}
+                            className="w-10 h-10 rounded-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-sm font-medium text-gray-600">
+                            {technician.first_name?.[0]}{technician.last_name?.[0]}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium">{technician.first_name} {technician.last_name}</p>
+                        <p className="text-sm text-gray-500">Cliquer pour voir les messages</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-500 mb-2">Fonctionnalité de messagerie verrouillée</p>
                   <p className="text-sm text-gray-400">
-                    Envoyez une demande de mission à un technicien et attendez qu'elle soit acceptée pour débloquer la messagerie.
+                    Envoyez une demande de mission à un technicien et attendez qu'elle soit acceptée pour débloquer la messagerie avec ce technicien.
                   </p>
                 </div>
               )}
