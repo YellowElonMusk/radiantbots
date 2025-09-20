@@ -7,6 +7,7 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Menu, User as UserIcon, MessageCircle } from 'lucide-react';
 import { usePendingMissions } from '@/hooks/usePendingMissions';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import {
   Sheet,
   SheetContent,
@@ -24,6 +25,7 @@ export function Header({ onNavigate }: HeaderProps) {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const { pendingCount } = usePendingMissions(user?.id);
+  const { unreadCount } = useUnreadMessages(user?.id);
 
   useEffect(() => {
     const fetchUserData = async (user: User | null) => {
@@ -155,42 +157,21 @@ export function Header({ onNavigate }: HeaderProps) {
                       
                       <Button 
                         variant="ghost" 
-                        className="w-full justify-start" 
+                        className="w-full justify-start relative" 
                         onClick={handleMyProfile}
                       >
                         <UserIcon className="mr-2 h-4 w-4" />
                         Mon Profil
-                      </Button>
-                      
-                      <Button 
-                        variant="ghost" 
-                        className="w-full justify-start" 
-                        onClick={handleMessages}
-                      >
-                        <MessageCircle className="mr-2 h-4 w-4" />
-                        Messages
+                        {unreadCount > 0 && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                            !
+                          </div>
+                        )}
                       </Button>
                       
                       {/* Show technician-specific menu items only for technicians */}
                       {userRole === 'technician' && (
                         <>
-                          <Button 
-                            variant="ghost" 
-                            className="w-full justify-start relative" 
-                            onClick={() => {
-                              setIsSheetOpen(false);
-                              onNavigate('technician-dashboard', { activeTab: 'missions' });
-                            }}
-                          >
-                            <UserIcon className="mr-2 h-4 w-4" />
-                            My Missions
-                            {pendingCount > 0 && (
-                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
-                                !
-                              </div>
-                            )}
-                          </Button>
-                         
                          <Button 
                            variant="ghost" 
                            className="w-full justify-start" 
