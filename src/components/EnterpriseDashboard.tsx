@@ -10,6 +10,8 @@ import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { ReservedTechnicians } from './ReservedTechnicians';
+import { EnterpriseMessaging } from './EnterpriseMessaging';
+import { TechnicianProfile } from './TechnicianProfile';
 
 interface EnterpriseDashboardProps {
   onNavigate: (page: string) => void;
@@ -19,6 +21,8 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [acceptedTechnicians, setAcceptedTechnicians] = useState<any[]>([]);
+  const [currentView, setCurrentView] = useState<'dashboard' | 'messaging' | 'profile'>('dashboard');
+  const [selectedTechnician, setSelectedTechnician] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     company_name: '',
     contact_person: '',
@@ -202,6 +206,38 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
       });
     }
   };
+
+  // Handle messaging view
+  if (currentView === 'messaging' && selectedTechnician && user) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-6">
+          <EnterpriseMessaging
+            technicianId={selectedTechnician}
+            currentUserId={user.id}
+            onBack={() => setCurrentView('dashboard')}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Handle profile view
+  if (currentView === 'profile' && selectedTechnician) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-6">
+          <TechnicianProfile
+            technicianId={selectedTechnician}
+            onBack={() => setCurrentView('dashboard')}
+            onMessage={() => {
+              setCurrentView('messaging');
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -398,7 +434,15 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsContent value="technicians">
             <Card className="p-6">
               <h2 className="text-xl font-semibold mb-6">Techniciens réservés</h2>
-              {user && <ReservedTechnicians userId={user.id} />}
+              {user && (
+                <ReservedTechnicians 
+                  userId={user.id} 
+                  onViewProfile={(technicianId) => {
+                    setSelectedTechnician(technicianId);
+                    setCurrentView('profile');
+                  }}
+                />
+              )}
             </Card>
           </TabsContent>
 
@@ -408,7 +452,14 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
               {acceptedTechnicians.length > 0 ? (
                 <div className="space-y-4">
                   {acceptedTechnicians.map((technician) => (
-                    <div key={technician.user_id} className="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <div 
+                      key={technician.user_id} 
+                      className="flex items-center p-4 border rounded-lg hover:bg-gray-50 cursor-pointer"
+                      onClick={() => {
+                        setSelectedTechnician(technician.user_id);
+                        setCurrentView('messaging');
+                      }}
+                    >
                       <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center mr-3">
                         {technician.profile_photo_url ? (
                           <img 

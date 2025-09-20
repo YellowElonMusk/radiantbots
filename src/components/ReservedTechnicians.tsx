@@ -29,9 +29,10 @@ interface Mission {
 
 interface ReservedTechniciansProps {
   userId: string;
+  onViewProfile?: (technicianId: string) => void;
 }
 
-export function ReservedTechnicians({ userId }: ReservedTechniciansProps) {
+export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechniciansProps) {
   const [missions, setMissions] = useState<Mission[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -146,14 +147,20 @@ export function ReservedTechnicians({ userId }: ReservedTechniciansProps) {
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <Avatar>
+                <Avatar 
+                  className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                  onClick={() => onViewProfile?.(mission.technician_id)}
+                >
                   <AvatarImage src={mission.profiles?.profile_photo_url} />
                   <AvatarFallback>
                     {mission.profiles?.first_name?.[0]}{mission.profiles?.last_name?.[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="font-semibold text-lg">
+                  <h3 
+                    className="font-semibold text-lg cursor-pointer hover:text-primary transition-colors"
+                    onClick={() => onViewProfile?.(mission.technician_id)}
+                  >
                     {mission.profiles?.first_name} {mission.profiles?.last_name}
                   </h3>
                   <p className="text-sm text-gray-600">
