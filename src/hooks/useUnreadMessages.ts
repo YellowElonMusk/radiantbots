@@ -83,7 +83,7 @@ export const markMessagesAsRead = async (messageIds: string[]) => {
 export const markMissionMessagesAsRead = async (missionId: string, userId: string) => {
   console.log('Marking mission messages as read:', { missionId, userId });
   
-  // First get the messages to mark as read
+  // First get the messages that this user received and haven't read yet
   const { data: messages, error: fetchError } = await supabase
     .from('messages')
     .select('id')
@@ -97,22 +97,24 @@ export const markMissionMessagesAsRead = async (missionId: string, userId: strin
   }
 
   if (!messages || messages.length === 0) {
-    console.log('No unread messages to mark as read');
+    console.log('No unread messages to mark as read for this user');
     return;
   }
 
-  console.log(`Found ${messages.length} unread messages to mark as read`);
+  console.log(`Found ${messages.length} unread messages to mark as read:`, messages);
 
-  const { error } = await supabase
+  // Mark these specific messages as read
+  const messageIds = messages.map(m => m.id);
+  
+  const { error, data } = await supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
-    .eq('mission_id', missionId)
-    .eq('receiver_id', userId)
-    .is('read_at', null);
+    .in('id', messageIds)
+    .select('id, read_at');
 
   if (error) {
     console.error('Error marking mission messages as read:', error);
   } else {
-    console.log('Successfully marked mission messages as read');
+    console.log('Successfully marked mission messages as read:', data);
   }
 };
