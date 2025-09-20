@@ -14,12 +14,12 @@ export function useUnreadMessages(userId?: string) {
 
     const fetchUnreadMessages = async () => {
       try {
-        // For now, we'll count all messages where user is receiver
-        // In a real app, you'd track read status
+        // Count messages where user is receiver and read_at is null (unread)
         const { data, error } = await supabase
           .from('messages')
           .select('id')
-          .eq('receiver_id', userId);
+          .eq('receiver_id', userId)
+          .is('read_at', null);
 
         if (error) {
           console.error('Error fetching unread messages:', error);
@@ -61,3 +61,29 @@ export function useUnreadMessages(userId?: string) {
 
   return { unreadCount, isLoading };
 }
+
+// Helper function to mark messages as read
+export const markMessagesAsRead = async (messageIds: string[]) => {
+  const { error } = await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .in('id', messageIds);
+
+  if (error) {
+    console.error('Error marking messages as read:', error);
+  }
+};
+
+// Helper function to mark all messages from a specific mission as read
+export const markMissionMessagesAsRead = async (missionId: string, userId: string) => {
+  const { error } = await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('mission_id', missionId)
+    .eq('receiver_id', userId)
+    .is('read_at', null);
+
+  if (error) {
+    console.error('Error marking mission messages as read:', error);
+  }
+};

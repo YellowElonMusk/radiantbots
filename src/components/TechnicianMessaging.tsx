@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeft, Send, MessageCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { markMissionMessagesAsRead } from '@/hooks/useUnreadMessages';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
 
@@ -130,6 +131,9 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
 
       if (error) throw error;
       setMessages(data || []);
+      
+      // Mark messages as read when loading conversation
+      await markMissionMessagesAsRead(mission.id, currentUserId);
     } catch (error) {
       console.error('Error loading messages:', error);
     }

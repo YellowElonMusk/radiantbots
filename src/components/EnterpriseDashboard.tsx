@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { ReservedTechnicians } from './ReservedTechnicians';
 import { EnterpriseMessaging } from './EnterpriseMessaging';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { TechnicianProfile } from './TechnicianProfile';
 
 interface EnterpriseDashboardProps {
@@ -39,6 +40,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [newBrand, setNewBrand] = useState('');
   const [newModel, setNewModel] = useState('');
   const { toast } = useToast();
+  const { unreadCount } = useUnreadMessages(user?.id);
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -259,8 +261,13 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <TabsList>
             <TabsTrigger value="profile">Mon Profil</TabsTrigger>
             <TabsTrigger value="technicians">Techniciens Réservés</TabsTrigger>
-            <TabsTrigger value="messages" disabled={acceptedTechnicians.length === 0}>
+            <TabsTrigger value="messages" disabled={acceptedTechnicians.length === 0} className="flex items-center gap-2 relative">
               Messages {acceptedTechnicians.length === 0 && "(Verrouillé)"}
+              {unreadCount > 0 && acceptedTechnicians.length > 0 && (
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                  !
+                </div>
+              )}
             </TabsTrigger>
           </TabsList>
 

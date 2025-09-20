@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase, MessageCircle } from 'lucide-react';
 import { usePendingMissions } from '@/hooks/usePendingMissions';
+import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { WeekdayRangePicker } from '@/components/ui/weekday-range-picker';
 import { MissionManagement } from './MissionManagement';
 import { MessagingInbox } from './MessagingInbox';
@@ -48,6 +49,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   const [availabilityPeriods, setAvailabilityPeriods] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { pendingCount } = usePendingMissions(user?.id);
+  const { unreadCount } = useUnreadMessages(user?.id);
 
   const translations = {
     fr: {
@@ -580,9 +582,14 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
               </div>
             )}
           </TabsTrigger>
-          <TabsTrigger value="messages" className="flex items-center gap-2">
+          <TabsTrigger value="messages" className="flex items-center gap-2 relative">
             <MessageCircle className="h-4 w-4" />
             Messages
+            {unreadCount > 0 && (
+              <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold">
+                !
+              </div>
+            )}
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
