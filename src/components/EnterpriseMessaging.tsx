@@ -117,6 +117,7 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: Ent
       setMessages(data || []);
       
       // Mark messages as read when loading conversation
+      console.log('Loading messages for mission:', mission.id, 'user:', currentUserId);
       await markMissionMessagesAsRead(mission.id, currentUserId);
     } catch (error) {
       console.error('Error loading messages:', error);

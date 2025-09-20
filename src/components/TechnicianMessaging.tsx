@@ -84,9 +84,9 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
           .from('profiles')
           .select('*')
           .eq('user_id', missionData.client_user_id)
-          .single();
+          .maybeSingle();
 
-        if (clientError) {
+        if (clientError || !clientData) {
           console.error('Error loading client profile:', clientError);
           // Use mission client data as fallback
           setClient({
@@ -133,6 +133,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
       setMessages(data || []);
       
       // Mark messages as read when loading conversation
+      console.log('Loading messages for mission:', mission.id, 'user:', currentUserId);
       await markMissionMessagesAsRead(mission.id, currentUserId);
     } catch (error) {
       console.error('Error loading messages:', error);

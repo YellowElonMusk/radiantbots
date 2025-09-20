@@ -49,7 +49,9 @@ export function useUnreadMessages(userId?: string) {
         (payload) => {
           console.log('Message change detected:', payload);
           // Refetch unread messages when there's a change
-          fetchUnreadMessages();
+          setTimeout(() => {
+            fetchUnreadMessages();
+          }, 500); // Small delay to ensure database is updated
         }
       )
       .subscribe();
@@ -64,6 +66,7 @@ export function useUnreadMessages(userId?: string) {
 
 // Helper function to mark messages as read
 export const markMessagesAsRead = async (messageIds: string[]) => {
+  console.log('Marking messages as read:', messageIds);
   const { error } = await supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
@@ -71,11 +74,35 @@ export const markMessagesAsRead = async (messageIds: string[]) => {
 
   if (error) {
     console.error('Error marking messages as read:', error);
+  } else {
+    console.log('Successfully marked messages as read');
   }
 };
 
 // Helper function to mark all messages from a specific mission as read
 export const markMissionMessagesAsRead = async (missionId: string, userId: string) => {
+  console.log('Marking mission messages as read:', { missionId, userId });
+  
+  // First get the messages to mark as read
+  const { data: messages, error: fetchError } = await supabase
+    .from('messages')
+    .select('id')
+    .eq('mission_id', missionId)
+    .eq('receiver_id', userId)
+    .is('read_at', null);
+
+  if (fetchError) {
+    console.error('Error fetching messages to mark as read:', fetchError);
+    return;
+  }
+
+  if (!messages || messages.length === 0) {
+    console.log('No unread messages to mark as read');
+    return;
+  }
+
+  console.log(`Found ${messages.length} unread messages to mark as read`);
+
   const { error } = await supabase
     .from('messages')
     .update({ read_at: new Date().toISOString() })
@@ -85,5 +112,7 @@ export const markMissionMessagesAsRead = async (missionId: string, userId: strin
 
   if (error) {
     console.error('Error marking mission messages as read:', error);
+  } else {
+    console.log('Successfully marked mission messages as read');
   }
 };
