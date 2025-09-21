@@ -13,25 +13,25 @@ interface Mission {
   description: string;
   desired_date: string;
   desired_time: string;
+  client_name: string;
+  client_email: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
-  accepted_at: string | null;
-  client_id: string | null;
-  technician_id: string | null;
-  updated_at: string;
+  accepted_at: string;
+  client_user_id: string;
+  guest_user_id: string;
   client_profile?: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
     linkedin_url: string;
+    company_name: string;
     city: string;
-    user_type: 'technician' | 'enterprise';
-    id: string;
-    user_id: string;
-    profile_photo_url: string;
-    created_at: string;
-    updated_at: string;
+  };
+  guest_profile?: {
+    name: string;
+    email: string;
   };
 }
 
@@ -52,38 +52,25 @@ export const MissionManagement = () => {
 
       console.log('Loading missions for technician user ID:', user.id);
 
-      // Get technician profile ID first
-      const { data: techProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!techProfile) {
-        console.error('Technician profile not found');
-        return;
-      }
-
       const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
           *,
-          client_profile:profiles!client_id(
-            id,
-            user_id,
+          client_profile:profiles!missions_client_user_id_fkey(
             first_name,
             last_name,
             email,
             phone,
             linkedin_url,
-            city,
-            user_type,
-            profile_photo_url,
-            created_at,
-            updated_at
+            company_name,
+            city
+          ),
+          guest_profile:guest_users!missions_guest_user_id_fkey(
+            name,
+            email
           )
         `)
-        .eq('technician_id', techProfile.id)
+        .eq('technician_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -92,14 +79,7 @@ export const MissionManagement = () => {
       }
 
       console.log('Loaded missions:', missionsData);
-      
-      // Filter out any missions where the profile queries failed and cast to proper type
-      const validMissions = (missionsData || []).filter(mission => {
-        const hasValidClientProfile = !mission.client_profile || (typeof mission.client_profile === 'object' && !('error' in mission.client_profile));
-        return hasValidClientProfile;
-      }) as Mission[];
-      
-      setMissions(validMissions);
+      setMissions(missionsData || []);
     } catch (error: any) {
       console.error('Error loading missions:', error);
       toast({
@@ -199,29 +179,35 @@ export const MissionManagement = () => {
 
   const formatClientName = (mission: Mission) => {
     if (!mission.client_profile) {
-      return 'Client';
+      return mission.guest_profile?.name || mission.client_name;
     }
 
-    const { first_name, last_name, city } = mission.client_profile;
+    const { first_name, last_name, company_name, city } = mission.client_profile;
     let formattedName = '';
 
-    // Format name
+    // Add title (Mr/Mrs) if not already present
     if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
       formattedName = `Mr ${first_name}`;
     } else {
       formattedName = first_name || '';
     }
-    
+
+    // Add last name
     if (last_name) {
       formattedName += ` ${last_name}`;
     }
 
-    // Add city information
-    if (city) {
-      formattedName += ` from ${city}`;
+    // Add company information
+    if (company_name) {
+      formattedName += ` from ${company_name} company`;
     }
 
-    return formattedName || 'Client';
+    // Add city information
+    if (city) {
+      formattedName += ` of ${city} city`;
+    }
+
+    return formattedName;
   };
 
   const filterMissions = (status: string) => {
@@ -300,7 +286,7 @@ export const MissionManagement = () => {
                             {getStatusIcon(mission.status)}
                           </CardTitle>
                           <CardDescription>
-                            Requested by {formatClientName(mission)}
+                            Requested by {mission.client_name}
                           </CardDescription>
                         </div>
                         <Badge className={getStatusColor(mission.status)}>
@@ -345,7 +331,7 @@ export const MissionManagement = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <Mail className="h-3 w-3" />
-                              {mission.client_profile?.email || 'Contact via platform'}
+                              {mission.client_profile?.email || mission.guest_profile?.email || mission.client_email}
                             </div>
                             {mission.client_profile?.phone && (
                               <div className="flex items-center gap-2">

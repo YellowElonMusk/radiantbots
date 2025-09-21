@@ -15,10 +15,8 @@ interface Mission {
   desired_time: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
-  accepted_at: string | null;
-  client_id: string;
-  technician_id: string | null;
-  technician?: {
+  accepted_at: string;
+  technician: {
     first_name: string;
     last_name: string;
     city: string;
@@ -26,7 +24,7 @@ interface Mission {
     phone: string;
     linkedin_url: string;
     profile_photo_url: string;
-  } | null;
+  };
 }
 
 interface Message {
@@ -35,10 +33,10 @@ interface Message {
   created_at: string;
   sender_id: string;
   mission_id: string;
-  sender?: {
+  sender: {
     first_name: string;
     last_name: string;
-  } | null;
+  };
 }
 
 export const ClientDashboard = () => {
@@ -57,18 +55,6 @@ export const ClientDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Get client profile ID first
-      const { data: clientProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!clientProfile) {
-        console.error('Client profile not found');
-        return;
-      }
-
       // Load missions
       const { data: missionsData, error: missionsError } = await supabase
         .from('missions')
@@ -81,9 +67,7 @@ export const ClientDashboard = () => {
           status,
           created_at,
           accepted_at,
-          client_id,
-          technician_id,
-          technician:profiles(
+          technician:profiles!missions_technician_id_fkey(
             first_name,
             last_name,
             city,
@@ -93,7 +77,7 @@ export const ClientDashboard = () => {
             profile_photo_url
           )
         `)
-        .eq('client_id', clientProfile.id)
+        .eq('client_user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (missionsError) throw missionsError;
@@ -107,7 +91,17 @@ export const ClientDashboard = () => {
       if (acceptedMissionIds.length > 0) {
         const { data: msgs, error: messagesError } = await supabase
           .from('messages')
-          .select('*')
+          .select(`
+            id,
+            content,
+            created_at,
+            sender_id,
+            mission_id,
+            sender:profiles!messages_sender_id_fkey(
+              first_name,
+              last_name
+            )
+          `)
           .in('mission_id', acceptedMissionIds)
           .order('created_at', { ascending: false });
 
@@ -115,9 +109,8 @@ export const ClientDashboard = () => {
         messagesData = msgs || [];
       }
 
-      // Use 'any' type to avoid TypeScript errors with the simplified schema
-      setMissions(missionsData as any || []);
-      setMessages(messagesData as any || []);
+      setMissions(missionsData || []);
+      setMessages(messagesData);
     } catch (error: any) {
       console.error('Error loading client data:', error);
       toast({
@@ -232,7 +225,7 @@ export const ClientDashboard = () => {
                           {getStatusIcon(mission.status)}
                         </CardTitle>
                         <CardDescription>
-                          {mission.technician ? `Requested from ${mission.technician.first_name} ${mission.technician.last_name}` : 'Technician not found'}
+                          Requested from {mission.technician.first_name} {mission.technician.last_name}
                         </CardDescription>
                       </div>
                       <Badge className={getStatusColor(mission.status)}>
@@ -267,7 +260,7 @@ export const ClientDashboard = () => {
                       )}
                     </div>
 
-                    {mission.status === 'accepted' && mission.technician && (
+                    {mission.status === 'accepted' && (
                       <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
                           Mission Accepted! Contact Information:

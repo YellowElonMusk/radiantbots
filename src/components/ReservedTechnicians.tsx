@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import { Calendar, Clock, User, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
@@ -15,24 +16,15 @@ interface Mission {
   desired_date: string;
   desired_time: string;
   created_at: string;
-  accepted_at?: string | null;
-  technician_id: string | null;
-  client_id: string | null;
-  updated_at: string;
-  technician: {
+  accepted_at?: string;
+  technician_id: string;
+  profiles: {
     first_name: string;
     last_name: string;
     profile_photo_url?: string;
     phone?: string;
-    id: string;
-    user_id: string;
-    email: string;
-    city: string;
-    user_type: 'technician' | 'enterprise';
-    linkedin_url?: string;
-    created_at: string;
-    updated_at: string;
-  } | null;
+    hourly_rate?: number;
+  };
 }
 
 interface ReservedTechniciansProps {
@@ -50,49 +42,25 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
 
   const loadMissions = async () => {
     try {
-      // Get client profile ID first
-      const { data: clientProfile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-
-      if (!clientProfile) {
-        console.error('Client profile not found');
-        setLoading(false);
-        return;
-      }
-
-      const { data: missionsData, error } = await supabase
+      const { data, error } = await supabase
         .from('missions')
         .select(`
           *,
-          technician:profiles!technician_id(
-            id,
-            user_id,
+          profiles!missions_technician_id_fkey (
             first_name,
-            last_name,
+            last_name, 
             profile_photo_url,
             phone,
-            email,
-            city,
-            user_type,
-            linkedin_url,
-            created_at,
-            updated_at
+            hourly_rate
           )
         `)
-        .eq('client_id', clientProfile.id)
+        .eq('client_user_id', userId)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading missions:', error);
       } else {
-        // Filter out any missions where the technician query failed and cast to proper type
-        const validMissions = (missionsData || []).filter(mission => 
-          !mission.technician || (typeof mission.technician === 'object' && !('error' in mission.technician))
-        ) as Mission[];
-        setMissions(validMissions);
+        setMissions(data || []);
       }
     } catch (error) {
       console.error('Error in loadMissions:', error);
@@ -179,26 +147,24 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
           <CardContent className="p-6">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center space-x-3">
-                {mission.technician && (
-                  <Avatar 
-                    className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
-                    onClick={() => onViewProfile && mission.technician_id && onViewProfile(mission.technician_id)}
-                  >
-                    <AvatarImage src={mission.technician.profile_photo_url} />
-                    <AvatarFallback>
-                      {mission.technician.first_name?.[0]}{mission.technician.last_name?.[0]}
-                    </AvatarFallback>
-                  </Avatar>
-                )}
+                <Avatar 
+                  className="cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all"
+                  onClick={() => onViewProfile?.(mission.technician_id)}
+                >
+                  <AvatarImage src={mission.profiles?.profile_photo_url} />
+                  <AvatarFallback>
+                    {mission.profiles?.first_name?.[0]}{mission.profiles?.last_name?.[0]}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <h3 
                     className="font-semibold text-lg cursor-pointer hover:text-primary transition-colors"
-                    onClick={() => onViewProfile && mission.technician_id && onViewProfile(mission.technician_id)}
+                    onClick={() => onViewProfile?.(mission.technician_id)}
                   >
-                    {mission.technician ? `${mission.technician.first_name} ${mission.technician.last_name}` : 'Unknown Technician'}
+                    {mission.profiles?.first_name} {mission.profiles?.last_name}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    75€/heure
+                    {mission.profiles?.hourly_rate}€/heure
                   </p>
                 </div>
               </div>
@@ -238,10 +204,10 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
               )}
             </div>
 
-            {mission.technician?.phone && (
+            {mission.profiles?.phone && (
               <div className="mt-4 pt-4 border-t">
                 <p className="text-sm text-gray-600">
-                  Contact: {mission.technician.phone}
+                  Contact: {mission.profiles.phone}
                 </p>
               </div>
             )}

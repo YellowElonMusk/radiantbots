@@ -10,14 +10,11 @@ interface Profile {
   first_name: string | null;
   last_name: string | null;
   city: string | null;
+  hourly_rate: number | null;
+  bio: string | null;
   profile_photo_url: string | null;
   user_id: string;
-  user_type: 'technician' | 'enterprise';
-  email?: string | null;
-  phone?: string | null;
-  linkedin_url?: string | null;
-  created_at: string;
-  updated_at: string;
+  role?: string;
 }
 interface LandingProps {
   onNavigate: (page: string, data?: any) => void;
@@ -77,7 +74,7 @@ export function Landing({
         const {
           data: profiles,
           error
-        } = await supabase.from('profiles').select('*').eq('user_type', 'technician').not('first_name', 'is', null).not('last_name', 'is', null).order('created_at', {
+        } = await supabase.from('profiles').select('*').not('first_name', 'is', null).not('last_name', 'is', null).not('hourly_rate', 'is', null).order('created_at', {
           ascending: false
         }).limit(3);
         if (error) {
@@ -132,12 +129,12 @@ export function Landing({
                 </>}
               
               {user && userProfile && <>
-                  {userProfile.user_type !== 'technician' && <Button variant="hero" size="lg" onClick={handleFindTechnician} className="text-lg px-8 py-6 h-auto">
+                  {userProfile.role !== 'technician' && <Button variant="hero" size="lg" onClick={handleFindTechnician} className="text-lg px-8 py-6 h-auto">
                       <Wrench className="mr-2 h-5 w-5" />
                       {t('landing.hero.findTech')}
                     </Button>}
                   
-                  {userProfile.user_type !== 'enterprise' && <Button variant="outline" size="lg" onClick={() => onNavigate('bootcamp')} className="text-lg px-8 py-6 h-auto">
+                  {userProfile.role !== 'enterprise' && <Button variant="outline" size="lg" onClick={() => onNavigate('bootcamp')} className="text-lg px-8 py-6 h-auto">
                       {t('landing.hero.becomeTech')}
                     </Button>}
                 </>}
@@ -203,7 +200,7 @@ export function Landing({
                   </div>
                   
                   <div className="text-primary font-semibold mb-4">
-                    À partir de €75/h
+                    À partir de €{tech.hourly_rate || 'TBD'}/h
                   </div>
                   
                   <Button variant="book" size="sm" className="w-full">

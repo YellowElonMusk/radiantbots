@@ -32,7 +32,7 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
         // Check user role from profiles table
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('user_type')
+          .select('role')
           .eq('user_id', data.user.id)
           .maybeSingle();
           
@@ -47,7 +47,7 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
         }
         
         // Redirect if user is not an enterprise client
-        if (profileData?.user_type === 'technician') {
+        if (profileData?.role === 'technician') {
           await supabase.auth.signOut(); // Sign them out since they're in the wrong place
           toast({
             title: "Compte Technicien Détecté",
@@ -55,7 +55,7 @@ export function EnterpriseLogin({ onNavigate }: EnterpriseLoginProps) {
             variant: "destructive",
           });
           return;
-        } else if (profileData?.user_type !== 'enterprise') {
+        } else if (profileData?.role !== 'client') {
           await supabase.auth.signOut();
           toast({
             title: "Accès Refusé",

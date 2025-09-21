@@ -93,7 +93,8 @@ export function TechnicianRegistration({ onNavigate }: TechnicianRegistrationPro
             phone: formData.phone,
             bio: formData.bio,
             city: formData.city,
-            user_type: 'technician'
+            accepts_travel: formData.acceptsTravel,
+            max_travel_distance: formData.maxTravelDistance,
           }
         }
       });

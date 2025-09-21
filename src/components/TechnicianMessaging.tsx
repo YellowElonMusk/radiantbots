@@ -13,9 +13,8 @@ interface Message {
   id: string;
   content: string;
   sender_id: string;
+  receiver_id: string;
   created_at: string;
-  read_at?: string | null;
-  mission_id: string;
   sender?: {
     first_name: string;
     last_name: string;
@@ -29,12 +28,9 @@ interface Mission {
   status: string;
   desired_date: string;
   created_at: string;
-  client_id?: string;
-  technician_id?: string;
-  description?: string;
-  desired_time?: string;
-  accepted_at?: string;
-  updated_at?: string;
+  client_name: string;
+  client_user_id?: string;
+  guest_user_id?: string;
 }
 
 interface TechnicianMessagingProps {
@@ -83,29 +79,29 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
       setMission(missionData);
 
       // Load client profile if they have a user account
-      if (missionData.client_id) {
+      if (missionData.client_user_id) {
         const { data: clientData, error: clientError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('id', missionData.client_id)
+          .eq('user_id', missionData.client_user_id)
           .maybeSingle();
 
         if (clientError || !clientData) {
           console.error('Error loading client profile:', clientError);
-          // Use default client data
+          // Use mission client data as fallback
           setClient({
-            first_name: 'Client',
-            last_name: '',
+            first_name: missionData.client_name.split(' ')[0] || '',
+            last_name: missionData.client_name.split(' ').slice(1).join(' ') || '',
             profile_photo_url: null
           });
         } else {
           setClient(clientData);
         }
       } else {
-        // No client ID - use default
+        // Guest user - use mission client data
         setClient({
-          first_name: 'Client',
-          last_name: '',
+          first_name: missionData.client_name.split(' ')[0] || '',
+          last_name: missionData.client_name.split(' ').slice(1).join(' ') || '',
           profile_photo_url: null
         });
       }
@@ -134,13 +130,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      
-      // Filter out any messages where the sender query failed and cast to proper type
-      const validMessages = (data || []).filter(message => 
-        !message.sender || (typeof message.sender === 'object' && !('error' in message.sender))
-      ) as Message[];
-      
-      setMessages(validMessages);
+      setMessages(data || []);
       
       // Mark messages as read when loading conversation
       console.log('Loading messages for mission:', mission.id, 'user:', currentUserId);
@@ -153,9 +143,12 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
   const sendMessage = async () => {
     if (!newMessage.trim() || !mission?.id) return;
 
-    // In simplified schema, we don't support messaging
-    console.log('Messaging not supported in simplified schema');
-    return;
+    // Determine receiver ID
+    const receiverId = mission.client_user_id || null;
+    if (!receiverId) {
+      console.error('Cannot send message to guest user');
+      return;
+    }
 
     try {
       const { data, error } = await supabase
@@ -163,6 +156,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .insert({
           content: newMessage.trim(),
           sender_id: currentUserId,
+          receiver_id: receiverId,
           mission_id: mission.id
         })
         .select(`
@@ -177,16 +171,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
 
       if (error) throw error;
 
-      // Only add the message if it has a valid sender
-      if (!data.sender || (data.sender && typeof data.sender === 'object' && !('error' in data.sender))) {
-        const validMessage = {
-          ...data,
-          sender: data.sender && typeof data.sender === 'object' && !('error' in data.sender)
-            ? data.sender! as any
-            : undefined
-        } as Message;
-        setMessages(prev => [...prev, validMessage]);
-      }
+      setMessages(prev => [...prev, data]);
       setNewMessage('');
 
       // Simulate client response after a short delay
@@ -199,7 +184,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
   };
 
   const simulateClientResponse = async () => {
-    if (!mission?.id || !mission.client_id) return;
+    if (!mission?.id || !mission.client_user_id) return;
 
     const responses = [
       "Merci pour votre message ! C'est exactement ce dont j'avais besoin.",
@@ -216,7 +201,8 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .from('messages')
         .insert({
           content: randomResponse,
-          sender_id: mission.client_id,
+          sender_id: mission.client_user_id,
+          receiver_id: currentUserId,
           mission_id: mission.id
         })
         .select(`
@@ -230,17 +216,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .single();
 
       if (error) throw error;
-      
-      // Only add the message if it has a valid sender
-      if (!data.sender || (data.sender && typeof data.sender === 'object' && !('error' in data.sender))) {
-        const validMessage = {
-          ...data,
-          sender: data.sender && typeof data.sender === 'object' && !('error' in data.sender)
-            ? data.sender! as any
-            : undefined
-        } as Message;
-        setMessages(prev => [...prev, validMessage]);
-      }
+      setMessages(prev => [...prev, data]);
     } catch (error) {
       console.error('Error simulating response:', error);
     }
@@ -294,26 +270,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
               </Avatar>
               <div>
                 <h3 className="font-semibold">
-                  {(() => {
-                    if (!mission?.client_id) {
-                      return client.first_name && client.last_name 
-                        ? `${client.first_name} ${client.last_name}`
-                        : 'Client';
-                    }
-                    
-                    let formattedName = '';
-                    if (client.first_name && !client.first_name.toLowerCase().includes('mr') && !client.first_name.toLowerCase().includes('mrs')) {
-                      formattedName = `Mr ${client.first_name}`;
-                    } else {
-                      formattedName = client.first_name || '';
-                    }
-                    
-                    if (client.last_name) {
-                      formattedName += ` ${client.last_name}`;
-                    }
-                    
-                    return formattedName || 'Client';
-                  })()}
+                  {client.first_name} {client.last_name}
                 </h3>
                 <p className="text-sm text-gray-600">
                   Client
@@ -390,7 +347,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
       </Card>
 
       {/* Message Input */}
-      {mission.client_id && (
+      {mission.client_user_id && (
         <Card>
           <CardContent className="p-4">
             <div className="flex space-x-2">
