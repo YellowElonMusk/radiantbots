@@ -34,9 +34,10 @@ interface EnterpriseMessagingProps {
   technicianId: string;
   onBack: () => void;
   currentUserId: string;
+  onViewProfile?: (technicianId: string) => void;
 }
 
-export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: EnterpriseMessagingProps) {
+export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onViewProfile }: EnterpriseMessagingProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [technician, setTechnician] = useState<any>(null);
@@ -209,6 +210,12 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: Ent
     return format(new Date(timestamp), 'dd MMM yyyy', { locale: fr });
   };
 
+  const handleViewProfile = () => {
+    if (onViewProfile) {
+      onViewProfile(technicianId);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -241,14 +248,20 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId }: Ent
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Retour
               </Button>
-              <Avatar>
+              <Avatar 
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={handleViewProfile}
+              >
                 <AvatarImage src={technician.profile_photo_url} />
                 <AvatarFallback>
                   {technician.first_name?.[0]}{technician.last_name?.[0]}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <h3 className="font-semibold">
+                <h3 
+                  className="font-semibold cursor-pointer hover:text-primary transition-colors"
+                  onClick={handleViewProfile}
+                >
                   {technician.first_name} {technician.last_name}
                 </h3>
                 <p className="text-sm text-gray-600">

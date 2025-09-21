@@ -239,6 +239,10 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
             technicianId={selectedTechnician}
             currentUserId={user.id}
             onBack={() => setCurrentView('dashboard')}
+            onViewProfile={(technicianId) => {
+              setSelectedTechnician(technicianId);
+              setCurrentView('profile');
+            }}
           />
         </div>
       </div>
