@@ -14,108 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      availability: {
-        Row: {
-          created_at: string
-          date: string
-          id: string
-          is_available: boolean
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          date: string
-          id?: string
-          is_available?: boolean
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          date?: string
-          id?: string
-          is_available?: boolean
-          user_id?: string
-        }
-        Relationships: []
-      }
-      availability_periods: {
-        Row: {
-          count_weekdays: number
-          created_at: string
-          end_date: string
-          id: string
-          selected_weekdays: string[]
-          start_date: string
-          updated_at: string
-          user_id: string
-          weekend_excluded: boolean
-        }
-        Insert: {
-          count_weekdays: number
-          created_at?: string
-          end_date: string
-          id?: string
-          selected_weekdays: string[]
-          start_date: string
-          updated_at?: string
-          user_id: string
-          weekend_excluded?: boolean
-        }
-        Update: {
-          count_weekdays?: number
-          created_at?: string
-          end_date?: string
-          id?: string
-          selected_weekdays?: string[]
-          start_date?: string
-          updated_at?: string
-          user_id?: string
-          weekend_excluded?: boolean
-        }
-        Relationships: []
-      }
-      brands: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      guest_users: {
-        Row: {
-          browser_token: string
-          created_at: string
-          email: string | null
-          id: string
-          name: string | null
-        }
-        Insert: {
-          browser_token: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string | null
-        }
-        Update: {
-          browser_token?: string
-          created_at?: string
-          email?: string | null
-          id?: string
-          name?: string | null
-        }
-        Relationships: []
-      }
       messages: {
         Row: {
           content: string
@@ -123,8 +21,7 @@ export type Database = {
           id: string
           mission_id: string
           read_at: string | null
-          receiver_id: string | null
-          sender_id: string | null
+          sender_id: string
         }
         Insert: {
           content: string
@@ -132,8 +29,7 @@ export type Database = {
           id?: string
           mission_id: string
           read_at?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
+          sender_id: string
         }
         Update: {
           content?: string
@@ -141,24 +37,9 @@ export type Database = {
           id?: string
           mission_id?: string
           read_at?: string | null
-          receiver_id?: string | null
-          sender_id?: string | null
+          sender_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "fk_messages_mission"
-            columns: ["mission_id"]
-            isOneToOne: false
-            referencedRelation: "missions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_messages_sender"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "messages_mission_id_fkey"
             columns: ["mission_id"]
@@ -166,37 +47,23 @@ export type Database = {
             referencedRelation: "missions"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
-      }
-      mission_types: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
       }
       missions: {
         Row: {
           accepted_at: string | null
-          client_email: string
-          client_id: string | null
-          client_name: string
+          client_id: string
           created_at: string
           description: string | null
           desired_date: string | null
           desired_time: string | null
-          guest_user_id: string | null
           id: string
           status: Database["public"]["Enums"]["mission_status"]
           technician_id: string | null
@@ -205,14 +72,11 @@ export type Database = {
         }
         Insert: {
           accepted_at?: string | null
-          client_email: string
-          client_id?: string | null
-          client_name: string
+          client_id: string
           created_at?: string
           description?: string | null
           desired_date?: string | null
           desired_time?: string | null
-          guest_user_id?: string | null
           id?: string
           status?: Database["public"]["Enums"]["mission_status"]
           technician_id?: string | null
@@ -221,14 +85,11 @@ export type Database = {
         }
         Update: {
           accepted_at?: string | null
-          client_email?: string
-          client_id?: string | null
-          client_name?: string
+          client_id?: string
           created_at?: string
           description?: string | null
           desired_date?: string | null
           desired_time?: string | null
-          guest_user_id?: string | null
           id?: string
           status?: Database["public"]["Enums"]["mission_status"]
           technician_id?: string | null
@@ -237,214 +98,65 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "fk_missions_client"
+            foreignKeyName: "missions_client_id_fkey"
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "fk_missions_technician"
+            foreignKeyName: "missions_technician_id_fkey"
             columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "missions_guest_user_id_fkey"
-            columns: ["guest_user_id"]
-            isOneToOne: false
-            referencedRelation: "guest_users"
             referencedColumns: ["id"]
           },
         ]
       }
       profiles: {
         Row: {
-          accepts_travel: boolean | null
-          address: string | null
-          bio: string | null
           city: string | null
-          company_name: string | null
-          contact_person: string | null
           created_at: string
-          description: string | null
           email: string | null
           first_name: string | null
-          hourly_rate: number | null
           id: string
           last_name: string | null
           linkedin_url: string | null
-          max_travel_distance: number | null
           phone: string | null
-          postal_code: string | null
           profile_photo_url: string | null
-          regions: string[] | null
-          robot_brands: string[] | null
-          robot_models: string[] | null
-          role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
-          accepts_travel?: boolean | null
-          address?: string | null
-          bio?: string | null
           city?: string | null
-          company_name?: string | null
-          contact_person?: string | null
           created_at?: string
-          description?: string | null
           email?: string | null
           first_name?: string | null
-          hourly_rate?: number | null
           id?: string
           last_name?: string | null
           linkedin_url?: string | null
-          max_travel_distance?: number | null
           phone?: string | null
-          postal_code?: string | null
           profile_photo_url?: string | null
-          regions?: string[] | null
-          robot_brands?: string[] | null
-          robot_models?: string[] | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id: string
           user_type: Database["public"]["Enums"]["user_type"]
         }
         Update: {
-          accepts_travel?: boolean | null
-          address?: string | null
-          bio?: string | null
           city?: string | null
-          company_name?: string | null
-          contact_person?: string | null
           created_at?: string
-          description?: string | null
           email?: string | null
           first_name?: string | null
-          hourly_rate?: number | null
           id?: string
           last_name?: string | null
           linkedin_url?: string | null
-          max_travel_distance?: number | null
           phone?: string | null
-          postal_code?: string | null
           profile_photo_url?: string | null
-          regions?: string[] | null
-          robot_brands?: string[] | null
-          robot_models?: string[] | null
-          role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id?: string
           user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
-      }
-      search_requests: {
-        Row: {
-          client_email: string | null
-          created_at: string
-          date_flexible: boolean | null
-          deployment_address: string
-          deployment_city: string
-          id: string
-          mission_date: string
-          mission_type: string
-        }
-        Insert: {
-          client_email?: string | null
-          created_at?: string
-          date_flexible?: boolean | null
-          deployment_address: string
-          deployment_city: string
-          id?: string
-          mission_date: string
-          mission_type: string
-        }
-        Update: {
-          client_email?: string | null
-          created_at?: string
-          date_flexible?: boolean | null
-          deployment_address?: string
-          deployment_city?: string
-          id?: string
-          mission_date?: string
-          mission_type?: string
-        }
-        Relationships: []
-      }
-      skills: {
-        Row: {
-          created_at: string
-          id: string
-          name: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          name: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          name?: string
-        }
-        Relationships: []
-      }
-      technician_brands: {
-        Row: {
-          brand_id: string
-          id: string
-          user_id: string
-        }
-        Insert: {
-          brand_id: string
-          id?: string
-          user_id: string
-        }
-        Update: {
-          brand_id?: string
-          id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_brands_brand_id_fkey"
-            columns: ["brand_id"]
-            isOneToOne: false
-            referencedRelation: "brands"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      technician_skills: {
-        Row: {
-          id: string
-          skill_id: string
-          user_id: string
-        }
-        Insert: {
-          id?: string
-          skill_id: string
-          user_id: string
-        }
-        Update: {
-          id?: string
-          skill_id?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "technician_skills_skill_id_fkey"
-            columns: ["skill_id"]
-            isOneToOne: false
-            referencedRelation: "skills"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Views: {
@@ -455,7 +167,6 @@ export type Database = {
     }
     Enums: {
       mission_status: "pending" | "accepted" | "declined" | "completed"
-      user_role: "client" | "technician" | "enterprise" | "freelance"
       user_type: "technician" | "enterprise"
     }
     CompositeTypes: {
@@ -585,7 +296,6 @@ export const Constants = {
   public: {
     Enums: {
       mission_status: ["pending", "accepted", "declined", "completed"],
-      user_role: ["client", "technician", "enterprise", "freelance"],
       user_type: ["technician", "enterprise"],
     },
   },

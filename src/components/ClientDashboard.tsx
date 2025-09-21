@@ -16,9 +16,9 @@ interface Mission {
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
   accepted_at: string | null;
-  client_id: string | null;
+  client_id: string;
   technician_id: string | null;
-  technician: {
+  technician?: {
     first_name: string;
     last_name: string;
     city: string;
@@ -35,10 +35,10 @@ interface Message {
   created_at: string;
   sender_id: string;
   mission_id: string;
-  sender: {
+  sender?: {
     first_name: string;
     last_name: string;
-  };
+  } | null;
 }
 
 export const ClientDashboard = () => {
@@ -107,17 +107,7 @@ export const ClientDashboard = () => {
       if (acceptedMissionIds.length > 0) {
         const { data: msgs, error: messagesError } = await supabase
           .from('messages')
-          .select(`
-            id,
-            content,
-            created_at,
-            sender_id,
-            mission_id,
-            sender:profiles(
-              first_name,
-              last_name
-            )
-          `)
+          .select('*')
           .in('mission_id', acceptedMissionIds)
           .order('created_at', { ascending: false });
 
@@ -125,13 +115,18 @@ export const ClientDashboard = () => {
         messagesData = msgs || [];
       }
 
-      // Filter out any missions where the technician query failed and cast to proper type
+      // Filter valid data and cast to proper types
       const validMissions = (missionsData || []).filter(mission => 
-        !mission.technician || (typeof mission.technician === 'object' && !('error' in mission.technician))
+        mission && typeof mission === 'object' && 'id' in mission
       ) as Mission[];
+
+      const validMessages = (messagesData || []).filter(message => 
+        message && typeof message === 'object' && 'id' in message && 
+        (!message.sender || (typeof message.sender === 'object' && 'first_name' in message.sender))
+      ) as Message[];
       
       setMissions(validMissions);
-      setMessages(messagesData);
+      setMessages(validMessages);
     } catch (error: any) {
       console.error('Error loading client data:', error);
       toast({
