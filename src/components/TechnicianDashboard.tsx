@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
+import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User, Calendar as CalendarIcon, Settings, LogOut, Upload, Plus, X, Briefcase, MessageCircle } from 'lucide-react';
@@ -37,7 +37,10 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
     linkedin: '',
     bio: '',
     hourlyRate: '',
-    profilePhotoUrl: ''
+    profilePhotoUrl: '',
+    city: '',
+    acceptsTravel: false,
+    maxTravelDistance: 0
   });
   const [skills, setSkills] = useState<string[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
@@ -208,7 +211,10 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         linkedin: data.linkedin_url || '',
         bio: data.bio || user?.user_metadata?.bio || '',
         hourlyRate: data.hourly_rate ? data.hourly_rate.toString() : '',
-        profilePhotoUrl: data.profile_photo_url || ''
+        profilePhotoUrl: data.profile_photo_url || '',
+        city: data.city || '',
+        acceptsTravel: data.accepts_travel || false,
+        maxTravelDistance: data.max_travel_distance || 0
       });
     } else if (user) {
       // If no profile exists, load from user metadata
@@ -220,7 +226,10 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         linkedin: '',
         bio: user.user_metadata?.bio || '',
         hourlyRate: '',
-        profilePhotoUrl: ''
+        profilePhotoUrl: '',
+        city: '',
+        acceptsTravel: false,
+        maxTravelDistance: 0
       });
     }
   };
@@ -467,7 +476,10 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         linkedin_url: profile.linkedin,
         bio: profile.bio,
         hourly_rate: profile.hourlyRate ? parseFloat(profile.hourlyRate) : null,
-        profile_photo_url: profile.profilePhotoUrl
+        profile_photo_url: profile.profilePhotoUrl,
+        city: profile.city,
+        accepts_travel: profile.acceptsTravel,
+        max_travel_distance: profile.maxTravelDistance
       }, {
         onConflict: 'user_id'
       });
@@ -704,6 +716,15 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
                     />
                   </div>
                   <div className="space-y-2">
+                    <Label htmlFor="city">Ville d'opération</Label>
+                    <Input
+                      id="city"
+                      value={profile.city}
+                      onChange={(e) => setProfile(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Paris, Lyon, Marseille..."
+                    />
+                  </div>
+                  <div className="space-y-2">
                     <Label htmlFor="hourlyRate">{t.hourlyRate}</Label>
                     <Input
                       id="hourlyRate"
@@ -712,6 +733,39 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
                       onChange={(e) => setProfile(prev => ({ ...prev, hourlyRate: e.target.value }))}
                     />
                   </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3">
+                    <Checkbox
+                      id="acceptsTravel"
+                      checked={profile.acceptsTravel}
+                      onCheckedChange={(checked) => setProfile(prev => ({ ...prev, acceptsTravel: checked as boolean }))}
+                    />
+                    <div className="space-y-1 leading-none">
+                      <Label htmlFor="acceptsTravel" className="cursor-pointer">
+                        J'accepte de me déplacer pour des missions
+                      </Label>
+                      <p className="text-sm text-muted-foreground">
+                        Cochez cette case si vous acceptez de voyager vers d'autres villes pour le travail
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {profile.acceptsTravel && (
+                    <div className="space-y-2 ml-6">
+                      <Label htmlFor="maxTravelDistance">Distance maximale de déplacement (km)</Label>
+                      <Input
+                        id="maxTravelDistance"
+                        type="number"
+                        value={profile.maxTravelDistance || ''}
+                        onChange={(e) => setProfile(prev => ({ ...prev, maxTravelDistance: Number(e.target.value) }))}
+                        placeholder="50"
+                        min="0"
+                        max="500"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-2">
