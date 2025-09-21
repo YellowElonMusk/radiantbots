@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { ReservedTechnicians } from './ReservedTechnicians';
 import { EnterpriseMessaging } from './EnterpriseMessaging';
+import { MissionTracking } from './MissionTracking';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { TechnicianProfile } from './TechnicianProfile';
 
@@ -22,7 +23,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [acceptedTechnicians, setAcceptedTechnicians] = useState<any[]>([]);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'messaging' | 'profile'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'messaging' | 'profile' | 'missions'>('dashboard');
   const [selectedTechnician, setSelectedTechnician] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     company_name: '',
@@ -266,6 +267,20 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
     );
   }
 
+  // Handle mission tracking view
+  if (currentView === 'missions' && user) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-6">
+          <MissionTracking
+            currentUserId={user.id}
+            onBack={() => setCurrentView('dashboard')}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-6">
@@ -298,6 +313,12 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
                   !
                 </div>
               )}
+            </TabsTrigger>
+            <TabsTrigger 
+              value="missions"
+              onClick={() => setCurrentView('missions')}
+            >
+              Suivi des missions
             </TabsTrigger>
           </TabsList>
 
