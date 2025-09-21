@@ -28,6 +28,7 @@ interface Mission {
     linkedin_url: string;
     company_name: string;
     city: string;
+    contact_person: string;
   };
   guest_profile?: {
     name: string;
@@ -63,7 +64,8 @@ export const MissionManagement = () => {
             phone,
             linkedin_url,
             company_name,
-            city
+            city,
+            contact_person
           ),
           guest_profile:guest_users!missions_guest_user_id_fkey(
             name,
@@ -182,19 +184,23 @@ export const MissionManagement = () => {
       return mission.guest_profile?.name || mission.client_name;
     }
 
-    const { first_name, last_name, company_name, city } = mission.client_profile;
+    const { contact_person, company_name, city } = mission.client_profile;
     let formattedName = '';
 
-    // Add title (Mr/Mrs) if not already present
-    if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
-      formattedName = `Mr ${first_name}`;
+    // Use contact_person if available, otherwise fallback to first_name last_name
+    if (contact_person) {
+      formattedName = contact_person;
     } else {
-      formattedName = first_name || '';
-    }
-
-    // Add last name
-    if (last_name) {
-      formattedName += ` ${last_name}`;
+      const { first_name, last_name } = mission.client_profile;
+      if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
+        formattedName = `Mr ${first_name}`;
+      } else {
+        formattedName = first_name || '';
+      }
+      
+      if (last_name) {
+        formattedName += ` ${last_name}`;
+      }
     }
 
     // Add company information
@@ -207,7 +213,7 @@ export const MissionManagement = () => {
       formattedName += ` of ${city} city`;
     }
 
-    return formattedName;
+    return formattedName || mission.client_name;
   };
 
   const filterMissions = (status: string) => {
