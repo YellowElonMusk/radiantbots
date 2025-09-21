@@ -75,16 +75,34 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
       if (techError) throw techError;
       setTechnician(techData);
 
+      // Get client profile ID first
+      const { data: clientProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .single();
+
+      if (!clientProfile) return;
+
+      // Get technician profile ID
+      const { data: techProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', technicianId)
+        .single();
+
+      if (!techProfile) return;
+
       // Load mission between current user and technician
       const { data: missionData, error: missionError } = await supabase
         .from('missions')
         .select('*')
-        .eq('client_user_id', currentUserId)
-        .eq('technician_id', technicianId)
+        .eq('client_id', clientProfile.id)
+        .eq('technician_id', techProfile.id)
         .eq('status', 'accepted')
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       if (missionError && missionError.code !== 'PGRST116') throw missionError;
       if (missionData) {
@@ -105,7 +123,7 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
         .from('messages')
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(
+          sender:profiles(
             first_name,
             last_name,
             profile_photo_url
@@ -131,17 +149,33 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
     if (!newMessage.trim() || !mission?.id) return;
 
     try {
+      // Get sender profile ID
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .single();
+
+      // Get receiver profile ID
+      const { data: receiverProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', technicianId)
+        .single();
+
+      if (!senderProfile || !receiverProfile) return;
+
       const { data, error } = await supabase
         .from('messages')
         .insert({
           content: newMessage.trim(),
-          sender_id: currentUserId,
-          receiver_id: technicianId,
+          sender_id: senderProfile.id,
+          receiver_id: receiverProfile.id,
           mission_id: mission.id
         })
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(
+          sender:profiles(
             first_name,
             last_name,
             profile_photo_url
@@ -177,17 +211,33 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
     const randomResponse = responses[Math.floor(Math.random() * responses.length)];
 
     try {
+      // Get sender profile ID (technician)
+      const { data: senderProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', technicianId)
+        .single();
+
+      // Get receiver profile ID (client)
+      const { data: receiverProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .single();
+
+      if (!senderProfile || !receiverProfile) return;
+
       const { data, error } = await supabase
         .from('messages')
         .insert({
           content: randomResponse,
-          sender_id: technicianId,
-          receiver_id: currentUserId,
+          sender_id: senderProfile.id,
+          receiver_id: receiverProfile.id,
           mission_id: mission.id
         })
         .select(`
           *,
-          sender:profiles!messages_sender_id_fkey(
+          sender:profiles(
             first_name,
             last_name,
             profile_photo_url
@@ -307,22 +357,22 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
                 <div
                   key={message.id}
                   className={`flex ${
-                    message.sender_id === currentUserId ? 'justify-end' : 'justify-start'
+                    message.sender?.first_name ? 'justify-start' : 'justify-end'
                   }`}
                 >
                   <div
                     className={`max-w-[70%] p-3 rounded-lg ${
-                      message.sender_id === currentUserId
-                        ? 'bg-primary text-white ml-4'
-                        : 'bg-gray-100 text-gray-900 mr-4'
+                      message.sender?.first_name
+                        ? 'bg-gray-100 text-gray-900 mr-4'
+                        : 'bg-primary text-white ml-4'
                     }`}
                   >
                     <p className="text-sm">{message.content}</p>
                     <p
                       className={`text-xs mt-1 ${
-                        message.sender_id === currentUserId
-                          ? 'text-white/70'
-                          : 'text-gray-500'
+                        message.sender?.first_name
+                          ? 'text-gray-500'
+                          : 'text-white/70'
                       }`}
                     >
                       {formatTime(message.created_at)}

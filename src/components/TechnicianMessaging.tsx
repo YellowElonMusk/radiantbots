@@ -79,11 +79,11 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
       setMission(missionData);
 
       // Load client profile if they have a user account
-      if (missionData.client_user_id) {
+      if (missionData.client_id) {
         const { data: clientData, error: clientError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', missionData.client_user_id)
+          .eq('id', missionData.client_id)
           .maybeSingle();
 
         if (clientError || !clientData) {
@@ -130,7 +130,13 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      
+      // Filter out any messages where the sender query failed and cast to proper type
+      const validMessages = (data || []).filter(message => 
+        !message.sender || (typeof message.sender === 'object' && !('error' in message.sender))
+      ) as Message[];
+      
+      setMessages(validMessages);
       
       // Mark messages as read when loading conversation
       console.log('Loading messages for mission:', mission.id, 'user:', currentUserId);
@@ -171,7 +177,16 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, data]);
+      // Only add the message if it has a valid sender
+      if (!data.sender || (data.sender && typeof data.sender === 'object' && !('error' in data.sender))) {
+        const validMessage = {
+          ...data,
+          sender: data.sender && typeof data.sender === 'object' && !('error' in data.sender)
+            ? data.sender! as any
+            : undefined
+        } as Message;
+        setMessages(prev => [...prev, validMessage]);
+      }
       setNewMessage('');
 
       // Simulate client response after a short delay
@@ -216,7 +231,17 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .single();
 
       if (error) throw error;
-      setMessages(prev => [...prev, data]);
+      
+      // Only add the message if it has a valid sender
+      if (!data.sender || (data.sender && typeof data.sender === 'object' && !('error' in data.sender))) {
+        const validMessage = {
+          ...data,
+          sender: data.sender && typeof data.sender === 'object' && !('error' in data.sender)
+            ? data.sender! as any
+            : undefined
+        } as Message;
+        setMessages(prev => [...prev, validMessage]);
+      }
     } catch (error) {
       console.error('Error simulating response:', error);
     }

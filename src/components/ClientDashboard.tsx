@@ -15,9 +15,9 @@ interface Mission {
   desired_time: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
-  accepted_at: string;
-  client_id: string;
-  technician_id: string;
+  accepted_at: string | null;
+  client_id: string | null;
+  technician_id: string | null;
   technician: {
     first_name: string;
     last_name: string;
@@ -125,7 +125,12 @@ export const ClientDashboard = () => {
         messagesData = msgs || [];
       }
 
-      setMissions(missionsData || []);
+      // Filter out any missions where the technician query failed and cast to proper type
+      const validMissions = (missionsData || []).filter(mission => 
+        !mission.technician || (typeof mission.technician === 'object' && !('error' in mission.technician))
+      ) as Mission[];
+      
+      setMissions(validMissions);
       setMessages(messagesData);
     } catch (error: any) {
       console.error('Error loading client data:', error);
@@ -241,7 +246,7 @@ export const ClientDashboard = () => {
                           {getStatusIcon(mission.status)}
                         </CardTitle>
                         <CardDescription>
-                          Requested from {mission.technician.first_name} {mission.technician.last_name}
+                          {mission.technician ? `Requested from ${mission.technician.first_name} ${mission.technician.last_name}` : 'Technician not found'}
                         </CardDescription>
                       </div>
                       <Badge className={getStatusColor(mission.status)}>
@@ -276,7 +281,7 @@ export const ClientDashboard = () => {
                       )}
                     </div>
 
-                    {mission.status === 'accepted' && (
+                    {mission.status === 'accepted' && mission.technician && (
                       <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
                         <h4 className="font-semibold text-green-800 dark:text-green-200 mb-2">
                           Mission Accepted! Contact Information:

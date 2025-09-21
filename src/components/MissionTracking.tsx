@@ -17,8 +17,8 @@ interface Mission {
   desired_time: string | null;
   created_at: string;
   accepted_at: string | null;
-  client_user_id: string | null;
-  technician_id: string;
+  client_id: string | null;
+  technician_id: string | null;
   technician: {
     first_name: string;
     last_name: string;
@@ -52,18 +52,30 @@ export function MissionTracking({ onBack, currentUserId }: MissionTrackingProps)
 
   const loadMissions = async () => {
     try {
+      // Get client profile ID first
+      const { data: clientProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .single();
+
+      if (!clientProfile) {
+        console.error('Client profile not found');
+        return;
+      }
+
       const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
           *,
-          technician:profiles!missions_technician_id_fkey(
+          technician:profiles(
             first_name,
             last_name,
             profile_photo_url,
             hourly_rate
           )
         `)
-        .eq('client_user_id', currentUserId)
+        .eq('client_id', clientProfile.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

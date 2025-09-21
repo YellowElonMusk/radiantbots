@@ -17,9 +17,10 @@ interface Mission {
   client_email: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
-  accepted_at: string;
-  client_user_id: string;
-  guest_user_id: string;
+  accepted_at: string | null;
+  client_id: string | null;
+  technician_id: string | null;
+  guest_user_id: string | null;
   client_profile?: {
     first_name: string;
     last_name: string;
@@ -53,11 +54,23 @@ export const MissionManagement = () => {
 
       console.log('Loading missions for technician user ID:', user.id);
 
+      // Get technician profile ID first
+      const { data: techProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!techProfile) {
+        console.error('Technician profile not found');
+        return;
+      }
+
       const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
           *,
-          client_profile:profiles!missions_client_user_id_fkey(
+          client_profile:profiles(
             first_name,
             last_name,
             email,
@@ -67,12 +80,12 @@ export const MissionManagement = () => {
             city,
             contact_person
           ),
-          guest_profile:guest_users!missions_guest_user_id_fkey(
+          guest_profile:guest_users(
             name,
             email
           )
         `)
-        .eq('technician_id', user.id)
+        .eq('technician_id', techProfile.id)
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -81,7 +94,15 @@ export const MissionManagement = () => {
       }
 
       console.log('Loaded missions:', missionsData);
-      setMissions(missionsData || []);
+      
+      // Filter out any missions where the profile queries failed and cast to proper type
+      const validMissions = (missionsData || []).filter(mission => {
+        const hasValidClientProfile = !mission.client_profile || (typeof mission.client_profile === 'object' && !('error' in mission.client_profile));
+        const hasValidGuestProfile = !mission.guest_profile || (typeof mission.guest_profile === 'object' && !('error' in mission.guest_profile));
+        return hasValidClientProfile && hasValidGuestProfile;
+      }) as Mission[];
+      
+      setMissions(validMissions);
     } catch (error: any) {
       console.error('Error loading missions:', error);
       toast({

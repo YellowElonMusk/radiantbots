@@ -488,7 +488,8 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         profile_photo_url: profile.profilePhotoUrl,
         city: profile.city,
         accepts_travel: profile.acceptsTravel,
-        max_travel_distance: profile.maxTravelDistance
+        max_travel_distance: profile.maxTravelDistance,
+        user_type: 'technician'
       }, {
         onConflict: 'user_id'
       });
@@ -553,7 +554,8 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
           // Include other required fields to prevent constraint violations
           email: profile.email || user.email,
           first_name: profile.firstName,
-          last_name: profile.lastName
+          last_name: profile.lastName,
+          user_type: 'technician'
         }, {
           onConflict: 'user_id'
         });
