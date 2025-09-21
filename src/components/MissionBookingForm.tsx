@@ -137,6 +137,30 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         clientName = guestUser.name;
       }
 
+      // Get client profile ID if authenticated user
+      let clientProfileId = null;
+      if (clientUserId) {
+        const { data: clientProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', clientUserId)
+          .single();
+        clientProfileId = clientProfile?.id;
+      }
+
+      // Get technician profile ID
+      const { data: techProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', technicianId)
+        .single();
+
+      if (!techProfile) {
+        console.error('Technician profile not found');
+        alert('Erreur: profil technicien non trouvé');
+        return;
+      }
+
       // Create mission record
       const { data: mission, error: missionError } = await supabase
         .from('missions')
@@ -147,9 +171,9 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           desired_time: preferredTime || null,
           client_name: clientName,
           client_email: clientEmail,
-          client_user_id: clientUserId,
+          client_id: clientProfileId,
           guest_user_id: guestUserId,
-          technician_id: technicianId,
+          technician_id: techProfile.id,
           status: 'pending'
         })
         .select()

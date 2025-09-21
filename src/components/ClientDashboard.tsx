@@ -16,6 +16,8 @@ interface Mission {
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
   accepted_at: string;
+  client_id: string;
+  technician_id: string;
   technician: {
     first_name: string;
     last_name: string;
@@ -24,7 +26,7 @@ interface Mission {
     phone: string;
     linkedin_url: string;
     profile_photo_url: string;
-  };
+  } | null;
 }
 
 interface Message {
@@ -55,6 +57,18 @@ export const ClientDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Get client profile ID first
+      const { data: clientProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!clientProfile) {
+        console.error('Client profile not found');
+        return;
+      }
+
       // Load missions
       const { data: missionsData, error: missionsError } = await supabase
         .from('missions')
@@ -67,7 +81,9 @@ export const ClientDashboard = () => {
           status,
           created_at,
           accepted_at,
-          technician:profiles!missions_technician_id_fkey(
+          client_id,
+          technician_id,
+          technician:profiles(
             first_name,
             last_name,
             city,
@@ -77,7 +93,7 @@ export const ClientDashboard = () => {
             profile_photo_url
           )
         `)
-        .eq('client_user_id', user.id)
+        .eq('client_id', clientProfile.id)
         .order('created_at', { ascending: false });
 
       if (missionsError) throw missionsError;
@@ -97,7 +113,7 @@ export const ClientDashboard = () => {
             created_at,
             sender_id,
             mission_id,
-            sender:profiles!messages_sender_id_fkey(
+            sender:profiles(
               first_name,
               last_name
             )
