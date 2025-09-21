@@ -34,11 +34,11 @@ export function Header({ onNavigate }: HeaderProps) {
         // Fetch user role from profiles table
         const { data: profileData } = await supabase
           .from('profiles')
-          .select('role')
+          .select('user_type')
           .eq('user_id', user.id)
           .single();
         
-        setUserRole(profileData?.role || null);
+        setUserRole(profileData?.user_type || null);
       } else {
         setUserRole(null);
       }

@@ -13,8 +13,9 @@ interface Message {
   id: string;
   content: string;
   sender_id: string;
-  receiver_id: string;
+  mission_id: string;
   created_at: string;
+  read_at?: string;
   sender?: {
     first_name: string;
     last_name: string;
@@ -133,7 +134,7 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setMessages(data || []);
+      setMessages(data as Message[] || []);
       
       // Mark messages as read when loading conversation
       console.log('Loading messages for mission:', mission.id, 'user:', currentUserId);
@@ -185,7 +186,7 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
 
       if (error) throw error;
 
-      setMessages(prev => [...prev, data]);
+        setMessages(prev => [...prev, data as Message]);
       setNewMessage('');
 
       // Simulate technician response after a short delay
@@ -246,7 +247,7 @@ export function EnterpriseMessaging({ technicianId, onBack, currentUserId, onVie
         .single();
 
       if (error) throw error;
-      setMessages(prev => [...prev, data]);
+      setMessages(prev => [...prev, data as Message]);
     } catch (error) {
       console.error('Error simulating response:', error);
     }

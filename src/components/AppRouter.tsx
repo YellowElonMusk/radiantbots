@@ -46,7 +46,7 @@ export function AppRouter() {
         return <Landing onNavigate={navigate} />;
       
       case 'catalog':
-        return <Catalog onNavigate={navigate} />;
+        return <Catalog />;
       
       case 'profile':
         return (

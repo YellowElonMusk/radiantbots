@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 
 interface Technician {
   id: string;
+  user_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -17,7 +18,9 @@ interface Technician {
   city: string;
   linkedin_url: string;
   profile_photo_url: string;
-  user_type: 'technician';
+  user_type: 'technician' | 'enterprise';
+  created_at: string;
+  updated_at: string;
 }
 
 export const Catalog = () => {
@@ -40,7 +43,7 @@ export const Catalog = () => {
         .not('last_name', 'is', null);
 
       if (error) throw error;
-      setTechnicians(data || []);
+      setTechnicians((data || []).filter(t => t.user_type === 'technician'));
     } catch (error: any) {
       console.error('Error loading technicians:', error);
       toast({
