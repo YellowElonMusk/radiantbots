@@ -345,8 +345,17 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    onNavigate('landing');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error);
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      // Always navigate regardless of logout result
+      onNavigate('landing');
+    }
   };
 
 

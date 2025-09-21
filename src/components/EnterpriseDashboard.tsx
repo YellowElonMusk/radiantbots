@@ -288,9 +288,23 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           <h1 className="text-3xl font-bold">Tableau de bord Entreprise</h1>
           <Button 
             variant="outline" 
-            onClick={() => {
-              supabase.auth.signOut();
-              onNavigate('landing');
+            onClick={async () => {
+              try {
+                const { error } = await supabase.auth.signOut();
+                if (error) {
+                  console.error('Logout error:', error);
+                } else {
+                  // Clear any local state and navigate
+                  setUser(null);
+                  setUserProfile(null);
+                  setAcceptedTechnicians([]);
+                  onNavigate('landing');
+                }
+              } catch (error) {
+                console.error('Logout failed:', error);
+                // Force navigation even if logout fails
+                onNavigate('landing');
+              }
             }}
           >
             Déconnexion

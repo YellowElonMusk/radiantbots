@@ -60,9 +60,18 @@ export function Header({ onNavigate }: HeaderProps) {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setIsSheetOpen(false);
-    onNavigate('landing');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Logout error:', error);
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+    } finally {
+      // Always close sheet and navigate regardless of logout result
+      setIsSheetOpen(false);
+      onNavigate('landing');
+    }
   };
 
   const handleMyProfile = () => {
