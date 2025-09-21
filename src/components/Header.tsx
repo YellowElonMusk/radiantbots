@@ -61,22 +61,29 @@ export function Header({ onNavigate }: HeaderProps) {
 
   const handleLogout = async () => {
     console.log('Logout button clicked - starting logout process');
+    
+    // Clear local state immediately
+    setUser(null);
+    setUserRole(null);
+    setIsSheetOpen(false);
+    
     try {
       console.log('Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut();
-      if (error) {
+      if (error && error.message !== 'Auth session missing!') {
         console.error('Logout error:', error);
       } else {
-        console.log('Logout successful');
+        console.log('Logout successful or session already cleared');
       }
     } catch (error) {
       console.error('Logout failed:', error);
-    } finally {
-      // Always close sheet and navigate regardless of logout result
-      console.log('Closing sheet and navigating to landing');
-      setIsSheetOpen(false);
-      onNavigate('landing');
     }
+    
+    // Clear localStorage as backup
+    localStorage.removeItem('supabase.auth.token');
+    
+    console.log('Navigating to landing');
+    onNavigate('landing');
   };
 
   const handleMyProfile = () => {
