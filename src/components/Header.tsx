@@ -60,15 +60,20 @@ export function Header({ onNavigate }: HeaderProps) {
   }, []);
 
   const handleLogout = async () => {
+    console.log('Logout button clicked - starting logout process');
     try {
+      console.log('Calling supabase.auth.signOut()');
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Logout error:', error);
+      } else {
+        console.log('Logout successful');
       }
     } catch (error) {
       console.error('Logout failed:', error);
     } finally {
       // Always close sheet and navigate regardless of logout result
+      console.log('Closing sheet and navigating to landing');
       setIsSheetOpen(false);
       onNavigate('landing');
     }
@@ -209,7 +214,12 @@ export function Header({ onNavigate }: HeaderProps) {
                       <Button 
                         variant="outline" 
                         className="w-full" 
-                        onClick={handleLogout}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          console.log('Button clicked directly');
+                          handleLogout();
+                        }}
                       >
                         Déconnexion
                       </Button>
