@@ -85,6 +85,11 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
       return;
     }
 
+    if (!technician) {
+      alert('Erreur: Informations du technicien non disponibles');
+      return;
+    }
+
     try {
       setSubmitting(true);
       
@@ -165,7 +170,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           client_email: clientEmail,
           client_user_id: clientUserId,
           guest_user_id: guestUserId,
-          technician_id: technicianId,
+          technician_id: technician?.id, // Use technician profile ID, not user ID
           status: 'pending'
         })
         .select()
