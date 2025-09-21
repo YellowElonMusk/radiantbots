@@ -5,7 +5,6 @@ import { Star, MapPin, Wrench, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { User } from '@supabase/supabase-js';
-
 interface Profile {
   id: string;
   first_name: string | null;
@@ -17,20 +16,25 @@ interface Profile {
   user_id: string;
   role?: string;
 }
-
 interface LandingProps {
   onNavigate: (page: string, data?: any) => void;
 }
-
-export function Landing({ onNavigate }: LandingProps) {
+export function Landing({
+  onNavigate
+}: LandingProps) {
   const [featuredTechs, setFeaturedTechs] = useState<Profile[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
-  const { t } = useLanguage();
-
+  const {
+    t
+  } = useLanguage();
   useEffect(() => {
     // Check current session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({
+      data: {
+        session
+      }
+    }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
         fetchUserProfile(session.user.id);
@@ -38,73 +42,62 @@ export function Landing({ onNavigate }: LandingProps) {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setUser(session?.user ?? null);
-        if (session?.user) {
-          fetchUserProfile(session.user.id);
-        } else {
-          setUserProfile(null);
-        }
+    const {
+      data: {
+        subscription
       }
-    );
-
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setUserProfile(null);
+      }
+    });
     const fetchUserProfile = async (userId: string) => {
       try {
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', userId)
-          .single();
-
+        const {
+          data: profile,
+          error
+        } = await supabase.from('profiles').select('*').eq('user_id', userId).single();
         if (error) {
           console.error('Error fetching user profile:', error);
           return;
         }
-
         setUserProfile(profile);
       } catch (error) {
         console.error('Error:', error);
       }
     };
-
     const fetchFeaturedTechnicians = async () => {
       try {
-        const { data: profiles, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .not('first_name', 'is', null)
-          .not('last_name', 'is', null)
-          .not('hourly_rate', 'is', null)
-          .order('created_at', { ascending: false })
-          .limit(3);
-
+        const {
+          data: profiles,
+          error
+        } = await supabase.from('profiles').select('*').not('first_name', 'is', null).not('last_name', 'is', null).not('hourly_rate', 'is', null).order('created_at', {
+          ascending: false
+        }).limit(3);
         if (error) {
           console.error('Error fetching profiles:', error);
           return;
         }
-
         setFeaturedTechs(profiles || []);
       } catch (error) {
         console.error('Error:', error);
       }
     };
-
     fetchFeaturedTechnicians();
-
     return () => subscription.unsubscribe();
   }, []);
-
   const handleFindTechnician = () => {
     onNavigate('catalog');
   };
-
   const handleTechClick = (tech: Profile) => {
-    onNavigate('profile', { technicianId: tech.user_id });
+    onNavigate('profile', {
+      technicianId: tech.user_id
+    });
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background pt-20">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background pt-20">
       {/* Hero Section */}
       <section className="relative overflow-hidden pt-16 pb-16">
         <div className="container mx-auto px-4">
@@ -124,61 +117,33 @@ export function Landing({ onNavigate }: LandingProps) {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              {!user && (
-                <>
-                  <Button 
-                    variant="hero" 
-                    size="lg" 
-                    onClick={handleFindTechnician}
-                    className="text-lg px-8 py-6 h-auto"
-                  >
+              {!user && <>
+                  <Button variant="hero" size="lg" onClick={handleFindTechnician} className="text-lg px-8 py-6 h-auto">
                     <Wrench className="mr-2 h-5 w-5" />
                     {t('landing.hero.findTech')}
                   </Button>
                   
-                  <Button 
-                    variant="outline" 
-                    size="lg"
-                    onClick={() => onNavigate('bootcamp')}
-                    className="text-lg px-8 py-6 h-auto"
-                  >
+                  <Button variant="outline" size="lg" onClick={() => onNavigate('bootcamp')} className="text-lg px-8 py-6 h-auto">
                     {t('landing.hero.becomeTech')}
                   </Button>
-                </>
-              )}
+                </>}
               
-              {user && userProfile && (
-                <>
-                  {userProfile.role !== 'technician' && (
-                    <Button 
-                      variant="hero" 
-                      size="lg" 
-                      onClick={handleFindTechnician}
-                      className="text-lg px-8 py-6 h-auto"
-                    >
+              {user && userProfile && <>
+                  {userProfile.role !== 'technician' && <Button variant="hero" size="lg" onClick={handleFindTechnician} className="text-lg px-8 py-6 h-auto">
                       <Wrench className="mr-2 h-5 w-5" />
                       {t('landing.hero.findTech')}
-                    </Button>
-                  )}
+                    </Button>}
                   
-                  {userProfile.role !== 'enterprise' && (
-                    <Button 
-                      variant="outline" 
-                      size="lg"
-                      onClick={() => onNavigate('bootcamp')}
-                      className="text-lg px-8 py-6 h-auto"
-                    >
+                  {userProfile.role !== 'enterprise' && <Button variant="outline" size="lg" onClick={() => onNavigate('bootcamp')} className="text-lg px-8 py-6 h-auto">
                       {t('landing.hero.becomeTech')}
-                    </Button>
-                  )}
-                </>
-              )}
+                    </Button>}
+                </>}
             </div>
             
             {/* Stats */}
             <div className="grid grid-cols-3 gap-8 mt-16 max-w-md mx-auto">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">500+</div>
+                <div className="text-2xl font-bold text-primary">100+</div>
                 <div className="text-sm text-muted-foreground">{t('landing.stats.technicians')}</div>
               </div>
               <div className="text-center">
@@ -186,7 +151,7 @@ export function Landing({ onNavigate }: LandingProps) {
                 <div className="text-sm text-muted-foreground">{t('landing.stats.response')}</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary">98%</div>
+                <div className="text-2xl font-bold text-primary">95%</div>
                 <div className="text-sm text-muted-foreground">{t('landing.stats.success')}</div>
               </div>
             </div>
@@ -205,23 +170,10 @@ export function Landing({ onNavigate }: LandingProps) {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {featuredTechs.length > 0 ? featuredTechs.map((tech) => (
-              <div
-                key={tech.id}
-                onClick={() => handleTechClick(tech)}
-                className="bg-card rounded-xl p-6 shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer group border border-border/50"
-              >
+            {featuredTechs.length > 0 ? featuredTechs.map(tech => <div key={tech.id} onClick={() => handleTechClick(tech)} className="bg-card rounded-xl p-6 shadow-card hover:shadow-hover transition-all duration-300 cursor-pointer group border border-border/50">
                 <div className="flex flex-col items-center text-center">
                   <div className="w-20 h-20 rounded-full bg-gradient-primary mb-4 flex items-center justify-center">
-                    {tech.profile_photo_url ? (
-                      <img 
-                        src={tech.profile_photo_url} 
-                        alt={`${tech.first_name} ${tech.last_name}`}
-                        className="w-full h-full rounded-full object-cover"
-                      />
-                    ) : (
-                      <Wrench className="h-10 w-10 text-white" />
-                    )}
+                    {tech.profile_photo_url ? <img src={tech.profile_photo_url} alt={`${tech.first_name} ${tech.last_name}`} className="w-full h-full rounded-full object-cover" /> : <Wrench className="h-10 w-10 text-white" />}
                   </div>
                   
                   <h3 className="font-semibold text-lg mb-2 group-hover:text-primary transition-colors">
@@ -256,9 +208,7 @@ export function Landing({ onNavigate }: LandingProps) {
                     {t('landing.featured.bookNow')}
                   </Button>
                 </div>
-              </div>
-            )) : (
-              <div className="text-center py-12 md:col-span-3">
+              </div>) : <div className="text-center py-12 md:col-span-3">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
                   <Wrench className="h-8 w-8 text-muted-foreground" />
                 </div>
@@ -269,8 +219,7 @@ export function Landing({ onNavigate }: LandingProps) {
                 <Button variant="outline" onClick={() => onNavigate('bootcamp')}>
                   {t('landing.featured.registerFirst')}
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
       </section>
@@ -318,6 +267,5 @@ export function Landing({ onNavigate }: LandingProps) {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 }
