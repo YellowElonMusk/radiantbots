@@ -58,19 +58,13 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         .from('profiles')
         .select('id, user_id, first_name, last_name, city, hourly_rate, profile_photo_url')
         .eq('user_id', technicianId)
-        .maybeSingle();
+        .single();
 
       if (error) {
         console.error('Error loading technician:', error);
         return;
       }
 
-      if (!profile) {
-        console.error('No technician profile found for user_id:', technicianId);
-        return;
-      }
-
-      console.log('Loaded technician profile:', profile);
       setTechnician(profile);
     } catch (error) {
       console.error('Error loading technician:', error);
@@ -91,11 +85,6 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
       return;
     }
 
-    if (!technician) {
-      alert('Erreur: Informations du technicien non disponibles');
-      return;
-    }
-
     try {
       setSubmitting(true);
       
@@ -110,31 +99,15 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         // Authenticated user
         clientEmail = user.email || '';
         clientUserId = user.id;
-        // Get user profile for name - including enterprise client fields
+        // Get user profile for name
         const { data: profile } = await supabase
           .from('profiles')
-          .select('first_name, last_name, contact_person, company_name, city, id')
+          .select('first_name, last_name')
           .eq('user_id', user.id)
           .single();
         
         if (profile) {
-          // Set the client_user_id to the profile.id instead of user.id for proper foreign key relationship
-          clientUserId = profile.id;
-          
-          // Use contact_person if available (for enterprise clients), otherwise use first_name + last_name
-          if (profile.contact_person) {
-            clientName = profile.contact_person;
-            if (profile.company_name) {
-              clientName += ` from ${profile.company_name}`;
-            }
-            if (profile.city) {
-              clientName += ` based in ${profile.city}`;
-            }
-          } else if (profile.first_name && profile.last_name) {
-            clientName = `${profile.first_name} ${profile.last_name}`;
-          } else {
-            clientName = user.email || 'Client';
-          }
+          clientName = `${profile.first_name} ${profile.last_name}`;
         } else {
           clientName = user.email || 'Client';
         }
@@ -165,12 +138,6 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
       }
 
       // Create mission record
-      console.log('Creating mission with:', {
-        client_user_id: clientUserId,
-        technician_id: technician?.id,
-        technician_user_id: technician?.user_id
-      });
-      
       const { data: mission, error: missionError } = await supabase
         .from('missions')
         .insert({
@@ -182,7 +149,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           client_email: clientEmail,
           client_user_id: clientUserId,
           guest_user_id: guestUserId,
-          technician_id: technician?.id, // Use technician profile ID, not user ID
+          technician_id: technicianId,
           status: 'pending'
         })
         .select()

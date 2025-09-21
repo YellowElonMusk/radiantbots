@@ -241,7 +241,7 @@ export type Database = {
             columns: ["client_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "missions_guest_user_id_fkey"
