@@ -58,13 +58,19 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         .from('profiles')
         .select('id, user_id, first_name, last_name, city, hourly_rate, profile_photo_url')
         .eq('user_id', technicianId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error loading technician:', error);
         return;
       }
 
+      if (!profile) {
+        console.error('No technician profile found for user_id:', technicianId);
+        return;
+      }
+
+      console.log('Loaded technician profile:', profile);
       setTechnician(profile);
     } catch (error) {
       console.error('Error loading technician:', error);
@@ -159,6 +165,12 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
       }
 
       // Create mission record
+      console.log('Creating mission with:', {
+        client_user_id: clientUserId,
+        technician_id: technician?.id,
+        technician_user_id: technician?.user_id
+      });
+      
       const { data: mission, error: missionError } = await supabase
         .from('missions')
         .insert({
