@@ -286,7 +286,7 @@ export const MissionManagement = () => {
                             {getStatusIcon(mission.status)}
                           </CardTitle>
                           <CardDescription>
-                            Requested by {mission.client_name}
+                            Requested by {formatClientName(mission)}
                           </CardDescription>
                         </div>
                         <Badge className={getStatusColor(mission.status)}>
