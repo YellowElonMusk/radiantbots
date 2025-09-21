@@ -26,6 +26,8 @@ interface Mission {
     email: string;
     phone: string;
     linkedin_url: string;
+    company_name: string;
+    city: string;
   };
   guest_profile?: {
     name: string;
@@ -59,7 +61,9 @@ export const MissionManagement = () => {
             last_name,
             email,
             phone,
-            linkedin_url
+            linkedin_url,
+            company_name,
+            city
           ),
           guest_profile:guest_users!missions_guest_user_id_fkey(
             name,
@@ -171,6 +175,39 @@ export const MissionManagement = () => {
       minute: '2-digit',
       hour12: true
     });
+  };
+
+  const formatClientName = (mission: Mission) => {
+    if (!mission.client_profile) {
+      return mission.guest_profile?.name || mission.client_name;
+    }
+
+    const { first_name, last_name, company_name, city } = mission.client_profile;
+    let formattedName = '';
+
+    // Add title (Mr/Mrs) if not already present
+    if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
+      formattedName = `Mr ${first_name}`;
+    } else {
+      formattedName = first_name || '';
+    }
+
+    // Add last name
+    if (last_name) {
+      formattedName += ` ${last_name}`;
+    }
+
+    // Add company information
+    if (company_name) {
+      formattedName += ` from ${company_name} company`;
+    }
+
+    // Add city information
+    if (city) {
+      formattedName += ` of ${city} city`;
+    }
+
+    return formattedName;
   };
 
   const filterMissions = (status: string) => {
@@ -290,10 +327,7 @@ export const MissionManagement = () => {
                           <div className="space-y-1 text-sm">
                             <div className="flex items-center gap-2">
                               <User className="h-3 w-3" />
-                              {mission.client_profile 
-                                ? `${mission.client_profile.first_name} ${mission.client_profile.last_name}`
-                                : mission.guest_profile?.name || mission.client_name
-                              }
+                              {formatClientName(mission)}
                             </div>
                             <div className="flex items-center gap-2">
                               <Mail className="h-3 w-3" />
