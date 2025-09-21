@@ -716,21 +716,21 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="city">Ville d'opération</Label>
-                    <Input
-                      id="city"
-                      value={profile.city}
-                      onChange={(e) => setProfile(prev => ({ ...prev, city: e.target.value }))}
-                      placeholder="Paris, Lyon, Marseille..."
-                    />
-                  </div>
-                  <div className="space-y-2">
                     <Label htmlFor="hourlyRate">{t.hourlyRate}</Label>
                     <Input
                       id="hourlyRate"
                       type="number"
                       value={profile.hourlyRate}
                       onChange={(e) => setProfile(prev => ({ ...prev, hourlyRate: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="city">Ville d'opération</Label>
+                    <Input
+                      id="city"
+                      value={profile.city}
+                      onChange={(e) => setProfile(prev => ({ ...prev, city: e.target.value }))}
+                      placeholder="Paris, Lyon, Marseille..."
                     />
                   </div>
                 </div>
