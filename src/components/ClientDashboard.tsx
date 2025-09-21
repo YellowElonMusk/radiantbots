@@ -55,6 +55,18 @@ export const ClientDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Get user profile first
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Error loading profile:', profileError);
+        return;
+      }
+
       // Load missions
       const { data: missionsData, error: missionsError } = await supabase
         .from('missions')
@@ -77,7 +89,7 @@ export const ClientDashboard = () => {
             profile_photo_url
           )
         `)
-        .eq('client_user_id', user.id)
+        .eq('client_user_id', profile.id)
         .order('created_at', { ascending: false });
 
       if (missionsError) throw missionsError;

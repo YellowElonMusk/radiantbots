@@ -137,6 +137,18 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
 
   const checkAcceptedMissions = async (userId: string) => {
     try {
+      // Get user profile first
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Error loading profile:', profileError);
+        return;
+      }
+
       const { data: missions, error } = await supabase
         .from('missions')
         .select(`
@@ -149,7 +161,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
             profile_photo_url
           )
         `)
-        .eq('client_user_id', userId)
+        .eq('client_user_id', profile.id)
         .eq('status', 'accepted');
 
       if (error) {

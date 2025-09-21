@@ -42,6 +42,20 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
 
   const loadMissions = async () => {
     try {
+      // Get user profile first
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', userId)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Error loading profile:', profileError);
+        setMissions([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('missions')
         .select(`
@@ -54,7 +68,7 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
             hourly_rate
           )
         `)
-        .eq('client_user_id', userId)
+        .eq('client_user_id', profile.id)
         .order('created_at', { ascending: false });
 
       if (error) {

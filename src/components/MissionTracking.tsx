@@ -52,6 +52,18 @@ export function MissionTracking({ onBack, currentUserId }: MissionTrackingProps)
 
   const loadMissions = async () => {
     try {
+      // Get user profile first
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', currentUserId)
+        .single();
+
+      if (profileError || !profile) {
+        console.error('Error loading profile:', profileError);
+        return;
+      }
+
       const { data: missionsData, error } = await supabase
         .from('missions')
         .select(`
@@ -63,7 +75,7 @@ export function MissionTracking({ onBack, currentUserId }: MissionTrackingProps)
             hourly_rate
           )
         `)
-        .eq('client_user_id', currentUserId)
+        .eq('client_user_id', profile.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
