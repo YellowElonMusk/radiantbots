@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Star, MapPin, Clock, Wrench } from 'lucide-react';
+import { Star, MapPin, Clock, Wrench, Car } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 interface TechnicianData {
   id: string;
@@ -17,6 +17,8 @@ interface TechnicianData {
   photo: string;
   experience: string;
   completedJobs: number;
+  acceptsTravel: boolean;
+  maxTravelDistance: number;
 }
 
 interface TechCardProps {
@@ -67,11 +69,17 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
         </div>
 
         {/* Available Badge */}
-        <div className="absolute top-4 right-4">
+        <div className="absolute top-4 right-4 flex flex-col gap-1">
           <Badge variant="secondary" className="bg-accent/90 text-accent-foreground">
             <Clock className="h-3 w-3 mr-1" />
             {t('techCard.available')}
           </Badge>
+          {technician.acceptsTravel && (
+            <Badge variant="outline" className="bg-white/90 text-foreground text-xs">
+              <Car className="h-3 w-3 mr-1" />
+              Déplacements
+            </Badge>
+          )}
         </div>
       </div>
 
@@ -85,6 +93,15 @@ export function TechCard({ technician, onViewProfile, onBookNow }: TechCardProps
           <div className="flex items-center gap-2 text-muted-foreground mb-2">
             <MapPin className="h-4 w-4" />
             <span className="text-sm">{technician.city}</span>
+            {technician.acceptsTravel && (
+              <>
+                <span className="text-sm">•</span>
+                <div className="flex items-center gap-1">
+                  <Car className="h-3 w-3" />
+                  <span className="text-xs">{technician.maxTravelDistance}km</span>
+                </div>
+              </>
+            )}
             <span className="text-sm">•</span>
             <span className="text-sm">{technician.experience} {t('techCard.experience')}</span>
           </div>

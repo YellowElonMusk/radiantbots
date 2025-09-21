@@ -258,12 +258,25 @@ export function Catalog({ onNavigate }: CatalogProps) {
     // Start with all technicians
     let filtered = technicians;
 
-    // Filter by city
+    // Filter by city with improved logic
     if (searchCriteria.deploymentCity) {
-      filtered = filtered.filter(tech => 
-        tech.city.toLowerCase().includes(searchCriteria.deploymentCity.toLowerCase()) ||
-        (tech.acceptsTravel && tech.maxTravelDistance > 0)
-      );
+      const requestedCity = searchCriteria.deploymentCity.toLowerCase().trim();
+      
+      filtered = filtered.filter(tech => {
+        const techCity = tech.city.toLowerCase().trim();
+        
+        // Exact or partial city match (local technician)
+        if (techCity.includes(requestedCity) || requestedCity.includes(techCity)) {
+          return true;
+        }
+        
+        // Technician accepts travel and has specified max distance
+        if (tech.acceptsTravel && tech.maxTravelDistance > 0) {
+          return true;
+        }
+        
+        return false;
+      });
     }
 
     // Filter by availability periods if date range is selected
