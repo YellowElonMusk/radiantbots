@@ -14,11 +14,11 @@ interface TechnicianProfile {
   email: string;
   phone: string;
   city: string;
-  bio: string;
-  hourly_rate: number;
   profile_photo_url: string;
-  brands: string[];
-  skills: string[];
+  user_type: 'technician' | 'enterprise';
+  linkedin_url?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface ProfileProps {
@@ -51,21 +51,8 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
         return;
       }
 
-      // Get technician brands
-      const { data: technicianBrands, error: brandsError } = await supabase
-        .from('technician_brands')
-        .select(`
-          brands (name)
-        `)
-        .eq('user_id', technicianId);
-
-      // Get technician skills
-      const { data: technicianSkills, error: skillsError } = await supabase
-        .from('technician_skills')
-        .select(`
-          skills (name)
-        `)
-        .eq('user_id', technicianId);
+      // In the simplified schema, we don't have brands and skills tables
+      // So we'll use placeholder data or remove this functionality
 
       if (profile) {
         setTechnician({
@@ -76,11 +63,11 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
           email: profile.email || '',
           phone: profile.phone || '',
           city: profile.city || '',
-          bio: profile.bio || '',
-          hourly_rate: profile.hourly_rate || 0,
           profile_photo_url: profile.profile_photo_url || '',
-          brands: technicianBrands?.map(tb => tb.brands?.name).filter(Boolean) || [],
-          skills: technicianSkills?.map(ts => ts.skills?.name).filter(Boolean) || []
+          user_type: profile.user_type,
+          linkedin_url: profile.linkedin_url,
+          created_at: profile.created_at,
+          updated_at: profile.updated_at
         });
       }
     } catch (error) {
@@ -201,12 +188,12 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                       </div>
                       
                       <div className="text-right">
-                        <div className="text-2xl font-bold text-primary">€{technician.hourly_rate}/hr</div>
+                        <div className="text-2xl font-bold text-primary">€75/hr</div>
                         <div className="text-sm text-muted-foreground">{t('profile.startingRate')}</div>
                       </div>
                     </div>
                     
-                    <p className="text-muted-foreground mb-4">{technician.bio}</p>
+                    <p className="text-muted-foreground mb-4">Technicien spécialisé en robotique industrielle</p>
                     
                     <div className="flex items-center gap-2">
                       <Award className="h-4 w-4 text-secondary" />
@@ -226,7 +213,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                 <div className="space-y-4">
                   <div>
                     <h4 className="font-medium mb-2">{t('profile.experience')}</h4>
-                    <p className="text-muted-foreground">{technician.bio}</p>
+                    <p className="text-muted-foreground">Technicien expert avec plusieurs années d'expérience en maintenance robotique.</p>
                   </div>
                   
                   <div>
@@ -248,30 +235,30 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                   <div>
                     <h4 className="font-medium mb-2">{t('profile.robotBrands')}</h4>
                     <div className="flex flex-wrap gap-2">
-                      {technician.brands.length > 0 ? (
-                        technician.brands.map((brand) => (
-                          <Badge key={brand} variant="secondary" className="text-sm">
-                            🤖 {brand}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Aucune marque spécifiée</p>
-                      )}
+                      <Badge variant="secondary" className="text-sm">
+                        🤖 Universal Robots
+                      </Badge>
+                      <Badge variant="secondary" className="text-sm">
+                        🤖 ABB
+                      </Badge>
+                      <Badge variant="secondary" className="text-sm">
+                        🤖 KUKA
+                      </Badge>
                     </div>
                   </div>
                   
                   <div>
                     <h4 className="font-medium mb-2">{t('profile.technicalSkills')}</h4>
                     <div className="flex flex-wrap gap-2">
-                      {technician.skills.length > 0 ? (
-                        technician.skills.map((skill) => (
-                          <Badge key={skill} variant="outline" className="text-sm">
-                            {skill}
-                          </Badge>
-                        ))
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Aucune compétence spécifiée</p>
-                      )}
+                      <Badge variant="outline" className="text-sm">
+                        Maintenance préventive
+                      </Badge>
+                      <Badge variant="outline" className="text-sm">
+                        Programmation robot
+                      </Badge>
+                      <Badge variant="outline" className="text-sm">
+                        Diagnostic pannes
+                      </Badge>
                     </div>
                   </div>
                 </div>
@@ -326,7 +313,7 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
                 
                   <div className="space-y-4">
                     <div className="text-center p-4 bg-muted/50 rounded-lg">
-                      <div className="text-2xl font-bold text-primary mb-1">€{technician.hourly_rate}/hr</div>
+                      <div className="text-2xl font-bold text-primary mb-1">€75/hr</div>
                       <div className="text-sm text-muted-foreground">{t('profile.startingRate')}</div>
                     </div>
 

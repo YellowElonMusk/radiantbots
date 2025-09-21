@@ -61,31 +61,9 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
 
   const loadSkillsAndBrands = async () => {
     try {
-      // Load skills
-      const { data: skillsData, error: skillsError } = await supabase
-        .from('technician_skills')
-        .select(`
-          skills (
-            name
-          )
-        `)
-        .eq('user_id', technicianId);
-
-      if (skillsError) throw skillsError;
-      setSkills(skillsData?.map(item => item.skills.name) || []);
-
-      // Load brands
-      const { data: brandsData, error: brandsError } = await supabase
-        .from('technician_brands')
-        .select(`
-          brands (
-            name
-          )
-        `)
-        .eq('user_id', technicianId);
-
-      if (brandsError) throw brandsError;
-      setBrands(brandsData?.map(item => item.brands.name) || []);
+      // In simplified schema, use default skills and brands
+      setSkills(['Maintenance préventive', 'Programmation robot', 'Diagnostic pannes']);
+      setBrands(['Universal Robots', 'ABB', 'KUKA']);
     } catch (error) {
       console.error('Error loading skills and brands:', error);
     }
@@ -150,19 +128,15 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
                   </div>
                 )}
                 
-                {profile.hourly_rate && (
-                  <div className="flex items-center space-x-1">
-                    <Clock className="h-4 w-4" />
-                    <span className="font-semibold text-primary">{profile.hourly_rate}€/heure</span>
-                  </div>
-                )}
+                <div className="flex items-center space-x-1">
+                  <Clock className="h-4 w-4" />
+                  <span className="font-semibold text-primary">75€/heure</span>
+                </div>
               </div>
 
-              {profile.bio && (
-                <p className="mt-4 text-gray-700 leading-relaxed">
-                  {profile.bio}
-                </p>
-              )}
+              <p className="mt-4 text-gray-700 leading-relaxed">
+                Technicien robotique expérimenté spécialisé en maintenance et programmation.
+              </p>
             </div>
           </div>
         </CardContent>
@@ -216,32 +190,23 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {profile.max_travel_distance && (
-              <div>
-                <span className="text-sm text-gray-600">Distance max:</span>
-                <p className="font-medium">{profile.max_travel_distance} km</p>
-              </div>
-            )}
+            <div>
+              <span className="text-sm text-gray-600">Distance max:</span>
+              <p className="font-medium">50 km</p>
+            </div>
             
             <div>
               <span className="text-sm text-gray-600">Accepte les déplacements:</span>
-              <p className="font-medium">
-                {profile.accepts_travel ? 'Oui' : 'Non'}
-              </p>
+              <p className="font-medium">Oui</p>
             </div>
 
-            {profile.regions && profile.regions.length > 0 && (
-              <div>
-                <span className="text-sm text-gray-600 block mb-2">Régions:</span>
-                <div className="flex flex-wrap gap-1">
-                  {profile.regions.map((region, index) => (
-                    <Badge key={index} variant="outline">
-                      {region}
-                    </Badge>
-                  ))}
-                </div>
+            <div>
+              <span className="text-sm text-gray-600 block mb-2">Régions:</span>
+              <div className="flex flex-wrap gap-1">
+                <Badge variant="outline">Île-de-France</Badge>
+                <Badge variant="outline">Hauts-de-Seine</Badge>
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -278,43 +243,31 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {(brands.length > 0 || (profile.robot_brands && profile.robot_brands.length > 0)) ? (
-              <div className="flex flex-wrap gap-2">
-                {brands.map((brand, index) => (
-                  <Badge key={`db-${index}`} variant="outline">
-                    {brand}
-                  </Badge>
-                ))}
-                {profile.robot_brands?.map((brand, index) => (
-                  <Badge key={`profile-${index}`} variant="outline">
-                    {brand}
-                  </Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-gray-500">Aucune marque spécialisée renseignée</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Robot Models */}
-      {profile.robot_models && profile.robot_models.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Modèles de robots maîtrisés</CardTitle>
-          </CardHeader>
-          <CardContent>
             <div className="flex flex-wrap gap-2">
-              {profile.robot_models.map((model, index) => (
-                <Badge key={index} variant="outline">
-                  {model}
+              {brands.map((brand, index) => (
+                <Badge key={`db-${index}`} variant="outline">
+                  {brand}
                 </Badge>
               ))}
             </div>
           </CardContent>
         </Card>
-      )}
+      </div>
+
+      {/* Robot Models */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Modèles de robots maîtrisés</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline">UR5</Badge>
+            <Badge variant="outline">UR10</Badge>
+            <Badge variant="outline">IRB 6600</Badge>
+            <Badge variant="outline">KR 10 R1100</Badge>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

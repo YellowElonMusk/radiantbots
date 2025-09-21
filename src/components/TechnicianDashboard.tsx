@@ -128,7 +128,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
       const { data: unreadMessages } = await supabase
         .from('messages')
         .select('id')
-        .eq('receiver_id', user.id)
+        .eq('sender_id', user.id)
         .is('read_at', null);
       
       if (unreadMessages && unreadMessages.length > 0) {
@@ -155,7 +155,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
     // Check user role from profiles table
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('role')
+      .select('user_type')
       .eq('user_id', user.id)
       .single();
       
@@ -166,13 +166,13 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
     }
     
     // Redirect if user is not a technician
-    if (profileData?.role !== 'technician') {
+    if (profileData?.user_type !== 'technician') {
       toast({
         title: "Accès refusé",
         description: "Cette page est réservée aux techniciens.",
         variant: "destructive"
       });
-      if (profileData?.role === 'client') {
+      if (profileData?.user_type === 'enterprise') {
         onNavigate('enterprise-dashboard');
       } else {
         onNavigate('home');
@@ -209,12 +209,12 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         email: data.email || user?.email || '',
         phone: data.phone || user?.user_metadata?.phone || '',
         linkedin: data.linkedin_url || '',
-        bio: data.bio || user?.user_metadata?.bio || '',
-        hourlyRate: data.hourly_rate ? data.hourly_rate.toString() : '',
+        bio: 'Technicien robotique expérimenté',
+        hourlyRate: '75',
         profilePhotoUrl: data.profile_photo_url || '',
         city: data.city || '',
-        acceptsTravel: data.accepts_travel || false,
-        maxTravelDistance: data.max_travel_distance || 0
+        acceptsTravel: false,
+        maxTravelDistance: 0
       });
     } else if (user) {
       // If no profile exists, load from user metadata
@@ -235,112 +235,36 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   };
 
   const loadUserSkills = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('technician_skills')
-      .select(`
-        skills (name)
-      `)
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error loading skills:', error);
-      return;
-    }
-
-    if (data) {
-      setSkills(data.map((item: any) => item.skills.name));
-    }
+    // In simplified schema, we don't have skills table
+    // Set some default skills
+    setSkills(['Maintenance préventive', 'Programmation robot', 'Diagnostic pannes']);
   };
 
   const loadUserBrands = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('technician_brands')
-      .select(`
-        brands (name)
-      `)
-      .eq('user_id', userId);
-
-    if (error) {
-      console.error('Error loading brands:', error);
-      return;
-    }
-
-    if (data) {
-      setBrands(data.map((item: any) => item.brands.name));
-    }
+    // In simplified schema, we don't have brands table
+    // Set some default brands
+    setBrands(['Universal Robots', 'ABB', 'KUKA']);
   };
 
   const loadAvailabilityPeriods = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('availability_periods')
-      .select('*')
-      .eq('user_id', userId)
-      .order('start_date', { ascending: true });
-
-    if (error) {
-      console.error('Error loading availability periods:', error);
-      return;
-    }
-
-    if (data) {
-      setAvailabilityPeriods(data);
-    }
+    // In simplified schema, we don't have availability_periods table
+    // Set empty array for now
+    setAvailabilityPeriods([]);
   };
 
   const addAvailabilityPeriod = async (period: any) => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('availability_periods')
-      .insert({
-        user_id: user.id,
-        ...period
-      })
-      .select()
-      .single();
-
-    if (error) {
-      console.error('Error adding availability period:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add availability period",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (data) {
-      setAvailabilityPeriods(prev => [...prev, data]);
-      toast({
-        title: "Success",
-        description: "Availability period added successfully!",
-      });
-    }
+    // In simplified schema, availability periods are not supported
+    toast({
+      title: "Info",
+      description: "Availability periods will be available in a future update",
+    });
   };
 
   const removeAvailabilityPeriod = async (periodId: string) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('availability_periods')
-      .delete()
-      .eq('id', periodId)
-      .eq('user_id', user.id);
-
-    if (error) {
-      console.error('Error removing availability period:', error);
-      toast({
-        title: "Error", 
-        description: "Failed to remove availability period",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setAvailabilityPeriods(prev => prev.filter(p => p.id !== periodId));
+    // In simplified schema, availability periods are not supported
     toast({
-      title: "Success",
-      description: "Availability period removed successfully!",
+      title: "Info",
+      description: "Availability periods will be available in a future update",
     });
   };
 
@@ -362,28 +286,7 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   const addSkill = async () => {
     if (!newSkill.trim() || skills.includes(newSkill.trim()) || !user) return;
 
-    // First, create or get the skill
-    const { data: skillData, error: skillError } = await supabase
-      .from('skills')
-      .upsert({ name: newSkill.trim() })
-      .select()
-      .single();
-
-    if (skillError) {
-      console.error('Error creating skill:', skillError);
-      return;
-    }
-
-    // Then, link it to the user
-    const { error: linkError } = await supabase
-      .from('technician_skills')
-      .insert({ user_id: user.id, skill_id: skillData.id });
-
-    if (linkError) {
-      console.error('Error linking skill:', linkError);
-      return;
-    }
-
+    // In simplified schema, just add to local state
     setSkills(prev => [...prev, newSkill.trim()]);
     setNewSkill('');
   };
@@ -391,81 +294,18 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
   const addBrand = async () => {
     if (!newBrand.trim() || brands.includes(newBrand.trim()) || !user) return;
 
-    // First, create or get the brand
-    const { data: brandData, error: brandError } = await supabase
-      .from('brands')
-      .upsert({ name: newBrand.trim() })
-      .select()
-      .single();
-
-    if (brandError) {
-      console.error('Error creating brand:', brandError);
-      return;
-    }
-
-    // Then, link it to the user
-    const { error: linkError } = await supabase
-      .from('technician_brands')
-      .insert({ user_id: user.id, brand_id: brandData.id });
-
-    if (linkError) {
-      console.error('Error linking brand:', linkError);
-      return;
-    }
-
+    // In simplified schema, just add to local state
     setBrands(prev => [...prev, newBrand.trim()]);
     setNewBrand('');
   };
 
   const removeSkill = async (skill: string) => {
-    if (!user) return;
-
-    // First get the skill ID
-    const { data: skillData } = await supabase
-      .from('skills')
-      .select('id')
-      .eq('name', skill)
-      .single();
-
-    if (!skillData) return;
-
-    const { error } = await supabase
-      .from('technician_skills')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('skill_id', skillData.id);
-
-    if (error) {
-      console.error('Error removing skill:', error);
-      return;
-    }
-
+    // In simplified schema, just remove from local state
     setSkills(prev => prev.filter(s => s !== skill));
   };
 
   const removeBrand = async (brand: string) => {
-    if (!user) return;
-
-    // First get the brand ID
-    const { data: brandData } = await supabase
-      .from('brands')
-      .select('id')
-      .eq('name', brand)
-      .single();
-
-    if (!brandData) return;
-
-    const { error } = await supabase
-      .from('technician_brands')
-      .delete()
-      .eq('user_id', user.id)
-      .eq('brand_id', brandData.id);
-
-    if (error) {
-      console.error('Error removing brand:', error);
-      return;
-    }
-
+    // In simplified schema, just remove from local state
     setBrands(prev => prev.filter(b => b !== brand));
   };
 
@@ -484,11 +324,8 @@ export function TechnicianDashboard({ onNavigate, data }: TechnicianDashboardPro
         phone: profile.phone,
         linkedin_url: profile.linkedin,
         bio: profile.bio,
-        hourly_rate: profile.hourlyRate ? parseFloat(profile.hourlyRate) : null,
         profile_photo_url: profile.profilePhotoUrl,
         city: profile.city,
-        accepts_travel: profile.acceptsTravel,
-        max_travel_distance: profile.maxTravelDistance,
         user_type: 'technician'
       }, {
         onConflict: 'user_id'

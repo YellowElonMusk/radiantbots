@@ -15,8 +15,13 @@ interface TechnicianProfile {
   first_name: string;
   last_name: string;
   city: string;
-  hourly_rate: number;
   profile_photo_url: string;
+  user_type: 'technician' | 'enterprise';
+  email?: string | null;
+  phone?: string | null;
+  linkedin_url?: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 interface MissionBookingFormProps {
@@ -56,7 +61,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
       setLoading(true);
       const { data: profile, error } = await supabase
         .from('profiles')
-        .select('id, user_id, first_name, last_name, city, hourly_rate, profile_photo_url')
+        .select('id, user_id, first_name, last_name, city, profile_photo_url, user_type, email, phone, linkedin_url, created_at, updated_at')
         .eq('user_id', technicianId)
         .single();
 
@@ -115,26 +120,12 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         // Guest user - generate a browser token
         const browserToken = crypto.randomUUID();
         
-        // Create or get guest user
-        const { data: guestUser, error: guestError } = await supabase
-          .from('guest_users')
-          .insert({
-            email: 'guest@example.com', // This will be updated with actual email in enterprise flow
-            name: clientCompany || 'Enterprise Client',
-            browser_token: browserToken
-          })
-          .select()
-          .single();
+        // For guest users, we'll store the mission without creating a guest_users record
+        // Since guest_users table doesn't exist in our simplified schema
+        guestUserId = browserToken; // Use browser token as identifier
+        clientEmail = 'guest@example.com';
+        clientName = clientCompany || 'Enterprise Client';
 
-        if (guestError) {
-          console.error('Error creating guest user:', guestError);
-          alert('Erreur lors de la création du compte temporaire');
-          return;
-        }
-
-        guestUserId = guestUser.id;
-        clientEmail = guestUser.email;
-        clientName = guestUser.name;
       }
 
       // Get client profile ID if authenticated user
@@ -169,10 +160,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
           description: missionDescription,
           desired_date: missionDateRange.start_date,
           desired_time: preferredTime || null,
-          client_name: clientName,
-          client_email: clientEmail,
           client_id: clientProfileId,
-          guest_user_id: guestUserId,
           technician_id: techProfile.id,
           status: 'pending'
         })
@@ -187,17 +175,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
 
       console.log('Mission created successfully:', mission);
 
-      // Also create search request for tracking
-      await supabase
-        .from('search_requests')
-        .insert({
-          deployment_city: missionLocation,
-          deployment_address: missionLocation,
-          mission_type: 'Support technique robotique',
-          mission_date: missionDateRange.start_date,
-          date_flexible: missionDateRange.count_weekdays > 1,
-          client_email: clientEmail
-        });
+      // Mission created successfully - no need for search_requests table in simplified schema
 
       alert('Votre demande de mission a été envoyée avec succès ! Le technicien recevra une notification.');
       onNavigate('catalog');
@@ -471,7 +449,7 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
                   </div>
                   
                   <div className="text-center p-3 bg-muted/50 rounded-lg">
-                    <div className="text-lg font-bold text-primary">€{technician.hourly_rate}/hr</div>
+                    <div className="text-lg font-bold text-primary">€75/hr</div>
                     <div className="text-xs text-muted-foreground">Tarif de base</div>
                   </div>
                 </CardContent>

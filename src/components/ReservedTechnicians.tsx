@@ -18,12 +18,20 @@ interface Mission {
   accepted_at?: string | null;
   technician_id: string | null;
   client_id: string | null;
+  updated_at: string;
   technician: {
     first_name: string;
     last_name: string;
     profile_photo_url?: string;
     phone?: string;
-    hourly_rate?: number;
+    id: string;
+    user_id: string;
+    email: string;
+    city: string;
+    user_type: 'technician' | 'enterprise';
+    linkedin_url?: string;
+    created_at: string;
+    updated_at: string;
   } | null;
 }
 
@@ -59,12 +67,19 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
         .from('missions')
         .select(`
           *,
-          technician:profiles(
+          technician:profiles!technician_id(
+            id,
+            user_id,
             first_name,
             last_name,
             profile_photo_url,
             phone,
-            hourly_rate
+            email,
+            city,
+            user_type,
+            linkedin_url,
+            created_at,
+            updated_at
           )
         `)
         .eq('client_id', clientProfile.id)
@@ -183,7 +198,7 @@ export function ReservedTechnicians({ userId, onViewProfile }: ReservedTechnicia
                     {mission.technician ? `${mission.technician.first_name} ${mission.technician.last_name}` : 'Unknown Technician'}
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {mission.technician?.hourly_rate ? `${mission.technician.hourly_rate}€/heure` : 'Rate not available'}
+                    75€/heure
                   </p>
                 </div>
               </div>

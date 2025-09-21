@@ -77,7 +77,7 @@ export function EnterpriseRegistration({ onNavigate }: EnterpriseRegistrationPro
             last_name: formData.lastName,
             phone: formData.phone,
             company_name: formData.companyName,
-            role: 'enterprise'
+            user_type: 'enterprise'
           }
         }
       });

@@ -13,27 +13,25 @@ interface Mission {
   description: string;
   desired_date: string;
   desired_time: string;
-  client_name: string;
-  client_email: string;
   status: 'pending' | 'accepted' | 'declined' | 'completed';
   created_at: string;
   accepted_at: string | null;
   client_id: string | null;
   technician_id: string | null;
-  guest_user_id: string | null;
+  updated_at: string;
   client_profile?: {
     first_name: string;
     last_name: string;
     email: string;
     phone: string;
     linkedin_url: string;
-    company_name: string;
     city: string;
-    contact_person: string;
-  };
-  guest_profile?: {
-    name: string;
-    email: string;
+    user_type: 'technician' | 'enterprise';
+    id: string;
+    user_id: string;
+    profile_photo_url: string;
+    created_at: string;
+    updated_at: string;
   };
 }
 
@@ -70,19 +68,19 @@ export const MissionManagement = () => {
         .from('missions')
         .select(`
           *,
-          client_profile:profiles(
+          client_profile:profiles!client_id(
+            id,
+            user_id,
             first_name,
             last_name,
             email,
             phone,
             linkedin_url,
-            company_name,
             city,
-            contact_person
-          ),
-          guest_profile:guest_users(
-            name,
-            email
+            user_type,
+            profile_photo_url,
+            created_at,
+            updated_at
           )
         `)
         .eq('technician_id', techProfile.id)
@@ -98,8 +96,7 @@ export const MissionManagement = () => {
       // Filter out any missions where the profile queries failed and cast to proper type
       const validMissions = (missionsData || []).filter(mission => {
         const hasValidClientProfile = !mission.client_profile || (typeof mission.client_profile === 'object' && !('error' in mission.client_profile));
-        const hasValidGuestProfile = !mission.guest_profile || (typeof mission.guest_profile === 'object' && !('error' in mission.guest_profile));
-        return hasValidClientProfile && hasValidGuestProfile;
+        return hasValidClientProfile;
       }) as Mission[];
       
       setMissions(validMissions);
@@ -202,39 +199,29 @@ export const MissionManagement = () => {
 
   const formatClientName = (mission: Mission) => {
     if (!mission.client_profile) {
-      return mission.guest_profile?.name || mission.client_name;
+      return 'Client';
     }
 
-    const { contact_person, company_name, city } = mission.client_profile;
+    const { first_name, last_name, city } = mission.client_profile;
     let formattedName = '';
 
-    // Use contact_person if available, otherwise fallback to first_name last_name
-    if (contact_person) {
-      formattedName = contact_person;
+    // Format name
+    if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
+      formattedName = `Mr ${first_name}`;
     } else {
-      const { first_name, last_name } = mission.client_profile;
-      if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
-        formattedName = `Mr ${first_name}`;
-      } else {
-        formattedName = first_name || '';
-      }
-      
-      if (last_name) {
-        formattedName += ` ${last_name}`;
-      }
+      formattedName = first_name || '';
     }
-
-    // Add company information
-    if (company_name) {
-      formattedName += ` from ${company_name} company`;
+    
+    if (last_name) {
+      formattedName += ` ${last_name}`;
     }
 
     // Add city information
     if (city) {
-      formattedName += ` of ${city} city`;
+      formattedName += ` from ${city}`;
     }
 
-    return formattedName || mission.client_name;
+    return formattedName || 'Client';
   };
 
   const filterMissions = (status: string) => {
@@ -358,7 +345,7 @@ export const MissionManagement = () => {
                             </div>
                             <div className="flex items-center gap-2">
                               <Mail className="h-3 w-3" />
-                              {mission.client_profile?.email || mission.guest_profile?.email || mission.client_email}
+                              {mission.client_profile?.email || 'Contact via platform'}
                             </div>
                             {mission.client_profile?.phone && (
                               <div className="flex items-center gap-2">

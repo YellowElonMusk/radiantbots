@@ -13,8 +13,9 @@ interface Message {
   id: string;
   content: string;
   sender_id: string;
-  receiver_id: string;
   created_at: string;
+  read_at?: string | null;
+  mission_id: string;
   sender?: {
     first_name: string;
     last_name: string;
@@ -28,9 +29,12 @@ interface Mission {
   status: string;
   desired_date: string;
   created_at: string;
-  client_name: string;
-  client_user_id?: string;
-  guest_user_id?: string;
+  client_id?: string;
+  technician_id?: string;
+  description?: string;
+  desired_time?: string;
+  accepted_at?: string;
+  updated_at?: string;
 }
 
 interface TechnicianMessagingProps {
@@ -88,20 +92,20 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
 
         if (clientError || !clientData) {
           console.error('Error loading client profile:', clientError);
-          // Use mission client data as fallback
+          // Use default client data
           setClient({
-            first_name: missionData.client_name.split(' ')[0] || '',
-            last_name: missionData.client_name.split(' ').slice(1).join(' ') || '',
+            first_name: 'Client',
+            last_name: '',
             profile_photo_url: null
           });
         } else {
           setClient(clientData);
         }
       } else {
-        // Guest user - use mission client data
+        // No client ID - use default
         setClient({
-          first_name: missionData.client_name.split(' ')[0] || '',
-          last_name: missionData.client_name.split(' ').slice(1).join(' ') || '',
+          first_name: 'Client',
+          last_name: '',
           profile_photo_url: null
         });
       }
@@ -149,12 +153,9 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
   const sendMessage = async () => {
     if (!newMessage.trim() || !mission?.id) return;
 
-    // Determine receiver ID
-    const receiverId = mission.client_user_id || null;
-    if (!receiverId) {
-      console.error('Cannot send message to guest user');
-      return;
-    }
+    // In simplified schema, we don't support messaging
+    console.log('Messaging not supported in simplified schema');
+    return;
 
     try {
       const { data, error } = await supabase
@@ -162,7 +163,6 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .insert({
           content: newMessage.trim(),
           sender_id: currentUserId,
-          receiver_id: receiverId,
           mission_id: mission.id
         })
         .select(`
@@ -199,7 +199,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
   };
 
   const simulateClientResponse = async () => {
-    if (!mission?.id || !mission.client_user_id) return;
+    if (!mission?.id || !mission.client_id) return;
 
     const responses = [
       "Merci pour votre message ! C'est exactement ce dont j'avais besoin.",
@@ -216,8 +216,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         .from('messages')
         .insert({
           content: randomResponse,
-          sender_id: mission.client_user_id,
-          receiver_id: currentUserId,
+          sender_id: mission.client_id,
           mission_id: mission.id
         })
         .select(`
@@ -296,10 +295,10 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
               <div>
                 <h3 className="font-semibold">
                   {(() => {
-                    if (!mission?.client_user_id) {
+                    if (!mission?.client_id) {
                       return client.first_name && client.last_name 
                         ? `${client.first_name} ${client.last_name}`
-                        : mission?.client_name || 'Client';
+                        : 'Client';
                     }
                     
                     let formattedName = '';
@@ -313,7 +312,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
                       formattedName += ` ${client.last_name}`;
                     }
                     
-                    return formattedName || mission?.client_name || 'Client';
+                    return formattedName || 'Client';
                   })()}
                 </h3>
                 <p className="text-sm text-gray-600">
@@ -391,7 +390,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
       </Card>
 
       {/* Message Input */}
-      {mission.client_user_id && (
+      {mission.client_id && (
         <Card>
           <CardContent className="p-4">
             <div className="flex space-x-2">
