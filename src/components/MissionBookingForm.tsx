@@ -99,15 +99,31 @@ export function MissionBookingForm({ technicianId, onNavigate }: MissionBookingF
         // Authenticated user
         clientEmail = user.email || '';
         clientUserId = user.id;
-        // Get user profile for name
+        // Get user profile for name - including enterprise client fields
         const { data: profile } = await supabase
           .from('profiles')
-          .select('first_name, last_name')
+          .select('first_name, last_name, contact_person, company_name, city, id')
           .eq('user_id', user.id)
           .single();
         
         if (profile) {
-          clientName = `${profile.first_name} ${profile.last_name}`;
+          // Set the client_user_id to the profile.id instead of user.id for proper foreign key relationship
+          clientUserId = profile.id;
+          
+          // Use contact_person if available (for enterprise clients), otherwise use first_name + last_name
+          if (profile.contact_person) {
+            clientName = profile.contact_person;
+            if (profile.company_name) {
+              clientName += ` from ${profile.company_name}`;
+            }
+            if (profile.city) {
+              clientName += ` based in ${profile.city}`;
+            }
+          } else if (profile.first_name && profile.last_name) {
+            clientName = `${profile.first_name} ${profile.last_name}`;
+          } else {
+            clientName = user.email || 'Client';
+          }
         } else {
           clientName = user.email || 'Client';
         }

@@ -189,7 +189,12 @@ export const MissionManagement = () => {
 
     // Use contact_person if available, otherwise fallback to first_name last_name
     if (contact_person) {
-      formattedName = contact_person;
+      // Add Mr/Mrs prefix to contact_person if not already present
+      if (!contact_person.toLowerCase().includes('mr') && !contact_person.toLowerCase().includes('mrs')) {
+        formattedName = `Mr/Mrs ${contact_person}`;
+      } else {
+        formattedName = contact_person;
+      }
     } else {
       const { first_name, last_name } = mission.client_profile;
       if (first_name && !first_name.toLowerCase().includes('mr') && !first_name.toLowerCase().includes('mrs')) {
@@ -205,12 +210,12 @@ export const MissionManagement = () => {
 
     // Add company information
     if (company_name) {
-      formattedName += ` from ${company_name} company`;
+      formattedName += ` from ${company_name}`;
     }
 
     // Add city information
     if (city) {
-      formattedName += ` of ${city} city`;
+      formattedName += ` based in ${city}`;
     }
 
     return formattedName || mission.client_name;

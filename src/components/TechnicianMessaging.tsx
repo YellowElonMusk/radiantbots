@@ -83,7 +83,7 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
         const { data: clientData, error: clientError } = await supabase
           .from('profiles')
           .select('*')
-          .eq('user_id', missionData.client_user_id)
+          .eq('id', missionData.client_user_id)
           .maybeSingle();
 
         if (clientError || !clientData) {
@@ -278,14 +278,35 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
                     }
                     
                     let formattedName = '';
-                    if (client.first_name && !client.first_name.toLowerCase().includes('mr') && !client.first_name.toLowerCase().includes('mrs')) {
-                      formattedName = `Mr ${client.first_name}`;
-                    } else {
-                      formattedName = client.first_name || '';
-                    }
                     
-                    if (client.last_name) {
-                      formattedName += ` ${client.last_name}`;
+                    // Use contact_person if available (for enterprise clients)
+                    if (client.contact_person) {
+                      if (!client.contact_person.toLowerCase().includes('mr') && !client.contact_person.toLowerCase().includes('mrs')) {
+                        formattedName = `Mr/Mrs ${client.contact_person}`;
+                      } else {
+                        formattedName = client.contact_person;
+                      }
+                      
+                      // Add company information
+                      if (client.company_name) {
+                        formattedName += ` from ${client.company_name}`;
+                      }
+                      
+                      // Add city information
+                      if (client.city) {
+                        formattedName += ` based in ${client.city}`;
+                      }
+                    } else {
+                      // Fallback to first_name + last_name
+                      if (client.first_name && !client.first_name.toLowerCase().includes('mr') && !client.first_name.toLowerCase().includes('mrs')) {
+                        formattedName = `Mr ${client.first_name}`;
+                      } else {
+                        formattedName = client.first_name || '';
+                      }
+                      
+                      if (client.last_name) {
+                        formattedName += ` ${client.last_name}`;
+                      }
                     }
                     
                     return formattedName || mission?.client_name || 'Client';
