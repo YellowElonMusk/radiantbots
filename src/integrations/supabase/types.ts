@@ -123,8 +123,8 @@ export type Database = {
           id: string
           mission_id: string
           read_at: string | null
-          receiver_id: string
-          sender_id: string
+          receiver_id: string | null
+          sender_id: string | null
         }
         Insert: {
           content: string
@@ -132,8 +132,8 @@ export type Database = {
           id?: string
           mission_id: string
           read_at?: string | null
-          receiver_id: string
-          sender_id: string
+          receiver_id?: string | null
+          sender_id?: string | null
         }
         Update: {
           content?: string
@@ -141,30 +141,30 @@ export type Database = {
           id?: string
           mission_id?: string
           read_at?: string | null
-          receiver_id?: string
-          sender_id?: string
+          receiver_id?: string | null
+          sender_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "messages_mission_id_fkey"
+            foreignKeyName: "fk_messages_mission"
             columns: ["mission_id"]
             isOneToOne: false
             referencedRelation: "missions"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "messages_receiver_id_fkey"
-            columns: ["receiver_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "messages_sender_id_fkey"
+            foreignKeyName: "fk_messages_sender"
             columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -190,8 +190,8 @@ export type Database = {
         Row: {
           accepted_at: string | null
           client_email: string
+          client_id: string | null
           client_name: string
-          client_user_id: string | null
           created_at: string
           description: string | null
           desired_date: string | null
@@ -199,15 +199,15 @@ export type Database = {
           guest_user_id: string | null
           id: string
           status: Database["public"]["Enums"]["mission_status"]
-          technician_id: string
+          technician_id: string | null
           title: string
           updated_at: string
         }
         Insert: {
           accepted_at?: string | null
           client_email: string
+          client_id?: string | null
           client_name: string
-          client_user_id?: string | null
           created_at?: string
           description?: string | null
           desired_date?: string | null
@@ -215,15 +215,15 @@ export type Database = {
           guest_user_id?: string | null
           id?: string
           status?: Database["public"]["Enums"]["mission_status"]
-          technician_id: string
+          technician_id?: string | null
           title: string
           updated_at?: string
         }
         Update: {
           accepted_at?: string | null
           client_email?: string
+          client_id?: string | null
           client_name?: string
-          client_user_id?: string | null
           created_at?: string
           description?: string | null
           desired_date?: string | null
@@ -231,14 +231,21 @@ export type Database = {
           guest_user_id?: string | null
           id?: string
           status?: Database["public"]["Enums"]["mission_status"]
-          technician_id?: string
+          technician_id?: string | null
           title?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "missions_client_user_id_fkey"
-            columns: ["client_user_id"]
+            foreignKeyName: "fk_missions_client"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_missions_technician"
+            columns: ["technician_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -249,13 +256,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "guest_users"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "missions_technician_id_fkey"
-            columns: ["technician_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -285,6 +285,7 @@ export type Database = {
           role: Database["public"]["Enums"]["user_role"] | null
           updated_at: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
           accepts_travel?: boolean | null
@@ -311,6 +312,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id: string
+          user_type: Database["public"]["Enums"]["user_type"]
         }
         Update: {
           accepts_travel?: boolean | null
@@ -337,6 +339,7 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"] | null
           updated_at?: string
           user_id?: string
+          user_type?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []
       }
@@ -453,6 +456,7 @@ export type Database = {
     Enums: {
       mission_status: "pending" | "accepted" | "declined" | "completed"
       user_role: "client" | "technician" | "enterprise" | "freelance"
+      user_type: "technician" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -582,6 +586,7 @@ export const Constants = {
     Enums: {
       mission_status: ["pending", "accepted", "declined", "completed"],
       user_role: ["client", "technician", "enterprise", "freelance"],
+      user_type: ["technician", "enterprise"],
     },
   },
 } as const
