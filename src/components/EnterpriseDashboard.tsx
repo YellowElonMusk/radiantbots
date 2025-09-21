@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ReservedTechnicians } from './ReservedTechnicians';
 import { EnterpriseMessaging } from './EnterpriseMessaging';
 import { MissionTracking } from './MissionTracking';
+import { EnterpriseMissionDashboard } from './EnterpriseMissionDashboard';
 import { useUnreadMessages } from '@/hooks/useUnreadMessages';
 import { TechnicianProfile } from './TechnicianProfile';
 
@@ -23,7 +24,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [acceptedTechnicians, setAcceptedTechnicians] = useState<any[]>([]);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'messaging' | 'profile' | 'missions'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'messaging' | 'profile' | 'missions' | 'all-missions'>('dashboard');
   const [selectedTechnician, setSelectedTechnician] = useState<string | null>(null);
   const [profile, setProfile] = useState({
     company_name: '',
@@ -101,8 +102,8 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
           });
         }
         
-        // Check accepted missions with specific technicians
-        await checkAcceptedMissions(currentUser.id);
+        // Load all missions and check accepted ones for messaging
+        await loadAllMissions(currentUser.id);
         
         // Redirect if user is not a client/enterprise
         if (profileData?.role !== 'client') {
@@ -135,7 +136,7 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
     return () => subscription.unsubscribe();
   }, [onNavigate, toast]);
 
-  const checkAcceptedMissions = async (userId: string) => {
+  const loadAllMissions = async (userId: string) => {
     try {
       // Get user profile first
       const { data: profile, error: profileError } = await supabase
@@ -153,39 +154,51 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
         .from('missions')
         .select(`
           id,
+          title,
+          description,
+          status,
+          desired_date,
+          desired_time,
+          created_at,
+          accepted_at,
           technician_id,
           profiles!missions_technician_id_fkey(
             user_id,
             first_name,
             last_name,
-            profile_photo_url
+            profile_photo_url,
+            hourly_rate,
+            phone,
+            email
           )
         `)
         .eq('client_user_id', profile.id)
-        .eq('status', 'accepted');
+        .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error checking missions:', error);
+        console.error('Error loading missions:', error);
         return;
       }
 
-      // Get unique technicians who have accepted missions
+      // Get unique technicians who have accepted missions for messaging
       const uniqueTechnicians = missions?.reduce((acc: any[], mission: any) => {
-        const existing = acc.find(tech => tech.user_id === mission.technician_id);
-        if (!existing && mission.profiles) {
-          acc.push({
-            user_id: mission.technician_id,
-            first_name: mission.profiles.first_name,
-            last_name: mission.profiles.last_name,
-            profile_photo_url: mission.profiles.profile_photo_url
-          });
+        if (mission.status === 'accepted') {
+          const existing = acc.find(tech => tech.user_id === mission.technician_id);
+          if (!existing && mission.profiles) {
+            acc.push({
+              user_id: mission.technician_id,
+              first_name: mission.profiles.first_name,
+              last_name: mission.profiles.last_name,
+              profile_photo_url: mission.profiles.profile_photo_url
+            });
+          }
         }
         return acc;
       }, []) || [];
 
       setAcceptedTechnicians(uniqueTechnicians);
     } catch (error) {
-      console.error('Error checking accepted missions:', error);
+      console.error('Error loading missions:', error);
     }
   };
 
@@ -293,6 +306,26 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
     );
   }
 
+  // Handle all missions view
+  if (currentView === 'all-missions' && user) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="container mx-auto px-6">
+          <EnterpriseMissionDashboard
+            currentUserId={user.id}
+            onNavigate={(page) => {
+              if (page === 'enterprise-dashboard') {
+                setCurrentView('dashboard');
+              } else {
+                onNavigate(page);
+              }
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="container mx-auto px-6">
@@ -345,6 +378,12 @@ export function EnterpriseDashboard({ onNavigate }: EnterpriseDashboardProps) {
               onClick={() => setCurrentView('missions')}
             >
               Suivi des missions
+            </TabsTrigger>
+            <TabsTrigger 
+              value="all-missions"
+              onClick={() => setCurrentView('all-missions')}
+            >
+              Mes missions
             </TabsTrigger>
           </TabsList>
 
