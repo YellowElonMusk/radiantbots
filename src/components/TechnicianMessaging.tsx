@@ -270,7 +270,26 @@ export function TechnicianMessaging({ missionId, onBack, currentUserId }: Techni
               </Avatar>
               <div>
                 <h3 className="font-semibold">
-                  {client.first_name} {client.last_name}
+                  {(() => {
+                    if (!mission?.client_user_id) {
+                      return client.first_name && client.last_name 
+                        ? `${client.first_name} ${client.last_name}`
+                        : mission?.client_name || 'Client';
+                    }
+                    
+                    let formattedName = '';
+                    if (client.first_name && !client.first_name.toLowerCase().includes('mr') && !client.first_name.toLowerCase().includes('mrs')) {
+                      formattedName = `Mr ${client.first_name}`;
+                    } else {
+                      formattedName = client.first_name || '';
+                    }
+                    
+                    if (client.last_name) {
+                      formattedName += ` ${client.last_name}`;
+                    }
+                    
+                    return formattedName || mission?.client_name || 'Client';
+                  })()}
                 </h3>
                 <p className="text-sm text-gray-600">
                   Client
