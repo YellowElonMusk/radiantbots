@@ -5,6 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ArrowLeft, Star, MapPin, Clock, Award, MessageSquare, Calendar, Wrench, CheckCircle } from 'lucide-react';
+import { TechnicianProfile } from './TechnicianProfile';
 
 interface TechnicianProfile {
   id: string;
@@ -32,8 +33,24 @@ export function Profile({ technicianId, onNavigate }: ProfileProps) {
   const { t } = useLanguage();
 
   useEffect(() => {
+    // Check if this is a fake profile
+    if (technicianId.startsWith('fake_tech_')) {
+      // Use TechnicianProfile component for fake profiles
+      return;
+    }
     loadTechnician();
   }, [technicianId]);
+
+  // If it's a fake profile, use the TechnicianProfile component
+  if (technicianId.startsWith('fake_tech_')) {
+    return (
+      <TechnicianProfile 
+        technicianId={technicianId} 
+        onBack={() => onNavigate('catalog')}
+        onNavigate={onNavigate}
+      />
+    );
+  }
 
   const loadTechnician = async () => {
     try {

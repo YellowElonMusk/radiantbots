@@ -97,84 +97,180 @@ export function Catalog({ onNavigate }: CatalogProps) {
     }
   };
 
+  const fakeTechnicians: TechnicianData[] = [
+    {
+      id: 'fake_tech_1',
+      user_id: 'fake_tech_1',
+      name: 'Alexandre Dupont',
+      first_name: 'Alexandre',
+      last_name: 'Dupont',
+      city: 'Paris',
+      rating: 4.9,
+      rate: 75,
+      brands: ['ABB', 'KUKA', 'Fanuc'],
+      skills: ['Programmation', 'Maintenance préventive', 'Diagnostic'],
+      bio: 'Ingénieur robotique avec 8 ans d\'expérience dans l\'automatisation industrielle. Spécialisé dans la programmation et la maintenance de robots industriels.',
+      photo: 'https://i.pravatar.cc/150?img=1',
+      experience: '8+ ans',
+      completedJobs: 127,
+      acceptsTravel: true,
+      maxTravelDistance: 200
+    },
+    {
+      id: 'fake_tech_2',
+      user_id: 'fake_tech_2',
+      name: 'Sophie Martin',
+      first_name: 'Sophie',
+      last_name: 'Martin',
+      city: 'Lyon',
+      rating: 4.8,
+      rate: 65,
+      brands: ['Universal Robots', 'ABB', 'Yaskawa'],
+      skills: ['Cobotique', 'Intégration système', 'Formation'],
+      bio: 'Experte en robotique collaborative avec une approche centrée sur la sécurité et l\'ergonomie. Formatrice certifiée Universal Robots.',
+      photo: 'https://i.pravatar.cc/150?img=5',
+      experience: '6+ ans',
+      completedJobs: 94,
+      acceptsTravel: true,
+      maxTravelDistance: 150
+    },
+    {
+      id: 'fake_tech_3',
+      user_id: 'fake_tech_3',
+      name: 'Thomas Leroy',
+      first_name: 'Thomas',
+      last_name: 'Leroy',
+      city: 'Toulouse',
+      rating: 4.7,
+      rate: 60,
+      brands: ['Fanuc', 'Mitsubishi', 'Denso'],
+      skills: ['Soudage robotisé', 'Vision artificielle', 'Calibrage'],
+      bio: 'Technicien spécialisé dans les applications de soudage robotisé et les systèmes de vision. Expert en calibrage haute précision.',
+      photo: 'https://i.pravatar.cc/150?img=3',
+      experience: '7+ ans',
+      completedJobs: 156,
+      acceptsTravel: false,
+      maxTravelDistance: 50
+    },
+    {
+      id: 'fake_tech_4',
+      user_id: 'fake_tech_4',
+      name: 'Marie Dubois',
+      first_name: 'Marie',
+      last_name: 'Dubois',
+      city: 'Marseille',
+      rating: 4.9,
+      rate: 70,
+      brands: ['KUKA', 'Staubli', 'Epson'],
+      skills: ['Palettisation', 'Manipulation', 'Optimisation trajectoires'],
+      bio: 'Ingénieure spécialisée dans les systèmes de palettisation et manipulation. Reconnue pour ses solutions d\'optimisation de trajectoires.',
+      photo: 'https://i.pravatar.cc/150?img=9',
+      experience: '5+ ans',
+      completedJobs: 78,
+      acceptsTravel: true,
+      maxTravelDistance: 300
+    },
+    {
+      id: 'fake_tech_5',
+      user_id: 'fake_tech_5',
+      name: 'Pierre Moreau',
+      first_name: 'Pierre',
+      last_name: 'Moreau',
+      city: 'Lille',
+      rating: 4.6,
+      rate: 55,
+      brands: ['Universal Robots', 'Doosan', 'Techman'],
+      skills: ['Installation', 'Dépannage d\'urgence', 'Mise en service'],
+      bio: 'Technicien de terrain expérimenté, spécialisé dans l\'installation et le dépannage d\'urgence. Disponible 24h/24 pour les interventions critiques.',
+      photo: 'https://i.pravatar.cc/150?img=7',
+      experience: '10+ ans',
+      completedJobs: 203,
+      acceptsTravel: true,
+      maxTravelDistance: 400
+    },
+    {
+      id: 'fake_tech_6',
+      user_id: 'fake_tech_6',
+      name: 'Camille Rousseau',
+      first_name: 'Camille',
+      last_name: 'Rousseau',
+      city: 'Nantes',
+      rating: 4.8,
+      rate: 68,
+      brands: ['ABB', 'Fanuc', 'Kawasaki'],
+      skills: ['Peinture robotisée', 'Environnement propre', 'Automatisation'],
+      bio: 'Spécialiste des applications de peinture robotisée et des environnements propres. Experte en automatisation de processus complexes.',
+      photo: 'https://i.pravatar.cc/150?img=16',
+      experience: '6+ ans',
+      completedJobs: 89,
+      acceptsTravel: true,
+      maxTravelDistance: 250
+    },
+    {
+      id: 'fake_tech_7',
+      user_id: 'fake_tech_7',
+      name: 'Julien Bernard',
+      first_name: 'Julien',
+      last_name: 'Bernard',
+      city: 'Strasbourg',
+      rating: 4.7,
+      rate: 62,
+      brands: ['KUKA', 'Universal Robots', 'Franka Emika'],
+      skills: ['R&D', 'Prototypage', 'IA robotique'],
+      bio: 'Ingénieur R&D passionné par l\'innovation en robotique. Spécialisé dans le prototypage rapide et l\'intégration d\'IA dans les systèmes robotiques.',
+      photo: 'https://i.pravatar.cc/150?img=11',
+      experience: '4+ ans',
+      completedJobs: 45,
+      acceptsTravel: false,
+      maxTravelDistance: 100
+    },
+    {
+      id: 'fake_tech_8',
+      user_id: 'fake_tech_8',
+      name: 'Amélie Garnier',
+      first_name: 'Amélie',
+      last_name: 'Garnier',
+      city: 'Bordeaux',
+      rating: 4.9,
+      rate: 72,
+      brands: ['Yaskawa', 'Mitsubishi', 'Omron'],
+      skills: ['Logistique automatisée', 'Convoyage', 'Système WMS'],
+      bio: 'Experte en logistique automatisée et systèmes de convoyage. Spécialisée dans l\'intégration de robots avec les systèmes WMS.',
+      photo: 'https://i.pravatar.cc/150?img=20',
+      experience: '7+ ans',
+      completedJobs: 112,
+      acceptsTravel: true,
+      maxTravelDistance: 180
+    },
+    {
+      id: 'fake_tech_9',
+      user_id: 'fake_tech_9',
+      name: 'Nicolas Petit',
+      first_name: 'Nicolas',
+      last_name: 'Petit',
+      city: 'Nice',
+      rating: 4.8,
+      rate: 58,
+      brands: ['Staubli', 'Epson', 'Denso'],
+      skills: ['Assemblage précision', 'Micromécanique', 'Contrôle qualité'],
+      bio: 'Technicien haute précision spécialisé dans l\'assemblage micromécanique et le contrôle qualité automatisé. Expert en applications médicales.',
+      photo: 'https://i.pravatar.cc/150?img=14',
+      experience: '9+ ans',
+      completedJobs: 167,
+      acceptsTravel: true,
+      maxTravelDistance: 120
+    }
+  ];
+
   const loadTechnicians = async () => {
     try {
-      // Get all profiles that have the required technician data
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          first_name,
-          last_name,
-          bio,
-          hourly_rate,
-          profile_photo_url,
-          city,
-          accepts_travel,
-          max_travel_distance
-        `)
-        .not('first_name', 'is', null)
-        .not('last_name', 'is', null)
-        .not('hourly_rate', 'is', null);
+      // Use fake technicians instead of real database data
+      setTechnicians(fakeTechnicians);
+      setFilteredTechs(fakeTechnicians);
 
-      if (profilesError) {
-        console.error('Error loading profiles:', profilesError);
-        return;
-      }
-
-      if (!profiles?.length) {
-        setTechnicians([]);
-        setFilteredTechs([]);
-        return;
-      }
-
-      // Get brands and skills for each technician
-      const technicianPromises = profiles.map(async (profile) => {
-        const [brandsResult, skillsResult] = await Promise.all([
-          supabase
-            .from('technician_brands')
-            .select(`
-              brands (name)
-            `)
-            .eq('user_id', profile.user_id),
-          supabase
-            .from('technician_skills')
-            .select(`
-              skills (name)
-            `)
-            .eq('user_id', profile.user_id)
-        ]);
-
-        const brands = brandsResult.data?.map((item: any) => item.brands?.name).filter(Boolean) || [];
-        const skills = skillsResult.data?.map((item: any) => item.skills?.name).filter(Boolean) || [];
-
-        return {
-          id: profile.user_id,
-          user_id: profile.user_id, // Add user_id field for mission requests
-          name: `${profile.first_name} ${profile.last_name}`,
-          first_name: profile.first_name,
-          last_name: profile.last_name,
-          city: profile.city || 'Paris',
-          rating: 4.8, // Default for now, could be calculated from reviews
-          rate: Number(profile.hourly_rate) || 50,
-          brands,
-          skills,
-          bio: profile.bio || '',
-          photo: profile.profile_photo_url || '',
-          experience: '5+ ans', // Default for now
-          completedJobs: 0, // Real data will be tracked when booking system is implemented
-          acceptsTravel: profile.accepts_travel || false,
-          maxTravelDistance: profile.max_travel_distance || 0
-        } as TechnicianData;
-      });
-
-      const allTechs = await Promise.all(technicianPromises);
-      setTechnicians(allTechs);
-      setFilteredTechs(allTechs);
-
-      // Extract unique locations and brands
-      const uniqueLocations = [...new Set(allTechs.map(tech => tech.city))].sort();
-      const uniqueBrands = [...new Set(allTechs.flatMap(tech => tech.brands))].sort();
+      // Extract unique locations and brands from fake data
+      const uniqueLocations = [...new Set(fakeTechnicians.map(tech => tech.city))].sort();
+      const uniqueBrands = [...new Set(fakeTechnicians.flatMap(tech => tech.brands))].sort();
       
       setLocations(uniqueLocations);
       setBrands(uniqueBrands);
@@ -228,7 +324,14 @@ export function Catalog({ onNavigate }: CatalogProps) {
   };
 
   const handleBookNow = (technicianId: string) => {
-    onNavigate('mission-booking', { technicianId });
+    if (technicianId.startsWith('fake_tech_')) {
+      // For fake profiles, redirect to quote request
+      const technician = fakeTechnicians.find(t => t.id === technicianId);
+      onNavigate('request-quote', { technicianName: technician?.name });
+    } else {
+      // For real profiles, use normal booking flow
+      onNavigate('mission-booking', { technicianId });
+    }
   };
 
 

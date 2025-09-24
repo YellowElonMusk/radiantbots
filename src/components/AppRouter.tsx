@@ -20,15 +20,19 @@ import { EnterpriseLogin } from './EnterpriseLogin';
 import { EnterpriseDashboard } from './EnterpriseDashboard';
 import { ForgotPassword } from './ForgotPassword';
 import { ResetPassword } from './ResetPassword';
+import { RequestQuote } from './RequestQuote';
 
 import { Header } from './Header';
 
-type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'account-type-selection' | 'enterprise-registration' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation' | 'forgot-password' | 'reset-password';
+type Page = 'landing' | 'catalog' | 'profile' | 'confirmation' | 'messages' | 'bootcamp' | 'registration' | 'technician-login' | 'technician-dashboard' | 'mission-booking' | 'messaging-inbox' | 'client-dashboard' | 'login-type-selection' | 'account-type-selection' | 'enterprise-registration' | 'enterprise-login' | 'enterprise-dashboard' | 'account-creation' | 'forgot-password' | 'reset-password' | 'request-quote';
 
 interface PageData {
   technicianId?: string;
   bookingId?: string;
   activeTab?: string;
+  technicianName?: string;
+  type?: string;
+  missionTitle?: string;
 }
 
 export function AppRouter() {
@@ -53,6 +57,14 @@ export function AppRouter() {
           <Profile 
             technicianId={pageData.technicianId!} 
             onNavigate={navigate} 
+          />
+        );
+
+      case 'request-quote':
+        return (
+          <RequestQuote 
+            onNavigate={navigate}
+            technicianName={pageData.technicianName}
           />
         );
       

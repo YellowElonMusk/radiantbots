@@ -10,6 +10,7 @@ interface TechnicianProfileProps {
   technicianId: string;
   onBack: () => void;
   onMessage?: () => void;
+  onNavigate?: (page: string, data?: any) => void;
 }
 
 interface TechnicianProfile {
@@ -31,15 +32,22 @@ interface TechnicianProfile {
   accepts_travel?: boolean;
 }
 
-export function TechnicianProfile({ technicianId, onBack, onMessage }: TechnicianProfileProps) {
+export function TechnicianProfile({ technicianId, onBack, onMessage, onNavigate }: TechnicianProfileProps) {
   const [profile, setProfile] = useState<TechnicianProfile | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isFakeProfile, setIsFakeProfile] = useState(false);
 
   useEffect(() => {
-    loadProfile();
-    loadSkillsAndBrands();
+    if (technicianId.startsWith('fake_tech_')) {
+      setIsFakeProfile(true);
+      loadFakeProfile();
+    } else {
+      setIsFakeProfile(false);
+      loadProfile();
+      loadSkillsAndBrands();
+    }
   }, [technicianId]);
 
   const loadProfile = async () => {
@@ -57,6 +65,168 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
     } finally {
       setLoading(false);
     }
+  };
+
+  const fakeTechnicians = {
+    'fake_tech_1': {
+      user_id: 'fake_tech_1',
+      first_name: 'Alexandre',
+      last_name: 'Dupont',
+      email: 'alexandre.dupont@exemple.fr',
+      phone: '+33 1 23 45 67 89',
+      bio: 'Ingénieur robotique avec 8 ans d\'expérience dans l\'automatisation industrielle. Spécialisé dans la programmation et la maintenance de robots industriels.',
+      hourly_rate: 75,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=1',
+      city: 'Paris',
+      robot_brands: ['ABB', 'KUKA', 'Fanuc'],
+      linkedin_url: 'https://linkedin.com/in/alexandre-dupont',
+      max_travel_distance: 200,
+      accepts_travel: true
+    },
+    'fake_tech_2': {
+      user_id: 'fake_tech_2',
+      first_name: 'Sophie',
+      last_name: 'Martin',
+      email: 'sophie.martin@exemple.fr',
+      phone: '+33 4 56 78 90 12',
+      bio: 'Experte en robotique collaborative avec une approche centrée sur la sécurité et l\'ergonomie. Formatrice certifiée Universal Robots.',
+      hourly_rate: 65,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=5',
+      city: 'Lyon',
+      robot_brands: ['Universal Robots', 'ABB', 'Yaskawa'],
+      linkedin_url: 'https://linkedin.com/in/sophie-martin',
+      max_travel_distance: 150,
+      accepts_travel: true
+    },
+    'fake_tech_3': {
+      user_id: 'fake_tech_3',
+      first_name: 'Thomas',
+      last_name: 'Leroy',
+      email: 'thomas.leroy@exemple.fr',
+      phone: '+33 5 34 56 78 90',
+      bio: 'Technicien spécialisé dans les applications de soudage robotisé et les systèmes de vision. Expert en calibrage haute précision.',
+      hourly_rate: 60,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=3',
+      city: 'Toulouse',
+      robot_brands: ['Fanuc', 'Mitsubishi', 'Denso'],
+      linkedin_url: 'https://linkedin.com/in/thomas-leroy',
+      max_travel_distance: 50,
+      accepts_travel: false
+    },
+    'fake_tech_4': {
+      user_id: 'fake_tech_4',
+      first_name: 'Marie',
+      last_name: 'Dubois',
+      email: 'marie.dubois@exemple.fr',
+      phone: '+33 4 91 23 45 67',
+      bio: 'Ingénieure spécialisée dans les systèmes de palettisation et manipulation. Reconnue pour ses solutions d\'optimisation de trajectoires.',
+      hourly_rate: 70,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=9',
+      city: 'Marseille',
+      robot_brands: ['KUKA', 'Staubli', 'Epson'],
+      linkedin_url: 'https://linkedin.com/in/marie-dubois',
+      max_travel_distance: 300,
+      accepts_travel: true
+    },
+    'fake_tech_5': {
+      user_id: 'fake_tech_5',
+      first_name: 'Pierre',
+      last_name: 'Moreau',
+      email: 'pierre.moreau@exemple.fr',
+      phone: '+33 3 20 12 34 56',
+      bio: 'Technicien de terrain expérimenté, spécialisé dans l\'installation et le dépannage d\'urgence. Disponible 24h/24 pour les interventions critiques.',
+      hourly_rate: 55,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=7',
+      city: 'Lille',
+      robot_brands: ['Universal Robots', 'Doosan', 'Techman'],
+      linkedin_url: 'https://linkedin.com/in/pierre-moreau',
+      max_travel_distance: 400,
+      accepts_travel: true
+    },
+    'fake_tech_6': {
+      user_id: 'fake_tech_6',
+      first_name: 'Camille',
+      last_name: 'Rousseau',
+      email: 'camille.rousseau@exemple.fr',
+      phone: '+33 2 40 12 34 56',
+      bio: 'Spécialiste des applications de peinture robotisée et des environnements propres. Experte en automatisation de processus complexes.',
+      hourly_rate: 68,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=16',
+      city: 'Nantes',
+      robot_brands: ['ABB', 'Fanuc', 'Kawasaki'],
+      linkedin_url: 'https://linkedin.com/in/camille-rousseau',
+      max_travel_distance: 250,
+      accepts_travel: true
+    },
+    'fake_tech_7': {
+      user_id: 'fake_tech_7',
+      first_name: 'Julien',
+      last_name: 'Bernard',
+      email: 'julien.bernard@exemple.fr',
+      phone: '+33 3 88 12 34 56',
+      bio: 'Ingénieur R&D passionné par l\'innovation en robotique. Spécialisé dans le prototypage rapide et l\'intégration d\'IA dans les systèmes robotiques.',
+      hourly_rate: 62,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=11',
+      city: 'Strasbourg',
+      robot_brands: ['KUKA', 'Universal Robots', 'Franka Emika'],
+      linkedin_url: 'https://linkedin.com/in/julien-bernard',
+      max_travel_distance: 100,
+      accepts_travel: false
+    },
+    'fake_tech_8': {
+      user_id: 'fake_tech_8',
+      first_name: 'Amélie',
+      last_name: 'Garnier',
+      email: 'amelie.garnier@exemple.fr',
+      phone: '+33 5 56 12 34 56',
+      bio: 'Experte en logistique automatisée et systèmes de convoyage. Spécialisée dans l\'intégration de robots avec les systèmes WMS.',
+      hourly_rate: 72,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=20',
+      city: 'Bordeaux',
+      robot_brands: ['Yaskawa', 'Mitsubishi', 'Omron'],
+      linkedin_url: 'https://linkedin.com/in/amelie-garnier',
+      max_travel_distance: 180,
+      accepts_travel: true
+    },
+    'fake_tech_9': {
+      user_id: 'fake_tech_9',
+      first_name: 'Nicolas',
+      last_name: 'Petit',
+      email: 'nicolas.petit@exemple.fr',
+      phone: '+33 4 93 12 34 56',
+      bio: 'Technicien haute précision spécialisé dans l\'assemblage micromécanique et le contrôle qualité automatisé. Expert en applications médicales.',
+      hourly_rate: 58,
+      profile_photo_url: 'https://i.pravatar.cc/150?img=14',
+      city: 'Nice',
+      robot_brands: ['Staubli', 'Epson', 'Denso'],
+      linkedin_url: 'https://linkedin.com/in/nicolas-petit',
+      max_travel_distance: 120,
+      accepts_travel: true
+    }
+  };
+
+  const fakeSkills = {
+    'fake_tech_1': ['Programmation', 'Maintenance préventive', 'Diagnostic'],
+    'fake_tech_2': ['Cobotique', 'Intégration système', 'Formation'],
+    'fake_tech_3': ['Soudage robotisé', 'Vision artificielle', 'Calibrage'],
+    'fake_tech_4': ['Palettisation', 'Manipulation', 'Optimisation trajectoires'],
+    'fake_tech_5': ['Installation', 'Dépannage d\'urgence', 'Mise en service'],
+    'fake_tech_6': ['Peinture robotisée', 'Environnement propre', 'Automatisation'],
+    'fake_tech_7': ['R&D', 'Prototypage', 'IA robotique'],
+    'fake_tech_8': ['Logistique automatisée', 'Convoyage', 'Système WMS'],
+    'fake_tech_9': ['Assemblage précision', 'Micromécanique', 'Contrôle qualité']
+  };
+
+  const loadFakeProfile = () => {
+    const fakeProfile = fakeTechnicians[technicianId as keyof typeof fakeTechnicians];
+    const fakeSkillsList = fakeSkills[technicianId as keyof typeof fakeSkills] || [];
+    
+    if (fakeProfile) {
+      setProfile(fakeProfile);
+      setSkills(fakeSkillsList);
+      setBrands(fakeProfile.robot_brands || []);
+    }
+    setLoading(false);
   };
 
   const loadSkillsAndBrands = async () => {
@@ -119,11 +289,17 @@ export function TechnicianProfile({ technicianId, onBack, onMessage }: Technicia
           <ArrowLeft className="h-4 w-4 mr-2" />
           Retour
         </Button>
-        {onMessage && (
-          <Button onClick={onMessage}>
-            Envoyer un message
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {isFakeProfile && onNavigate ? (
+            <Button onClick={() => onNavigate('request-quote', { technicianName: `${profile?.first_name} ${profile?.last_name}` })}>
+              Demander un devis
+            </Button>
+          ) : onMessage && (
+            <Button onClick={onMessage}>
+              Envoyer un message
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Profile Header */}
